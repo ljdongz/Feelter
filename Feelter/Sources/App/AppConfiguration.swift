@@ -7,22 +7,10 @@
 
 import Foundation
 
-struct AppConfiguration {
-    enum AppURL: String {
-        case baseURL = "BaseUrl"
-    }
+enum AppConfiguration {
     
-    enum AppKey: String {
-        case apiHeaderKey = "ApiHeaderKey"
-    }
-    
-    static func key(_ key: Self.AppKey) -> String {
-        return Self.value(forKey: key.rawValue)
-    }
-    
-    static func url(_ url: Self.AppURL) -> String {
-        return Self.value(forKey: url.rawValue)
-    }
+    static let apiKey = Self.value(forKey: "ApiHeaderKey")
+    static var baseURL = Self.value(forKey: "BaseUrl")
     
     private static func value(forKey: String) -> String {
         guard let value = Bundle.main.object(forInfoDictionaryKey: forKey) as? String else {

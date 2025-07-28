@@ -27,9 +27,6 @@ final class ViewController: RxBaseViewController {
             make.center.equalToSuperview()
             
         }
-        
-        print(AppConfiguration.url(.baseURL))
-        print(AppConfiguration.key(.apiHeaderKey))
     }
 
     override func addSubviews() {
