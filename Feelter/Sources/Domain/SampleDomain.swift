@@ -1,5 +1,5 @@
 //
-//  Sample.swift
+//  SampleDomain.swift
 //  Feelter
 //
 //  Created by 이정동 on 7/28/25.

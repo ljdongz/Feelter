@@ -13,9 +13,9 @@ import SnapKit
 
 final class ViewController: RxBaseViewController {
     
-    private lazy var image: UITextField = {
-        let view = UITextField()
-        
+    private lazy var image: UIImageView = {
+        let view = UIImageView()
+        view.image = .blackPoint
         return view
     }()
 
@@ -25,8 +25,11 @@ final class ViewController: RxBaseViewController {
         view.addSubview(image)
         image.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.width.equalTo(100)
+            
         }
+        
+        print(AppConfiguration.url(.baseURL))
+        print(AppConfiguration.key(.apiHeaderKey))
     }
 
     override func addSubviews() {
