@@ -50,6 +50,7 @@ final class FloatingTitleTextField: BaseView {
         let view = UIButton()
         view.setImage(nil, for: .normal)
         view.setTitle(nil, for: .normal)
+        view.tintColor = UIColor(resource: .gray0)
         return view
     }()
     
