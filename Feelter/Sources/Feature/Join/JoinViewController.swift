@@ -7,10 +7,18 @@
 
 import UIKit
 
-final class JoinViewController: RxBaseViewController {
+import RxCocoa
+import RxSwift
 
+final class JoinViewController: RxBaseViewController {
+    
+    private let mainView = JoinView()
+
+    override func loadView() {
+        self.view = mainView
+    }
+    
     override func viewDidLoad() {
-        view.backgroundColor = .brightTurquoise
         title = "회원가입"
     }
 }
