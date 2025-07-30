@@ -36,6 +36,7 @@ final class SignInView: BaseView {
     let passwordTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
         view.trailingButtonType = .passwordToggle
+        view.trailingButton.tintColor = .gray30
         view.titleLabel.text = "비밀번호"
         return view
     }()
