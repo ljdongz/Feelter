@@ -104,6 +104,7 @@ final class FloatingTitleTextField: BaseView {
     
     override func setupActions() {
         setupOptionButtonAction()
+        setupContainerTapGesture()
     }
 }
 
@@ -122,7 +123,7 @@ extension FloatingTitleTextField {
 
         case .passwordToggle:
             optionButton.setTitle(nil, for: .normal)
-            optionButton.setImage(.blackPoint, for: .normal)
+            optionButton.setImage(.eye, for: .normal)
             optionButton.isHidden = false
             optionButton.snp.updateConstraints { make in
                 make.width.equalTo(20)
@@ -155,10 +156,21 @@ extension FloatingTitleTextField {
         optionButton.addTarget(self, action: #selector(optionButtonTapped), for: .touchUpInside)
     }
     
+    private func setupContainerTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(containerTapped))
+        containerView.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func containerTapped() {
+        textField.becomeFirstResponder()
+    }
+    
     @objc private func optionButtonTapped() {
         switch optionType {
         case .passwordToggle:
             textField.isSecureTextEntry.toggle()
+            let image = textField.isSecureTextEntry ? UIImage.eye : UIImage.blind
+            optionButton.setImage(image, for: .normal)
         default:
             optionButtonAction?()
         }
