@@ -13,8 +13,10 @@ class BaseViewController: UIViewController {
         
         view.backgroundColor = .systemBackground
         
-        addSubviews()
-        configureConstraints()
+        setupView()
+        setupSubviews()
+        setupConstraints()
+        setupActions()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -22,7 +24,8 @@ class BaseViewController: UIViewController {
         view.endEditing(true)
     }
     
-    func addSubviews() {}
-    
-    func configureConstraints() {}
+    func setupView() {}
+    func setupSubviews() {}
+    func setupConstraints() {}
+    func setupActions() {}
 }
