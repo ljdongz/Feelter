@@ -19,18 +19,24 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
-    var onXmarkTap: (() -> Void)?
+    var xmarkButtonAction: (() -> Void)? {
+        didSet {
+            hashTagButton.xmarkImageView.isHidden = false
+        }
+    }
     
     private var disposeBag = DisposeBag()
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        
         disposeBag = DisposeBag()
-        onXmarkTap = nil
+        xmarkButtonAction = nil
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
         setupView()
     }
     
@@ -49,13 +55,12 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
         
         hashTagButton.rx.tap
         .subscribe(onNext: { [weak self] in
-            self?.onXmarkTap?()
+            self?.xmarkButtonAction?()
         })
         .disposed(by: disposeBag)
     }
     
-    func configure(with text: String, showXmark: Bool = true) {
-        hashTagButton.setTitle(text)
-        hashTagButton.xmarkImageView.isHidden = !showXmark
+    func configure(text: String) {
+        hashTagButton.textLabel.text = text
     }
 }
