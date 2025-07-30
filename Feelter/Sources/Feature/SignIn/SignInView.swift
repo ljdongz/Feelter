@@ -40,7 +40,7 @@ final class SignInView: BaseView {
         return view
     }()
     
-    private let signInButton: UIButton = {
+    let signInButton: UIButton = {
         let view = UIButton()
         view.setTitle("로그인", for: .normal)
         view.setTitleColor(.gray0, for: .normal)
@@ -52,7 +52,7 @@ final class SignInView: BaseView {
         return view
     }()
 
-    private let joinButton: UIButton = {
+    let joinButton: UIButton = {
         let view = UIButton()
         view.setTitle("회원가입", for: .normal)
         view.setTitleColor(.gray0, for: .normal)
@@ -82,7 +82,7 @@ final class SignInView: BaseView {
         return view
     }()
 
-    private let appleSignInButton: UIButton = {
+    let appleSignInButton: UIButton = {
         var config = UIButton.Configuration.filled()
         config.attributedTitle = AttributedString(
             "Apple 로그인",
@@ -101,7 +101,7 @@ final class SignInView: BaseView {
         return view
     }()
 
-    private let kakaoSignInButton: UIButton = {
+    let kakaoSignInButton: UIButton = {
         var config = UIButton.Configuration.filled()
         config.attributedTitle = AttributedString(
             "카카오 로그인",
