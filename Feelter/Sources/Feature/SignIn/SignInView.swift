@@ -28,14 +28,14 @@ final class SignInView: BaseView {
     
     let emailTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
-        view.optionType = .none
+        view.trailingButtonType = .none
         view.titleLabel.text = "이메일"
         return view
     }()
     
     let passwordTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
-        view.optionType = .passwordToggle
+        view.trailingButtonType = .passwordToggle
         view.titleLabel.text = "비밀번호"
         return view
     }()

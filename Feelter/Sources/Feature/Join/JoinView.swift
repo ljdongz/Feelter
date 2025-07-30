@@ -13,7 +13,7 @@ final class JoinView: BaseView {
     let emailTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
         view.titleLabel.text = "이메일(필수)"
-        view.optionType = .image(.brightness)
+        view.trailingButtonType = .image(.brightness)
         view.textField.keyboardType = .emailAddress
         return view
     }()
@@ -29,7 +29,7 @@ final class JoinView: BaseView {
     let passwordTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
         view.titleLabel.text = "비밀번호(필수)"
-        view.optionType = .passwordToggle
+        view.trailingButtonType = .passwordToggle
         return view
     }()
     
@@ -44,7 +44,7 @@ final class JoinView: BaseView {
     let nicknameTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
         view.titleLabel.text = "닉네임(필수)"
-        view.optionType = .none
+        view.trailingButtonType = .none
         return view
     }()
     
@@ -59,14 +59,14 @@ final class JoinView: BaseView {
     let nameTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
         view.titleLabel.text = "이름"
-        view.optionType = .none
+        view.trailingButtonType = .none
         return view
     }()
     
     let phoneTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
         view.titleLabel.text = "휴대폰 번호"
-        view.optionType = .none
+        view.trailingButtonType = .none
         view.textField.keyboardType = .numberPad
         return view
     }()
@@ -80,7 +80,7 @@ final class JoinView: BaseView {
     let hashTagTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
         view.titleLabel.text = "해시태그"
-        view.optionType = .image(.contrast)
+        view.trailingButtonType = .image(.contrast)
         return view
     }()
     

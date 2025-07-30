@@ -46,7 +46,7 @@ final class FloatingTitleTextField: BaseView {
         return view
     }()
 
-    let optionButton: UIButton = {
+    let trailingButton: UIButton = {
         let view = UIButton()
         view.setImage(nil, for: .normal)
         view.setTitle(nil, for: .normal)
@@ -54,13 +54,13 @@ final class FloatingTitleTextField: BaseView {
         return view
     }()
     
-    var optionType: TextFieldOptionButtonType = .none {
+    var trailingButtonType: TextFieldOptionButtonType = .none {
         didSet {
             updateOptionButton()
         }
     }
     
-    var optionButtonAction: (() -> Void)?
+    var trailingButtonAction: (() -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -75,7 +75,7 @@ final class FloatingTitleTextField: BaseView {
     override func setupSubviews() {
         addSubview(containerView)
         
-        [titleLabel, textField, optionButton].forEach {
+        [titleLabel, textField, trailingButton].forEach {
             containerView.addSubview($0)
         }
     }
@@ -88,15 +88,15 @@ final class FloatingTitleTextField: BaseView {
         titleLabel.snp.makeConstraints { make in
             make.centerY.equalToSuperview()
             make.leading.equalToSuperview().inset(10)
-            make.trailing.equalTo(optionButton.snp.leading).offset(-10)
+            make.trailing.equalTo(trailingButton.snp.leading).offset(-10)
         }
         
         textField.snp.makeConstraints { make in
             make.leading.bottom.equalToSuperview().inset(10)
-            make.trailing.equalTo(optionButton.snp.leading).offset(-10)
+            make.trailing.equalTo(trailingButton.snp.leading).offset(-10)
         }
         
-        optionButton.snp.makeConstraints { make in
+        trailingButton.snp.makeConstraints { make in
             make.centerY.equalToSuperview()
             make.trailing.equalToSuperview().inset(10)
             make.size.equalTo(20)
@@ -112,49 +112,49 @@ final class FloatingTitleTextField: BaseView {
 // MARK: - Private
 extension FloatingTitleTextField {
     private func updateOptionButton() {
-        switch optionType {
+        switch trailingButtonType {
         case .none:
-            optionButton.setTitle(nil, for: .normal)
-            optionButton.setImage(nil, for: .normal)
-            optionButton.isHidden = true
-            optionButton.snp.updateConstraints { make in
+            trailingButton.setTitle(nil, for: .normal)
+            trailingButton.setImage(nil, for: .normal)
+            trailingButton.isHidden = true
+            trailingButton.snp.updateConstraints { make in
                 make.width.equalTo(0)
             }
             textField.isSecureTextEntry = false
 
         case .passwordToggle:
-            optionButton.setTitle(nil, for: .normal)
-            optionButton.setImage(.eye, for: .normal)
-            optionButton.isHidden = false
-            optionButton.snp.updateConstraints { make in
+            trailingButton.setTitle(nil, for: .normal)
+            trailingButton.setImage(.eye, for: .normal)
+            trailingButton.isHidden = false
+            trailingButton.snp.updateConstraints { make in
                 make.width.equalTo(20)
             }
             textField.isSecureTextEntry = true
 
         case .image(let image):
-            optionButton.setTitle(nil, for: .normal)
-            optionButton.setImage(image, for: .normal)
-            optionButton.isHidden = false
-            optionButton.snp.updateConstraints { make in
+            trailingButton.setTitle(nil, for: .normal)
+            trailingButton.setImage(image, for: .normal)
+            trailingButton.isHidden = false
+            trailingButton.snp.updateConstraints { make in
                 make.width.equalTo(20)
             }
             textField.isSecureTextEntry = false
 
         case .text(let text):
-            optionButton.setTitle(text, for: .normal)
-            optionButton.setImage(nil, for: .normal)
-            optionButton.titleLabel?.font = .pretendard(size: 10, weight: .medium)
-            optionButton.setTitleColor(.gray60, for: .normal)
-            optionButton.isHidden = false
-            optionButton.snp.updateConstraints { make in
-                make.width.equalTo(optionButton.titleLabel?.intrinsicContentSize.width ?? 0)
+            trailingButton.setTitle(text, for: .normal)
+            trailingButton.setImage(nil, for: .normal)
+            trailingButton.titleLabel?.font = .pretendard(size: 10, weight: .medium)
+            trailingButton.setTitleColor(.gray60, for: .normal)
+            trailingButton.isHidden = false
+            trailingButton.snp.updateConstraints { make in
+                make.width.equalTo(trailingButton.titleLabel?.intrinsicContentSize.width ?? 0)
             }
             textField.isSecureTextEntry = false
         }
     }
     
     private func setupOptionButtonAction() {
-        optionButton.addTarget(self, action: #selector(optionButtonTapped), for: .touchUpInside)
+        trailingButton.addTarget(self, action: #selector(optionButtonTapped), for: .touchUpInside)
     }
     
     private func setupContainerTapGesture() {
@@ -167,13 +167,13 @@ extension FloatingTitleTextField {
     }
     
     @objc private func optionButtonTapped() {
-        switch optionType {
+        switch trailingButtonType {
         case .passwordToggle:
             textField.isSecureTextEntry.toggle()
             let image = textField.isSecureTextEntry ? UIImage.eye : UIImage.blind
-            optionButton.setImage(image, for: .normal)
+            trailingButton.setImage(image, for: .normal)
         default:
-            optionButtonAction?()
+            trailingButtonAction?()
         }
     }
 }
@@ -187,7 +187,7 @@ extension FloatingTitleTextField: UITextFieldDelegate {
         self.titleLabel.snp.remakeConstraints { make in
             make.top.equalToSuperview().inset(8)
             make.leading.equalToSuperview().inset(10)
-            make.trailing.equalTo(optionButton.snp.leading).offset(-10)
+            make.trailing.equalTo(trailingButton.snp.leading).offset(-10)
         }
         
         UIView.animate(
@@ -210,7 +210,7 @@ extension FloatingTitleTextField: UITextFieldDelegate {
         self.titleLabel.snp.remakeConstraints { make in
             make.centerY.equalToSuperview()
             make.leading.equalToSuperview().inset(10)
-            make.trailing.equalTo(optionButton.snp.leading).offset(-10)
+            make.trailing.equalTo(trailingButton.snp.leading).offset(-10)
         }
         
         UIView.animate(
