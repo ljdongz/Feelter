@@ -5,7 +5,6 @@
 //  Created by 이정동 on 7/21/25.
 //
 
-import SwiftUI
 import UIKit
 
 import RxCocoa
@@ -46,6 +45,7 @@ final class SignInViewController: RxBaseViewController {
 }
 
 #if DEBUG
+import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
     UINavigationController(rootViewController: SignInViewController())
