@@ -49,7 +49,7 @@ extension AppleAuthServiceImpl: ASAuthorizationControllerDelegate {
         
         let result = AppleAuthResult(
             identityToken: identityToken,
-            nickname: credential.fullName?.nickname
+            nickname: credential.fullName?.givenName
         )
         
         continuation?.resume(returning: result)

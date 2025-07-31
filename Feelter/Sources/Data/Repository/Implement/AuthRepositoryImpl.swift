@@ -20,31 +20,18 @@ struct AuthRepositoryImpl: AuthRepository {
         self.kakaoAuthService = kakaoAuthService
     }
     
-    func signInWithApple(
-        idToken: String,
-        deviceToken: String?,
-        nickname: String?
-    ) async throws {
-        do {
-            let result = try await appleAuthService.requestAuthorization()
-            
-            // TODO: 서버로 토큰 전송
-        } catch {
-            
-        }
+    func signInWithApple() async throws {
+   
+        let result = try await appleAuthService.requestAuthorization()
+        
+        // TODO: 서버로 토큰 전송
     }
     
-    func signInWithKakao(
-        oauthToken: String,
-        deviceToken: String?
-    ) async throws {
-        do {
-            let result = try await kakaoAuthService.requestAuthorization()
-            
-            // TODO: 서버로 토큰 전송
-        } catch {
-            
-        }
+    func signInWithKakao() async throws {
+        
+        let result = try await kakaoAuthService.requestAuthorization()
+        
+        // TODO: 서버로 토큰 전송
     }
     
     

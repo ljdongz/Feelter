@@ -8,14 +8,6 @@
 import Foundation
 
 protocol AuthRepository {
-    func signInWithApple(
-        idToken: String,
-        deviceToken: String?,
-        nickname: String?
-    ) async throws
-    
-    func signInWithKakao(
-        oauthToken: String,
-        deviceToken: String?
-    ) async throws
+    func signInWithApple() async throws
+    func signInWithKakao() async throws
 }
