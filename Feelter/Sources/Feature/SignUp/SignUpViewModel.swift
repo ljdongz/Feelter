@@ -119,6 +119,22 @@ final class SignUpViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
         
+        input.signUpButtonTapped
+            .flatMap { [weak self] () -> Observable<Void> in
+                guard let self else { return .empty() }
+                return .fromAsync {
+                    try await self.authRepository.signUpWithEmail(self.signUpForm)
+                }
+                .catch { error in
+                    print(error)
+                    return .empty()
+                }
+            }
+            .subscribe(with: self) { owner, _ in
+                print("Sub")
+            }
+            .disposed(by: disposeBag)
+        
         Observable.combineLatest(
             emailValidation,
             passwordValidation,
