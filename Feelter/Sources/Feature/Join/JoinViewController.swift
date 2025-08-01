@@ -40,6 +40,10 @@ final class JoinViewController: RxBaseViewController {
             passwordTextField: mainView.passwordTextField.textField.rx
                 .text
                 .orEmpty
+                .asObservable(),
+            nicknameTextField: mainView.nicknameTextField.textField.rx
+                .text
+                .orEmpty
                 .asObservable()
         )
         
@@ -77,6 +81,14 @@ final class JoinViewController: RxBaseViewController {
                 case .none:
                     break
                 }
+            }
+            .disposed(by: disposeBag)
+        
+        output.isJoinButtonEnable
+            .observe(on: MainScheduler.instance)
+            .distinctUntilChanged()
+            .subscribe(with: self) { owner, isEnable in
+                owner.mainView.isJoinButtonEnable = isEnable
             }
             .disposed(by: disposeBag)
     }

@@ -117,7 +117,15 @@ final class JoinView: BaseView {
 
     // MARK: - Properties
     private let gradientLayer = CAGradientLayer()
-
+    
+    var isJoinButtonEnable: Bool = false {
+        didSet {
+            joinButton.isUserInteractionEnabled = isJoinButtonEnable
+            
+            let alpha = isJoinButtonEnable ? 1.0 : 0.2
+            joinButton.backgroundColor = .lightTurquoise.withAlphaComponent(alpha)
+        }
+    }
     
     // MARK: - override
     override func layoutSubviews() {

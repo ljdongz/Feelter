@@ -16,14 +16,22 @@ final class JoinViewModel: ViewModel {
         let validEmailButtonTapped: Observable<String>
         
         let passwordTextField: Observable<String>
+        
+        let nicknameTextField: Observable<String>
     }
     
     struct Output {
         let isValidEmail = PublishRelay<ValidationResult>()
         let isValidPassword = PublishRelay<ValidationResult>()
+        
+        let isJoinButtonEnable = BehaviorRelay<Bool>(value: false)
     }
     
     @Dependency private var authRepository: AuthRepository
+    
+    private let emailValidation = BehaviorRelay<Bool>(value: false)
+    private let passwordValidation = BehaviorRelay<Bool>(value: false)
+    private let nicknameValidation = BehaviorRelay<Bool>(value: false)
     
     var disposeBag: DisposeBag = .init()
     
@@ -32,7 +40,11 @@ final class JoinViewModel: ViewModel {
         
         // TODO: 수정하기
         input.emailTextField
+            .distinctUntilChanged()
             .subscribe(with: self) { owner, text in
+                print("Change")
+                owner.emailValidation.accept(false)
+                
                 output.isValidEmail.accept(.none)
             }
             .disposed(by: disposeBag)
@@ -51,16 +63,37 @@ final class JoinViewModel: ViewModel {
                 }
             }
             .subscribe(with: self) { owner, result in
+                owner.emailValidation.accept(result.isValid)
                 output.isValidEmail.accept(result)
             }
             .disposed(by: disposeBag)
 
         input.passwordTextField
             .subscribe(with: self) { owner, password in
-                let isValid = ValidationHelper.validatePassword(password)
-                output.isValidPassword.accept(isValid)
+                let result = ValidationHelper.validatePassword(password)
+                
+                owner.passwordValidation.accept(result.isValid)
+                output.isValidPassword.accept(result)
             }
             .disposed(by: disposeBag)
+        
+        input.nicknameTextField
+            .subscribe(with: self) { owner, nickname in
+                let isEmpty = nickname.trimmingCharacters(in: .whitespaces).isEmpty
+                owner.nicknameValidation.accept(!isEmpty)
+            }
+            .disposed(by: disposeBag)
+        
+        Observable.combineLatest(
+            emailValidation,
+            passwordValidation,
+            nicknameValidation
+        ) {
+            $0 && $1 && $2
+        }
+        .bind(to: output.isJoinButtonEnable)
+        .disposed(by: disposeBag)
+            
         
         return output
     }
