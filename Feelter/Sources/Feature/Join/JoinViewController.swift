@@ -30,20 +30,50 @@ final class JoinViewController: RxBaseViewController {
             emailTextField: mainView.emailTextField.textField.rx
                 .text
                 .orEmpty
+                .distinctUntilChanged()
                 .asObservable(),
             validEmailButtonTapped: mainView.emailTextField.trailingButton.rx
                 .tap
                 .compactMap { [weak self] _ in
                     self?.mainView.emailTextField.textField.text
                 }
+                .distinctUntilChanged()
                 .asObservable(),
             passwordTextField: mainView.passwordTextField.textField.rx
                 .text
                 .orEmpty
+                .distinctUntilChanged()
                 .asObservable(),
             nicknameTextField: mainView.nicknameTextField.textField.rx
                 .text
                 .orEmpty
+                .distinctUntilChanged()
+                .asObservable(),
+            nameTextField: mainView.nameTextField.textField.rx
+                .text
+                .orEmpty
+                .distinctUntilChanged()
+                .asObservable(),
+            phoneNumberTextField: mainView.phoneTextField.textField.rx
+                .text
+                .orEmpty
+                .distinctUntilChanged()
+                .asObservable(),
+            introductionTextView: mainView.introduceTextView.textView.rx
+                .text
+                .orEmpty
+                .distinctUntilChanged()
+                .asObservable(),
+            hashTagAddButtonTapped: mainView.hashTagTextField.trailingButton.rx
+                .tap
+                .compactMap { [weak self] _ in
+                    self?.mainView.hashTagTextField.textField.text
+                }
+                .distinctUntilChanged()
+                .asObservable(),
+            hashTagDeleteButtonTapped: mainView.hashTagCollectionView.rx
+                .itemSelected
+                .map { $0.item }
                 .asObservable()
         )
         
@@ -83,6 +113,17 @@ final class JoinViewController: RxBaseViewController {
                 }
             }
             .disposed(by: disposeBag)
+        
+        output.hashTags
+            .observe(on: MainScheduler.instance)
+            .bind(to: mainView.hashTagCollectionView.rx.items(
+                cellIdentifier: HashTagCollectionViewCell.identifier,
+                cellType: HashTagCollectionViewCell.self
+            )) { (row, element, cell) in
+                cell.configure(text: element)
+            }
+            .disposed(by: disposeBag)
+                    
         
         output.isJoinButtonEnable
             .observe(on: MainScheduler.instance)

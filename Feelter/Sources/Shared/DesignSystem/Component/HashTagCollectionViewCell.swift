@@ -14,16 +14,11 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
     
     static let identifier = "HashTagCollectionViewCell"
     
-    private let hashTagButton: HashTagButton = {
+    let hashTagButton: HashTagButton = {
         let button = HashTagButton()
+        button.isUserInteractionEnabled = false
         return button
     }()
-    
-    var xmarkButtonAction: (() -> Void)? {
-        didSet {
-            hashTagButton.xmarkImageView.isHidden = false
-        }
-    }
     
     private var disposeBag = DisposeBag()
     
@@ -31,7 +26,6 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
         super.prepareForReuse()
         
         disposeBag = DisposeBag()
-        xmarkButtonAction = nil
     }
     
     override init(frame: CGRect) {
@@ -52,12 +46,6 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
             make.edges.equalToSuperview()
             make.height.equalTo(30)
         }
-        
-        hashTagButton.rx.tap
-        .subscribe(onNext: { [weak self] in
-            self?.xmarkButtonAction?()
-        })
-        .disposed(by: disposeBag)
     }
     
     func configure(text: String) {

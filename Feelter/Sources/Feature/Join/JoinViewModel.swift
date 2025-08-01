@@ -18,16 +18,26 @@ final class JoinViewModel: ViewModel {
         let passwordTextField: Observable<String>
         
         let nicknameTextField: Observable<String>
+        let nameTextField: Observable<String>
+        let phoneNumberTextField: Observable<String>
+        let introductionTextView: Observable<String>
+        
+        let hashTagAddButtonTapped: Observable<String>
+        let hashTagDeleteButtonTapped: Observable<Int>
     }
     
     struct Output {
         let isValidEmail = PublishRelay<ValidationResult>()
         let isValidPassword = PublishRelay<ValidationResult>()
         
+        let hashTags = BehaviorRelay<[String]>(value: [])
+        
         let isJoinButtonEnable = BehaviorRelay<Bool>(value: false)
     }
     
     @Dependency private var authRepository: AuthRepository
+    
+    private var joinInputField = JoinInputField()
     
     private let emailValidation = BehaviorRelay<Bool>(value: false)
     private let passwordValidation = BehaviorRelay<Bool>(value: false)
@@ -40,9 +50,8 @@ final class JoinViewModel: ViewModel {
         
         // TODO: 수정하기
         input.emailTextField
-            .distinctUntilChanged()
-            .subscribe(with: self) { owner, text in
-                print("Change")
+            .subscribe(with: self) { owner, email in
+                owner.joinInputField.email = email
                 owner.emailValidation.accept(false)
                 
                 output.isValidEmail.accept(.none)
@@ -64,6 +73,7 @@ final class JoinViewModel: ViewModel {
             }
             .subscribe(with: self) { owner, result in
                 owner.emailValidation.accept(result.isValid)
+                
                 output.isValidEmail.accept(result)
             }
             .disposed(by: disposeBag)
@@ -73,6 +83,8 @@ final class JoinViewModel: ViewModel {
                 let result = ValidationHelper.validatePassword(password)
                 
                 owner.passwordValidation.accept(result.isValid)
+                owner.joinInputField.password = password
+                
                 output.isValidPassword.accept(result)
             }
             .disposed(by: disposeBag)
@@ -81,6 +93,28 @@ final class JoinViewModel: ViewModel {
             .subscribe(with: self) { owner, nickname in
                 let isEmpty = nickname.trimmingCharacters(in: .whitespaces).isEmpty
                 owner.nicknameValidation.accept(!isEmpty)
+                owner.joinInputField.nickname = nickname
+            }
+            .disposed(by: disposeBag)
+        
+        input.nameTextField
+            .subscribe(with: self) { owner, name in
+                owner.joinInputField.name = name
+            }
+            .disposed(by: disposeBag)
+        
+        input.hashTagAddButtonTapped
+            .subscribe(with: self) { owner, hashTag in
+                owner.joinInputField.hashTags.append(hashTag)
+                output.hashTags.accept(owner.joinInputField.hashTags)
+            }
+            .disposed(by: disposeBag)
+        
+        input.hashTagDeleteButtonTapped
+            .subscribe(with: self) { owner, index in
+                print("Delete")
+                owner.joinInputField.hashTags.remove(at: index)
+                output.hashTags.accept(owner.joinInputField.hashTags)
             }
             .disposed(by: disposeBag)
         
@@ -96,5 +130,17 @@ final class JoinViewModel: ViewModel {
             
         
         return output
+    }
+}
+
+extension JoinViewModel {
+    struct JoinInputField {
+        var email: String = ""
+        var password: String = ""
+        var nickname: String = ""
+        var name: String?
+        var phoneNumber: String?
+        var introduction: String?
+        var hashTags: [String] = []
     }
 }
