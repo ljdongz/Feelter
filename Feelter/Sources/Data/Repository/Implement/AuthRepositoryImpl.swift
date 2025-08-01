@@ -23,6 +23,15 @@ struct AuthRepositoryImpl: AuthRepository {
         self.networkProvider = networkProvider
     }
     
+    func validationEmail(email: String) async throws {
+        let requestDTO = ValidationEmailRequestDTO(email: email)
+        
+        _ = try await networkProvider.request(
+            endpoint: AuthAPI.validationEmail(requestDTO),
+            type: ValidationEmailResponseDTO.self
+        )
+    }
+    
     func signInWithEmail(email: String, password: String) async throws {
         let requestDTO = EmailSignInRequestDTO(
             email: email,
