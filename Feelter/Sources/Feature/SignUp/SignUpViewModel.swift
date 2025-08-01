@@ -10,7 +10,7 @@ import Foundation
 import RxCocoa
 import RxSwift
 
-final class JoinViewModel: ViewModel {
+final class SignUpViewModel: ViewModel {
     struct Input {
         let emailTextField: Observable<String>
         let validEmailButtonTapped: Observable<String>
@@ -21,6 +21,7 @@ final class JoinViewModel: ViewModel {
         let introductionTextView: Observable<String>
         let hashTagAddButtonTapped: Observable<String>
         let hashTagDeleteButtonTapped: Observable<Int>
+        let signUpButtonTapped: Observable<Void>
     }
     
     struct Output {
@@ -28,12 +29,12 @@ final class JoinViewModel: ViewModel {
         let isValidPassword = PublishRelay<ValidationResult>()
         let newHashTag = PublishRelay<String>()
         let deleteHashTag = PublishRelay<String>()
-        let isJoinButtonEnable = BehaviorRelay<Bool>(value: false)
+        let isSignUpButtonEnabled = BehaviorRelay<Bool>(value: false)
     }
     
     @Dependency private var authRepository: AuthRepository
     
-    private var joinInputField = JoinInputField()
+    private var signUpForm = SignUpForm()
     
     private let emailValidation = BehaviorRelay<Bool>(value: false)
     private let passwordValidation = BehaviorRelay<Bool>(value: false)
@@ -47,7 +48,7 @@ final class JoinViewModel: ViewModel {
         // TODO: 수정하기
         input.emailTextField
             .subscribe(with: self) { owner, email in
-                owner.joinInputField.email = email
+                owner.signUpForm.email = email
                 owner.emailValidation.accept(false)
                 
                 output.isValidEmail.accept(.none)
@@ -79,7 +80,7 @@ final class JoinViewModel: ViewModel {
                 let result = ValidationHelper.validatePassword(password)
                 
                 owner.passwordValidation.accept(result.isValid)
-                owner.joinInputField.password = password
+                owner.signUpForm.password = password
                 
                 output.isValidPassword.accept(result)
             }
@@ -89,21 +90,21 @@ final class JoinViewModel: ViewModel {
             .subscribe(with: self) { owner, nickname in
                 let isEmpty = nickname.trimmingCharacters(in: .whitespaces).isEmpty
                 owner.nicknameValidation.accept(!isEmpty)
-                owner.joinInputField.nickname = nickname
+                owner.signUpForm.nickname = nickname
             }
             .disposed(by: disposeBag)
         
         input.nameTextField
             .subscribe(with: self) { owner, name in
-                owner.joinInputField.name = name
+                owner.signUpForm.name = name
             }
             .disposed(by: disposeBag)
         
         input.hashTagAddButtonTapped
             .subscribe(with: self) { owner, hashTag in
-                guard !owner.joinInputField.hashTags.contains(hashTag) else { return }
+                guard !owner.signUpForm.hashTags.contains(hashTag) else { return }
                 
-                owner.joinInputField.hashTags.append(hashTag)
+                owner.signUpForm.hashTags.append(hashTag)
                 
                 output.newHashTag.accept(hashTag)
                 output.newHashTag.accept("")
@@ -112,8 +113,8 @@ final class JoinViewModel: ViewModel {
         
         input.hashTagDeleteButtonTapped
             .subscribe(with: self) { owner, index in
-                let hashTag = owner.joinInputField.hashTags[index]
-                owner.joinInputField.hashTags.remove(at: index)
+                let hashTag = owner.signUpForm.hashTags[index]
+                owner.signUpForm.hashTags.remove(at: index)
                 output.deleteHashTag.accept(hashTag)
             }
             .disposed(by: disposeBag)
@@ -125,7 +126,7 @@ final class JoinViewModel: ViewModel {
         ) {
             $0 && $1 && $2
         }
-        .bind(to: output.isJoinButtonEnable)
+        .bind(to: output.isSignUpButtonEnabled)
         .disposed(by: disposeBag)
             
         
@@ -134,8 +135,8 @@ final class JoinViewModel: ViewModel {
 }
 
 // MARK: - Model
-extension JoinViewModel {
-    struct JoinInputField {
+extension SignUpViewModel {
+    struct SignUpForm {
         var email: String = ""
         var password: String = ""
         var nickname: String = ""

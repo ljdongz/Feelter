@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class JoinView: BaseView {
+final class SignUpView: BaseView {
     
     typealias DataSourceType = UICollectionViewDiffableDataSource<Section, String>
     
@@ -116,7 +116,7 @@ final class JoinView: BaseView {
         return view
     }()
     
-    let joinButton: UIButton = {
+    let signUpButton: UIButton = {
         let view = UIButton()
         view.setTitle("회원가입", for: .normal)
         view.setTitleColor(.gray0, for: .normal)
@@ -131,12 +131,12 @@ final class JoinView: BaseView {
     
     var dataSource: DataSourceType!
     
-    var isJoinButtonEnable: Bool = false {
+    var isSignUpButtonEnabled: Bool = false {
         didSet {
-            joinButton.isUserInteractionEnabled = isJoinButtonEnable
+            signUpButton.isUserInteractionEnabled = isSignUpButtonEnabled
             
-            let alpha = isJoinButtonEnable ? 1.0 : 0.2
-            joinButton.backgroundColor = .lightTurquoise.withAlphaComponent(alpha)
+            let alpha = isSignUpButtonEnabled ? 1.0 : 0.2
+            signUpButton.backgroundColor = .lightTurquoise.withAlphaComponent(alpha)
         }
     }
     
@@ -171,7 +171,7 @@ final class JoinView: BaseView {
          nicknameTextField, nicknameDescriptLabel,
          nameTextField, phoneTextField, introduceTextView,
          hashTagTextField, hashTagCollectionView,
-        joinButton].forEach { addSubview($0) }
+        signUpButton].forEach { addSubview($0) }
     }
     
     override func setupConstraints() {
@@ -238,7 +238,7 @@ final class JoinView: BaseView {
             make.height.equalTo(35)
         }
         
-        joinButton.snp.makeConstraints { make in
+        signUpButton.snp.makeConstraints { make in
             make.bottom.equalTo(safeAreaLayoutGuide.snp.bottom).offset(-15)
             make.horizontalEdges.equalToSuperview().inset(30)
             make.height.equalTo(45)
@@ -247,7 +247,7 @@ final class JoinView: BaseView {
 }
 
 // MARK: - Public Method
-extension JoinView {
+extension SignUpView {
     func appendHashTag(_ hashTag: String) {
         var snapshot = dataSource.snapshot(for: .main)
         snapshot.append([hashTag])
@@ -264,6 +264,6 @@ extension JoinView {
 #if DEBUG
 @available(iOS 17.0, *)
 #Preview {
-    JoinViewController()
+    SignUpViewController()
 }
 #endif

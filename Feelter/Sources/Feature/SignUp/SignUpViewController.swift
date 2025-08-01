@@ -10,11 +10,11 @@ import UIKit
 import RxCocoa
 import RxSwift
 
-final class JoinViewController: RxBaseViewController {
+final class SignUpViewController: RxBaseViewController {
     
-    private let mainView = JoinView()
+    private let mainView = SignUpView()
     
-    private let viewModel = JoinViewModel()
+    private let viewModel = SignUpViewModel()
 
     override func loadView() {
         self.view = mainView
@@ -26,7 +26,7 @@ final class JoinViewController: RxBaseViewController {
     }
     
     override func bind() {
-        let input = JoinViewModel.Input(
+        let input = SignUpViewModel.Input(
             emailTextField: mainView.emailTextField.textField.rx
                 .text
                 .orEmpty
@@ -74,6 +74,9 @@ final class JoinViewController: RxBaseViewController {
             hashTagDeleteButtonTapped: mainView.hashTagCollectionView.rx
                 .itemSelected
                 .map { $0.item }
+                .asObservable(),
+            signUpButtonTapped: mainView.signUpButton.rx
+                .tap
                 .asObservable()
         )
         
@@ -128,11 +131,11 @@ final class JoinViewController: RxBaseViewController {
             .disposed(by: disposeBag)
                     
         
-        output.isJoinButtonEnable
+        output.isSignUpButtonEnabled
             .observe(on: MainScheduler.instance)
             .distinctUntilChanged()
-            .subscribe(with: self) { owner, isEnable in
-                owner.mainView.isJoinButtonEnable = isEnable
+            .subscribe(with: self) { owner, isEnabled in
+                owner.mainView.isSignUpButtonEnabled = isEnabled
             }
             .disposed(by: disposeBag)
     }
@@ -142,6 +145,6 @@ final class JoinViewController: RxBaseViewController {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    JoinViewController()
+    SignUpViewController()
 }
 #endif

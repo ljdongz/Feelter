@@ -49,14 +49,14 @@ final class SignInViewController: RxBaseViewController {
         
         output.isEmailSignInButtonEnabled
             .distinctUntilChanged()
-            .subscribe(with: self, onNext: { owner, isEnable in
-                owner.mainView.isSignInButtonEnable = isEnable
+            .subscribe(with: self, onNext: { owner, isEnabled in
+                owner.mainView.isSignInButtonEnabled = isEnabled
             })
             .disposed(by: disposeBag)
         
-        mainView.joinButton.rx.tap
+        mainView.signUpButton.rx.tap
             .subscribe { _ in
-                let vc = JoinViewController()
+                let vc = SignUpViewController()
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             .disposed(by: disposeBag)
