@@ -14,14 +14,11 @@ final class JoinViewModel: ViewModel {
     struct Input {
         let emailTextField: Observable<String>
         let validEmailButtonTapped: Observable<String>
-        
         let passwordTextField: Observable<String>
-        
         let nicknameTextField: Observable<String>
         let nameTextField: Observable<String>
         let phoneNumberTextField: Observable<String>
         let introductionTextView: Observable<String>
-        
         let hashTagAddButtonTapped: Observable<String>
         let hashTagDeleteButtonTapped: Observable<Int>
     }
@@ -29,9 +26,8 @@ final class JoinViewModel: ViewModel {
     struct Output {
         let isValidEmail = PublishRelay<ValidationResult>()
         let isValidPassword = PublishRelay<ValidationResult>()
-        
-        let hashTags = BehaviorRelay<[String]>(value: [])
-        
+        let newHashTag = PublishRelay<String>()
+        let deleteHashTag = PublishRelay<String>()
         let isJoinButtonEnable = BehaviorRelay<Bool>(value: false)
     }
     
@@ -105,16 +101,20 @@ final class JoinViewModel: ViewModel {
         
         input.hashTagAddButtonTapped
             .subscribe(with: self) { owner, hashTag in
+                guard !owner.joinInputField.hashTags.contains(hashTag) else { return }
+                
                 owner.joinInputField.hashTags.append(hashTag)
-                output.hashTags.accept(owner.joinInputField.hashTags)
+                
+                output.newHashTag.accept(hashTag)
+                output.newHashTag.accept("")
             }
             .disposed(by: disposeBag)
         
         input.hashTagDeleteButtonTapped
             .subscribe(with: self) { owner, index in
-                print("Delete")
+                let hashTag = owner.joinInputField.hashTags[index]
                 owner.joinInputField.hashTags.remove(at: index)
-                output.hashTags.accept(owner.joinInputField.hashTags)
+                output.deleteHashTag.accept(hashTag)
             }
             .disposed(by: disposeBag)
         
@@ -133,6 +133,7 @@ final class JoinViewModel: ViewModel {
     }
 }
 
+// MARK: - Model
 extension JoinViewModel {
     struct JoinInputField {
         var email: String = ""

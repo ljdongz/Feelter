@@ -69,7 +69,7 @@ final class JoinViewController: RxBaseViewController {
                 .compactMap { [weak self] _ in
                     self?.mainView.hashTagTextField.textField.text
                 }
-                .distinctUntilChanged()
+                .do(onNext: { [weak self] _ in self?.mainView.hashTagTextField.textField.text = "" })
                 .asObservable(),
             hashTagDeleteButtonTapped: mainView.hashTagCollectionView.rx
                 .itemSelected
@@ -114,13 +114,16 @@ final class JoinViewController: RxBaseViewController {
             }
             .disposed(by: disposeBag)
         
-        output.hashTags
-            .observe(on: MainScheduler.instance)
-            .bind(to: mainView.hashTagCollectionView.rx.items(
-                cellIdentifier: HashTagCollectionViewCell.identifier,
-                cellType: HashTagCollectionViewCell.self
-            )) { (row, element, cell) in
-                cell.configure(text: element)
+        output.newHashTag
+            .filter { !$0.isEmpty }
+            .subscribe(with: self) { owner, hashTag in
+                owner.mainView.appendHashTag(hashTag)
+            }
+            .disposed(by: disposeBag)
+        
+        output.deleteHashTag
+            .subscribe(with: self) { owner, hashTag in
+                owner.mainView.deleteHashTag(hashTag)
             }
             .disposed(by: disposeBag)
                     

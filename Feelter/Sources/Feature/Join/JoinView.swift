@@ -9,6 +9,17 @@ import UIKit
 
 final class JoinView: BaseView {
     
+    typealias DataSourceType = UICollectionViewDiffableDataSource<Section, String>
+    
+    enum Section: CaseIterable {
+        case main
+    }
+    
+    struct HashTag: Identifiable {
+        let id: UUID = UUID()
+        let text: String
+    }
+    
     // MARK: - UI Properties
     let emailTextField: FloatingTitleTextField = {
         let view = FloatingTitleTextField()
@@ -118,6 +129,8 @@ final class JoinView: BaseView {
     // MARK: - Properties
     private let gradientLayer = CAGradientLayer()
     
+    var dataSource: DataSourceType!
+    
     var isJoinButtonEnable: Bool = false {
         didSet {
             joinButton.isUserInteractionEnabled = isJoinButtonEnable
@@ -139,6 +152,17 @@ final class JoinView: BaseView {
             UIColor.gray100.cgColor
         ]
         self.layer.addSublayer(gradientLayer)
+        
+        self.dataSource = DataSourceType(
+            collectionView: hashTagCollectionView,
+            cellProvider: { collectionView, indexPath, itemIdentifier in
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: HashTagCollectionViewCell.identifier,
+                    for: indexPath
+                ) as? HashTagCollectionViewCell else { return UICollectionViewCell() }
+                cell.configure(text: itemIdentifier)
+                return cell
+        })
     }
     
     override func setupSubviews() {
@@ -219,6 +243,21 @@ final class JoinView: BaseView {
             make.horizontalEdges.equalToSuperview().inset(30)
             make.height.equalTo(45)
         }
+    }
+}
+
+// MARK: - Public Method
+extension JoinView {
+    func appendHashTag(_ hashTag: String) {
+        var snapshot = dataSource.snapshot(for: .main)
+        snapshot.append([hashTag])
+        dataSource.apply(snapshot, to: .main)
+    }
+    
+    func deleteHashTag(_ hashTag: String) {
+        var snapshot = dataSource.snapshot(for: .main)
+        snapshot.delete([hashTag])
+        dataSource.apply(snapshot, to: .main)
     }
 }
 
