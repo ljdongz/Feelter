@@ -18,6 +18,12 @@ enum TextFieldOptionButtonType {
     case text(String)
 }
 
+enum TextFieldStatus {
+    case none
+    case success
+    case fail
+}
+
 final class FloatingTitleTextField: BaseView {
     
     private let containerView: UIView = {
@@ -60,7 +66,11 @@ final class FloatingTitleTextField: BaseView {
         }
     }
     
-    var trailingButtonAction: (() -> Void)?
+    var textFieldStatus: TextFieldStatus = .none {
+        didSet {
+            updateTextFieldStatus()
+        }
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -110,8 +120,8 @@ final class FloatingTitleTextField: BaseView {
 }
 
 // MARK: - Private
-extension FloatingTitleTextField {
-    private func updateOptionButton() {
+private extension FloatingTitleTextField {
+    func updateOptionButton() {
         switch trailingButtonType {
         case .none:
             trailingButton.setTitle(nil, for: .normal)
@@ -153,27 +163,38 @@ extension FloatingTitleTextField {
         }
     }
     
-    private func setupOptionButtonAction() {
+    func updateTextFieldStatus() {
+        switch textFieldStatus {
+        case .success:
+            containerView.layer.borderColor = UIColor.green.cgColor
+        case .fail:
+            containerView.layer.borderColor = UIColor.red.cgColor
+        case .none:
+            containerView.layer.borderColor = UIColor.gray75.cgColor
+        }
+    }
+    
+    func setupOptionButtonAction() {
         trailingButton.addTarget(self, action: #selector(optionButtonTapped), for: .touchUpInside)
     }
     
-    private func setupContainerTapGesture() {
+    func setupContainerTapGesture() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(containerTapped))
         containerView.addGestureRecognizer(tapGesture)
     }
     
-    @objc private func containerTapped() {
+    @objc func containerTapped() {
         textField.becomeFirstResponder()
     }
     
-    @objc private func optionButtonTapped() {
+    @objc func optionButtonTapped() {
         switch trailingButtonType {
         case .passwordToggle:
             textField.isSecureTextEntry.toggle()
             let image = textField.isSecureTextEntry ? UIImage.eye : UIImage.blind
             trailingButton.setImage(image, for: .normal)
         default:
-            trailingButtonAction?()
+            break
         }
     }
 }
