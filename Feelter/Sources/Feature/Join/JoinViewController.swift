@@ -13,12 +13,79 @@ import RxSwift
 final class JoinViewController: RxBaseViewController {
     
     private let mainView = JoinView()
+    
+    private let viewModel = JoinViewModel()
 
     override func loadView() {
         self.view = mainView
     }
     
     override func viewDidLoad() {
+        super.viewDidLoad()
         title = "회원가입"
     }
+    
+    override func bind() {
+        let input = JoinViewModel.Input(
+            emailTextField: mainView.emailTextField.textField.rx
+                .text
+                .orEmpty
+                .asObservable(),
+            validEmailButtonTapped: mainView.emailTextField.trailingButton.rx
+                .tap
+                .compactMap { [weak self] _ in
+                    self?.mainView.emailTextField.textField.text
+                }
+                .asObservable(),
+            passwordTextField: mainView.passwordTextField.textField.rx
+                .text
+                .orEmpty
+                .asObservable()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.isValidEmail
+            .observe(on: MainScheduler.instance)
+            .distinctUntilChanged()
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .valid:
+                    owner.mainView.emailTextField.textFieldStatus = .success
+                    owner.mainView.emailDescriptLabel.text = "사용 가능한 이메일입니다."
+                case .invalid(let message):
+                    owner.mainView.emailTextField.textFieldStatus = .fail
+                    owner.mainView.emailDescriptLabel.text = message
+                case .none:
+                    owner.mainView.emailTextField.textFieldStatus = .fail
+                    owner.mainView.emailDescriptLabel.text = "이메일 검증이 필요합니다."
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        output.isValidPassword
+            .observe(on: MainScheduler.instance)
+            .distinctUntilChanged()
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .valid:
+                    owner.mainView.passwordTextField.textFieldStatus = .success
+                    owner.mainView.passwordDescriptLabel.text = "사용 가능한 패스워드입니다."
+                case .invalid(let message):
+                    owner.mainView.passwordTextField.textFieldStatus = .fail
+                    owner.mainView.passwordDescriptLabel.text = message
+                case .none:
+                    break
+                }
+            }
+            .disposed(by: disposeBag)
+    }
 }
+
+#if DEBUG
+import SwiftUI
+@available(iOS 17.0, *)
+#Preview {
+    JoinViewController()
+}
+#endif

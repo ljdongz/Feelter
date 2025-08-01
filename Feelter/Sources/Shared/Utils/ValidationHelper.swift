@@ -9,7 +9,8 @@ import Foundation
 
 // MARK: - Validation Result
 
-enum ValidationResult {
+enum ValidationResult: Equatable {
+    case none
     case valid
     case invalid(message: String)
     
@@ -17,14 +18,14 @@ enum ValidationResult {
         switch self {
         case .valid:
             return true
-        case .invalid:
+        case .invalid, .none:
             return false
         }
     }
     
     var errorMessage: String? {
         switch self {
-        case .valid:
+        case .valid, .none:
             return nil
         case .invalid(let message):
             return message
@@ -80,7 +81,7 @@ struct ValidationHelper {
         let hasNumber = password.range(of: "[0-9]", options: .regularExpression) != nil
         let hasSpecialChar = password.range(of: "[@$!%*#?&]", options: .regularExpression) != nil
         
-        return hasUppercase && hasLowercase && hasNumber && hasSpecialChar
+        return (hasUppercase || hasLowercase) && hasNumber && hasSpecialChar
     }
     
     // MARK: - Password Confirmation
