@@ -11,6 +11,7 @@ enum AuthAPI {
     case refresh
     
     case validationEmail(Encodable)
+    case emailSignUp(Encodable)
     
     case emailLogin(Encodable)
     case appleLogin(Encodable)
@@ -28,6 +29,8 @@ extension AuthAPI: APIEndpoint {
             "/v1/auth/refresh"
         case .validationEmail:
             "/v1/users/validation/email"
+        case .emailSignUp:
+            "/v1/users/join"
         case .emailLogin:
             "/v1/users/login"
         case .appleLogin:
@@ -41,6 +44,7 @@ extension AuthAPI: APIEndpoint {
         switch self {
         case .refresh: .get
         case .validationEmail: .post
+        case .emailSignUp: .post
         case .emailLogin: .post
         case .appleLogin: .post
         case .kakaoLogin: .post
@@ -52,6 +56,8 @@ extension AuthAPI: APIEndpoint {
         case .refresh:
                 .requestPlain
         case .validationEmail(let data):
+                .requestJSONEncodable(data)
+        case .emailSignUp(let data):
                 .requestJSONEncodable(data)
         case .emailLogin(let data):
                 .requestJSONEncodable(data)

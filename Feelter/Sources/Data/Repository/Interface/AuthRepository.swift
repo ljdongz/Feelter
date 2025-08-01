@@ -10,6 +10,7 @@ import Foundation
 protocol AuthRepository {
     
     func validationEmail(email: String) async throws
+    func signUpWithEmail(_ form: SignUpForm) async throws
     
     func signInWithEmail(email: String, password: String) async throws
     func signInWithApple() async throws

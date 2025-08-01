@@ -32,6 +32,26 @@ struct AuthRepositoryImpl: AuthRepository {
         )
     }
     
+    func signUpWithEmail(_ form: SignUpForm) async throws {
+        let requestDTO = EmailSignUpRequestDTO(
+            email: form.email,
+            password: form.password,
+            nickname: form.nickname,
+            name: form.name,
+            phoneNumber: form.phoneNumber,
+            introduction: form.introduction,
+            hashTags: form.hashTags,
+            deviceToken: nil
+        )
+        
+        let response = try await networkProvider.request(
+            endpoint: AuthAPI.emailSignUp(requestDTO),
+            type: AuthTokenResponseDTO.self
+        )
+        
+        // TODO: 토큰 저장
+    }
+    
     func signInWithEmail(email: String, password: String) async throws {
         let requestDTO = EmailSignInRequestDTO(
             email: email,
@@ -41,7 +61,7 @@ struct AuthRepositoryImpl: AuthRepository {
         
         let response = try await networkProvider.request(
             endpoint: AuthAPI.emailLogin(requestDTO),
-            type: SignInResponseDTO.self
+            type: AuthTokenResponseDTO.self
         )
         
         // TODO: 토큰 저장
@@ -59,7 +79,7 @@ struct AuthRepositoryImpl: AuthRepository {
         
         let response = try await networkProvider.request(
             endpoint: AuthAPI.appleLogin(requestDTO),
-            type: SignInResponseDTO.self
+            type: AuthTokenResponseDTO.self
         )
         
         // TODO: 토큰 저장
@@ -76,7 +96,7 @@ struct AuthRepositoryImpl: AuthRepository {
         
         let response = try await networkProvider.request(
             endpoint: AuthAPI.kakaoLogin(requestDTO),
-            type: SignInResponseDTO.self
+            type: AuthTokenResponseDTO.self
         )
         
         // TODO: 토큰 저장
