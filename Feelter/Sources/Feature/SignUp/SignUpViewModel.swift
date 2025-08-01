@@ -45,17 +45,17 @@ final class SignUpViewModel: ViewModel {
     func transform(input: Input) -> Output {
         let output = Output()
         
-        // TODO: 수정하기
+        // 이메일 입력 필드
         input.emailTextField
             .subscribe(with: self) { owner, email in
                 owner.signUpForm.email = email
                 owner.emailValidation.accept(false)
                 
-                output.isValidEmail.accept(.none)
+                output.isValidEmail.accept(.invalid(message: "이메일 검증이 필요합니다."))
             }
             .disposed(by: disposeBag)
         
-        // TODO: 검사 상태에 따른 이벤트 전달 로직 수정 (with 에러처리)
+        // 이메일 검증 버튼 클릭
         input.validEmailButtonTapped
             .flatMap { [weak self] email -> Observable<ValidationResult> in
                 guard let self else { return .empty() }
@@ -75,6 +75,7 @@ final class SignUpViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
 
+        // 비밀번호 입력 필드
         input.passwordTextField
             .subscribe(with: self) { owner, password in
                 let result = ValidationHelper.validatePassword(password)
@@ -86,6 +87,7 @@ final class SignUpViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
         
+        // 닉네임 입력 필드
         input.nicknameTextField
             .subscribe(with: self) { owner, nickname in
                 let isEmpty = nickname.trimmingCharacters(in: .whitespaces).isEmpty
@@ -94,12 +96,14 @@ final class SignUpViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
         
+        // 이름 입력 필드
         input.nameTextField
             .subscribe(with: self) { owner, name in
                 owner.signUpForm.name = name
             }
             .disposed(by: disposeBag)
         
+        // 해시태그 추가 버튼 클릭
         input.hashTagAddButtonTapped
             .subscribe(with: self) { owner, hashTag in
                 guard !owner.signUpForm.hashTags.contains(hashTag) else { return }
@@ -111,6 +115,7 @@ final class SignUpViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
         
+        // 해시태그 삭제 버튼 클릭
         input.hashTagDeleteButtonTapped
             .subscribe(with: self) { owner, index in
                 let hashTag = owner.signUpForm.hashTags[index]
@@ -119,6 +124,7 @@ final class SignUpViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
         
+        // 회원가입 버튼 클릭
         input.signUpButtonTapped
             .flatMap { [weak self] () -> Observable<Void> in
                 guard let self else { return .empty() }
@@ -135,6 +141,7 @@ final class SignUpViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
         
+        // 회원가입 버튼 활성화 상태
         Observable.combineLatest(
             emailValidation,
             passwordValidation,
@@ -144,7 +151,6 @@ final class SignUpViewModel: ViewModel {
         }
         .bind(to: output.isSignUpButtonEnabled)
         .disposed(by: disposeBag)
-            
         
         return output
     }

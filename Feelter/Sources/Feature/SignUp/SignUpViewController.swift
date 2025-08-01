@@ -93,9 +93,6 @@ final class SignUpViewController: RxBaseViewController {
                 case .invalid(let message):
                     owner.mainView.emailTextField.textFieldStatus = .fail
                     owner.mainView.emailDescriptLabel.text = message
-                case .none:
-                    owner.mainView.emailTextField.textFieldStatus = .fail
-                    owner.mainView.emailDescriptLabel.text = "이메일 검증이 필요합니다."
                 }
             }
             .disposed(by: disposeBag)
@@ -111,8 +108,6 @@ final class SignUpViewController: RxBaseViewController {
                 case .invalid(let message):
                     owner.mainView.passwordTextField.textFieldStatus = .fail
                     owner.mainView.passwordDescriptLabel.text = message
-                case .none:
-                    break
                 }
             }
             .disposed(by: disposeBag)

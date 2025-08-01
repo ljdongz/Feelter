@@ -38,17 +38,20 @@ final class SignInViewModel: ViewModel {
             input.passwordTextField
         ) { email, password in
             let emailValidation = ValidationHelper.validateEmail(email)
-            let passwordValidation = ValidationHelper.validateRequired(password, fieldName: "비밀번호")
+            let isPasswordValid = password.count >= 8
             
-            return emailValidation.isValid && passwordValidation.isValid
+            return emailValidation.isValid && isPasswordValid
         }
         .bind(to: output.isEmailSignInButtonEnabled)
         .disposed(by: disposeBag)
         
         
-        // 이메일 로그인 처리
+        // 이메일 로그인
         input.emailSignInButtonTapped
-            .withLatestFrom(Observable.combineLatest(input.emailTextField, input.passwordTextField))
+            .withLatestFrom(Observable.combineLatest(
+                input.emailTextField,
+                input.passwordTextField
+            ))
             .flatMap { [weak self] email, password in
                 guard let self else { return Observable<Void>.empty() }
                 
@@ -63,6 +66,7 @@ final class SignInViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
         
+        // 애플 로그인
         input.appleSignInButtonTapped
             .flatMap { [weak self] _ in
                 guard let self else { return Observable<Void>.empty() }
@@ -78,6 +82,7 @@ final class SignInViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
 
+        // 카카오 로그인
         input.kakaoSignInButtonTapped
             .flatMap { [weak self] _ in
                 guard let self else { return Observable<Void>.empty() }

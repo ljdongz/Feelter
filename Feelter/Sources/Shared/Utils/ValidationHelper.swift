@@ -10,26 +10,11 @@ import Foundation
 // MARK: - Validation Result
 
 enum ValidationResult: Equatable {
-    case none
     case valid
     case invalid(message: String)
     
     var isValid: Bool {
-        switch self {
-        case .valid:
-            return true
-        case .invalid, .none:
-            return false
-        }
-    }
-    
-    var errorMessage: String? {
-        switch self {
-        case .valid, .none:
-            return nil
-        case .invalid(let message):
-            return message
-        }
+        self == .valid
     }
 }
 
@@ -84,44 +69,6 @@ struct ValidationHelper {
         return (hasUppercase || hasLowercase) && hasNumber && hasSpecialChar
     }
     
-    // MARK: - Password Confirmation
-    
-    static func validatePasswordConfirmation(password: String, confirmation: String) -> ValidationResult {
-        guard !confirmation.isEmpty else {
-            return .invalid(message: "비밀번호 확인을 입력해주세요.")
-        }
-        
-        guard password == confirmation else {
-            return .invalid(message: "비밀번호가 일치하지 않습니다.")
-        }
-        
-        return .valid
-    }
-    
-    // MARK: - General Text Validation
-    
-    static func validateRequired(_ text: String, fieldName: String) -> ValidationResult {
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return .invalid(message: "\(fieldName)을(를) 입력해주세요.")
-        }
-        
-        return .valid
-    }
-    
-    static func validateLength(_ text: String, min: Int, max: Int, fieldName: String) -> ValidationResult {
-        let length = text.count
-        
-        guard length >= min else {
-            return .invalid(message: "\(fieldName)은(는) \(min)자 이상이어야 합니다.")
-        }
-        
-        guard length <= max else {
-            return .invalid(message: "\(fieldName)은(는) \(max)자 이하여야 합니다.")
-        }
-        
-        return .valid
-    }
-    
     // MARK: - Phone Number Validation
     
     static func validatePhoneNumber(_ phoneNumber: String) -> ValidationResult {
@@ -137,37 +84,5 @@ struct ValidationHelper {
         }
         
         return .valid
-    }
-}
-
-// MARK: - Convenience Extensions
-
-extension ValidationHelper {
-    
-    // 여러 검증을 한번에 수행
-    static func validateMultiple(_ validations: [ValidationResult]) -> ValidationResult {
-        for validation in validations {
-            if case .invalid = validation {
-                return validation
-            }
-        }
-        return .valid
-    }
-    
-    // 로그인 폼 전체 검증
-    static func validateSignInForm(email: String, password: String) -> ValidationResult {
-        let emailValidation = validateEmail(email)
-        let passwordValidation = validateRequired(password, fieldName: "비밀번호")
-        
-        return validateMultiple([emailValidation, passwordValidation])
-    }
-    
-    // 회원가입 폼 전체 검증
-    static func validateSignUpForm(email: String, password: String, passwordConfirmation: String) -> ValidationResult {
-        let emailValidation = validateEmail(email)
-        let passwordValidation = validatePassword(password)
-        let confirmationValidation = validatePasswordConfirmation(password: password, confirmation: passwordConfirmation)
-        
-        return validateMultiple([emailValidation, passwordValidation, confirmationValidation])
     }
 }
