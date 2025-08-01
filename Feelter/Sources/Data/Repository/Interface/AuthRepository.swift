@@ -8,6 +8,7 @@
 import Foundation
 
 protocol AuthRepository {
+    func signInWithEmail(email: String, password: String) async throws
     func signInWithApple() async throws
     func signInWithKakao() async throws
 }
