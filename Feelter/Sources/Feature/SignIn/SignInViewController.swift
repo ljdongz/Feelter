@@ -21,6 +21,7 @@ final class SignInViewController: RxBaseViewController {
     private let viewModel = SignInViewModel()
     
     override func loadView() {
+        super.loadView()
         self.view = mainView
     }
 
