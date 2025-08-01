@@ -123,6 +123,15 @@ final class SignInView: BaseView {
     
     // MARK: - Properties
     private let gradientLayer = CAGradientLayer()
+    
+    var isSignInButtonEnable: Bool = false {
+        didSet {
+            signInButton.isUserInteractionEnabled = isSignInButtonEnable
+            
+            let alpha = isSignInButtonEnable ? 1.0 : 0.2
+            signInButton.backgroundColor = .lightTurquoise.withAlphaComponent(alpha)
+        }
+    }
 
     
     // MARK: - override
