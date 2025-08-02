@@ -30,6 +30,7 @@ final class SignUpViewModel: ViewModel {
         let newHashTag = PublishRelay<String>()
         let deleteHashTag = PublishRelay<String>()
         let isSignUpButtonEnabled = BehaviorRelay<Bool>(value: false)
+        let isLoadingSignUp = PublishRelay<Bool>()
     }
     
     @Dependency private var authRepository: AuthRepository
@@ -126,6 +127,9 @@ final class SignUpViewModel: ViewModel {
         
         // 회원가입 버튼 클릭
         input.signUpButtonTapped
+            .do(onNext: { _ in
+                output.isLoadingSignUp.accept(true)
+            })
             .flatMap { [weak self] () -> Observable<Void> in
                 guard let self else { return .empty() }
                 return .fromAsync {
@@ -137,7 +141,11 @@ final class SignUpViewModel: ViewModel {
                 }
             }
             .subscribe(with: self) { owner, _ in
-                print("Sub")
+                print("SignUp Success")
+                output.isLoadingSignUp.accept(false)
+            } onError: { owner, error in
+                print("SignUp Error: \(error)")
+                output.isLoadingSignUp.accept(false)
             }
             .disposed(by: disposeBag)
         

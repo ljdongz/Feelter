@@ -22,6 +22,7 @@ final class SignInViewModel: ViewModel {
     
     struct Output {
         let isEmailSignInButtonEnabled = BehaviorRelay<Bool>(value: false)
+        let isLoadingEmailSignIn = PublishRelay<Bool>()
     }
     
     @Dependency private var authRepository: AuthRepository
@@ -48,6 +49,9 @@ final class SignInViewModel: ViewModel {
         
         // 이메일 로그인
         input.emailSignInButtonTapped
+            .do(onNext: { _ in
+                output.isLoadingEmailSignIn.accept(true)
+            })
             .withLatestFrom(Observable.combineLatest(
                 input.emailTextField,
                 input.passwordTextField
@@ -61,8 +65,10 @@ final class SignInViewModel: ViewModel {
             }
             .subscribe(with: self) { owner, _ in
                 print("Email Login Success")
+                output.isLoadingEmailSignIn.accept(false)
             } onError: { owner, error in
                 print("Email Login Error: \(error)")
+                output.isLoadingEmailSignIn.accept(false)
             }
             .disposed(by: disposeBag)
         

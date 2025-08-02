@@ -133,6 +133,14 @@ final class SignUpViewController: RxBaseViewController {
                 owner.mainView.isSignUpButtonEnabled = isEnabled
             }
             .disposed(by: disposeBag)
+        
+        output.isLoadingSignUp
+            .observe(on: MainScheduler.instance)
+            .distinctUntilChanged()
+            .subscribe(with: self) { owner, isLoading in
+                owner.mainView.isSignUpLoading = isLoading
+            }
+            .disposed(by: disposeBag)
     }
 }
 

@@ -52,6 +52,13 @@ final class SignInView: BaseView {
         view.backgroundColor = .lightTurquoise.withAlphaComponent(0.2)
         return view
     }()
+    
+    private let signInLoadingIndicator: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .medium)
+        view.color = .gray0
+        view.hidesWhenStopped = true
+        return view
+    }()
 
     let signUpButton: UIButton = {
         let view = UIButton()
@@ -132,6 +139,20 @@ final class SignInView: BaseView {
             signInButton.backgroundColor = .lightTurquoise.withAlphaComponent(alpha)
         }
     }
+    
+    var isSignInLoading: Bool = false {
+        didSet {
+            if isSignInLoading {
+                signInButton.setTitle("", for: .normal)
+                signInLoadingIndicator.startAnimating()
+                signInButton.isUserInteractionEnabled = false
+            } else {
+                signInButton.setTitle("로그인", for: .normal)
+                signInLoadingIndicator.stopAnimating()
+                signInButton.isUserInteractionEnabled = isSignInButtonEnabled
+            }
+        }
+    }
 
     
     // MARK: - override
@@ -156,9 +177,9 @@ final class SignInView: BaseView {
             leftDivider, dividerLabel, rightDivider,
             appleSignInButton, kakaoSignInButton
         ]
-            .forEach {
-                addSubview($0)
-            }
+            .forEach { addSubview($0) }
+        
+        signInButton.addSubview(signInLoadingIndicator)
     }
     
     override func setupConstraints() {
@@ -224,6 +245,10 @@ final class SignInView: BaseView {
             make.top.equalTo(appleSignInButton.snp.bottom).offset(15)
             make.horizontalEdges.equalToSuperview().inset(30)
             make.height.equalTo(45)
+        }
+        
+        signInLoadingIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
 }

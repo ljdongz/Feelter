@@ -53,6 +53,14 @@ final class SignInViewController: RxBaseViewController {
             })
             .disposed(by: disposeBag)
         
+        output.isLoadingEmailSignIn
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self, onNext: { owner, isLoading in
+                owner.mainView.isSignInLoading = isLoading
+            })
+            .disposed(by: disposeBag)
+        
         mainView.signUpButton.rx.tap
             .subscribe { _ in
                 let vc = SignUpViewController()
