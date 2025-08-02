@@ -7,7 +7,18 @@
 
 import UIKit
 
-final class JoinView: BaseView {
+final class SignUpView: BaseView {
+    
+    typealias DataSourceType = UICollectionViewDiffableDataSource<Section, String>
+    
+    enum Section: CaseIterable {
+        case main
+    }
+    
+    struct HashTag: Identifiable {
+        let id: UUID = UUID()
+        let text: String
+    }
     
     // MARK: - UI Properties
     let emailTextField: FloatingTitleTextField = {
@@ -105,7 +116,7 @@ final class JoinView: BaseView {
         return view
     }()
     
-    let joinButton: UIButton = {
+    let signUpButton: UIButton = {
         let view = UIButton()
         view.setTitle("회원가입", for: .normal)
         view.setTitleColor(.gray0, for: .normal)
@@ -117,7 +128,17 @@ final class JoinView: BaseView {
 
     // MARK: - Properties
     private let gradientLayer = CAGradientLayer()
-
+    
+    var dataSource: DataSourceType!
+    
+    var isSignUpButtonEnabled: Bool = false {
+        didSet {
+            signUpButton.isUserInteractionEnabled = isSignUpButtonEnabled
+            
+            let alpha = isSignUpButtonEnabled ? 1.0 : 0.2
+            signUpButton.backgroundColor = .lightTurquoise.withAlphaComponent(alpha)
+        }
+    }
     
     // MARK: - override
     override func layoutSubviews() {
@@ -131,6 +152,17 @@ final class JoinView: BaseView {
             UIColor.gray100.cgColor
         ]
         self.layer.addSublayer(gradientLayer)
+        
+        self.dataSource = DataSourceType(
+            collectionView: hashTagCollectionView,
+            cellProvider: { collectionView, indexPath, itemIdentifier in
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: HashTagCollectionViewCell.identifier,
+                    for: indexPath
+                ) as? HashTagCollectionViewCell else { return UICollectionViewCell() }
+                cell.configure(text: itemIdentifier)
+                return cell
+        })
     }
     
     override func setupSubviews() {
@@ -139,7 +171,7 @@ final class JoinView: BaseView {
          nicknameTextField, nicknameDescriptLabel,
          nameTextField, phoneTextField, introduceTextView,
          hashTagTextField, hashTagCollectionView,
-        joinButton].forEach { addSubview($0) }
+        signUpButton].forEach { addSubview($0) }
     }
     
     override func setupConstraints() {
@@ -206,7 +238,7 @@ final class JoinView: BaseView {
             make.height.equalTo(35)
         }
         
-        joinButton.snp.makeConstraints { make in
+        signUpButton.snp.makeConstraints { make in
             make.bottom.equalTo(safeAreaLayoutGuide.snp.bottom).offset(-15)
             make.horizontalEdges.equalToSuperview().inset(30)
             make.height.equalTo(45)
@@ -214,9 +246,24 @@ final class JoinView: BaseView {
     }
 }
 
+// MARK: - Public Method
+extension SignUpView {
+    func appendHashTag(_ hashTag: String) {
+        var snapshot = dataSource.snapshot(for: .main)
+        snapshot.append([hashTag])
+        dataSource.apply(snapshot, to: .main)
+    }
+    
+    func deleteHashTag(_ hashTag: String) {
+        var snapshot = dataSource.snapshot(for: .main)
+        snapshot.delete([hashTag])
+        dataSource.apply(snapshot, to: .main)
+    }
+}
+
 #if DEBUG
 @available(iOS 17.0, *)
 #Preview {
-    JoinViewController()
+    SignUpViewController()
 }
 #endif

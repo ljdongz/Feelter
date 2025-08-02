@@ -18,6 +18,8 @@ final class SignInViewController: RxBaseViewController {
         return view
     }()
     
+    private let viewModel = SignInViewModel()
+    
     override func loadView() {
         self.view = mainView
     }
@@ -33,9 +35,27 @@ final class SignInViewController: RxBaseViewController {
     }
     
     override func bind() {
-        mainView.joinButton.rx.tap
+        
+        let input = SignInViewModel.Input(
+            emailTextField: mainView.emailTextField.textField.rx.text.orEmpty.asObservable(),
+            passwordTextField: mainView.passwordTextField.textField.rx.text.orEmpty.asObservable(),
+            emailSignInButtonTapped: mainView.signInButton.rx.tap.asObservable(),
+            appleSignInButtonTapped: mainView.appleSignInButton.rx.tap.asObservable(),
+            kakaoSignInButtonTapped: mainView.kakaoSignInButton.rx.tap.asObservable()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.isEmailSignInButtonEnabled
+            .distinctUntilChanged()
+            .subscribe(with: self, onNext: { owner, isEnabled in
+                owner.mainView.isSignInButtonEnabled = isEnabled
+            })
+            .disposed(by: disposeBag)
+        
+        mainView.signUpButton.rx.tap
             .subscribe { _ in
-                let vc = JoinViewController()
+                let vc = SignUpViewController()
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             .disposed(by: disposeBag)

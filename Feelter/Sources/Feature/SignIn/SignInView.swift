@@ -53,7 +53,7 @@ final class SignInView: BaseView {
         return view
     }()
 
-    let joinButton: UIButton = {
+    let signUpButton: UIButton = {
         let view = UIButton()
         view.setTitle("회원가입", for: .normal)
         view.setTitleColor(.gray0, for: .normal)
@@ -123,6 +123,15 @@ final class SignInView: BaseView {
     
     // MARK: - Properties
     private let gradientLayer = CAGradientLayer()
+    
+    var isSignInButtonEnabled: Bool = false {
+        didSet {
+            signInButton.isUserInteractionEnabled = isSignInButtonEnabled
+            
+            let alpha = isSignInButtonEnabled ? 1.0 : 0.2
+            signInButton.backgroundColor = .lightTurquoise.withAlphaComponent(alpha)
+        }
+    }
 
     
     // MARK: - override
@@ -143,7 +152,7 @@ final class SignInView: BaseView {
         [
             titleHeaderLabel, titleBodyLabel,
             emailTextField, passwordTextField,
-            signInButton, joinButton,
+            signInButton, signUpButton,
             leftDivider, dividerLabel, rightDivider,
             appleSignInButton, kakaoSignInButton
         ]
@@ -181,13 +190,13 @@ final class SignInView: BaseView {
             make.height.equalTo(45)
         }
         
-        joinButton.snp.makeConstraints { make in
+        signUpButton.snp.makeConstraints { make in
             make.top.equalTo(signInButton.snp.bottom).offset(24)
             make.centerX.equalToSuperview()
         }
         
         dividerLabel.snp.makeConstraints { make in
-            make.top.equalTo(joinButton.snp.bottom).offset(44)
+            make.top.equalTo(signUpButton.snp.bottom).offset(44)
             make.centerX.equalToSuperview()
         }
         
