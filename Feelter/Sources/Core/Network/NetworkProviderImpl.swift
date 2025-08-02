@@ -21,7 +21,7 @@ struct NetworkProviderImpl: NetworkProvider {
       let decodedData = try JSONDecoder().decode(T.self, from: data)
       return decodedData
     } catch {
-        throw NetworkError.stringDecodingError
+        throw NetworkError.decodingError(error)
     }
   }
 }

@@ -25,5 +25,6 @@ struct EmailSignUpRequestDTO: Encodable {
         case phoneNumber = "phoneNum"
         case introduction
         case hashTags
+        case deviceToken
     }
 }

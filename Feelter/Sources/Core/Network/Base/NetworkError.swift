@@ -11,5 +11,5 @@ enum NetworkError: Error {
   case invalidURL
   case httpStatusError(Int)
   case urlSessionError(Error)
-  case stringDecodingError
+  case decodingError(Error)
 }

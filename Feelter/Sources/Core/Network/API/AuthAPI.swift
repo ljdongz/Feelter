@@ -34,9 +34,9 @@ extension AuthAPI: APIEndpoint {
         case .emailLogin:
             "/v1/users/login"
         case .appleLogin:
-            "/v1//users/login/apple"
+            "/v1/users/login/apple"
         case .kakaoLogin:
-            "/v1//users/login/kakao"
+            "/v1/users/login/kakao"
         }
     }
     

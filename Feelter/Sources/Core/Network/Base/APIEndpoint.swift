@@ -36,11 +36,10 @@ extension APIEndpoint {
             break
             
         case let .requestQueryParameters(parameter):
-            let queryItems: [URLQueryItem] = parameter.compactMap {
-                guard let value = $0.value as? String else { return nil }
-                return URLQueryItem(name: $0.key, value: value)
+            let queryItems = parameter.map {
+                URLQueryItem(name: $0.key, value: String(describing: $0.value))
             }
-            urlComponents.queryItems = urlComponents.queryItems.map { $0 + queryItems } ?? queryItems
+            urlComponents.queryItems = (urlComponents.queryItems ?? []) + queryItems
             urlRequest.url = urlComponents.url
         
         case let .requestJSONEncodable(parameters):

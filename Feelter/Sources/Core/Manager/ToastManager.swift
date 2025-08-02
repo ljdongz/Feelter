@@ -44,10 +44,10 @@ final class ToastManager {
     ) {
         DispatchQueue.main.async {
             
-            // Remove oldest toast if limit exceeded
-            if self.activeToasts.count >= self.maxToasts {
-                self.activeToasts.first?.dismissImediately()
-                self.activeToasts.removeAll()
+            if self.activeToasts.count >= self.maxToasts,
+               let oldestToast = self.activeToasts.first {
+                oldestToast.dismissImediately()
+                self.removeToast(oldestToast)
             }
             
             let toast = ToastView(message: message, configuration: configuration)
