@@ -15,7 +15,7 @@ final class SignUpViewController: RxBaseViewController {
     private let mainView = SignUpView()
     
     private let viewModel = SignUpViewModel()
-
+    
     override func loadView() {
         self.view = mainView
     }
@@ -23,6 +23,18 @@ final class SignUpViewController: RxBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "회원가입"
+    }
+    
+    override func setupKeyboardObserver() -> KeyboardObserver.Configuration? {
+        .init(
+            defaultSpacing: 50,
+            customSpacings: [
+                .init(
+                    view: mainView.hashTagTextField.textField,
+                    spacing: 100
+                )
+            ]
+        )
     }
     
     override func bind() {
@@ -143,6 +155,8 @@ final class SignUpViewController: RxBaseViewController {
             .disposed(by: disposeBag)
     }
 }
+
+    
 
 #if DEBUG
 import SwiftUI
