@@ -58,21 +58,18 @@ final class SignUpViewModel: ViewModel {
         
         // 이메일 검증 버튼 클릭
         input.validEmailButtonTapped
-            .flatMap { [weak self] email -> Observable<ValidationResult> in
-                guard let self else { return .empty() }
-                
-                return .fromAsync {
-                    try await self.authRepository.validationEmail(email: email)
-                    return ValidationResult.valid
-                }
-                .catch { error in
-                    return .just(.invalid(message: "사용할 수 없는 이메일입니다."))
-                }
-            }
+            .withAsyncResult(with: self, { owner, email in
+                try await owner.authRepository.validationEmail(email: email)
+            })
             .subscribe(with: self) { owner, result in
-                owner.emailValidation.accept(result.isValid)
-                
-                output.isValidEmail.accept(result)
+                switch result {
+                case .success:
+                    owner.emailValidation.accept(true)
+                    output.isValidEmail.accept(.valid)
+                case .failure:
+                    owner.emailValidation.accept(false)
+                    output.isValidEmail.accept(.invalid(message: "사용할 수 없는 이메일입니다."))
+                }
             }
             .disposed(by: disposeBag)
 
@@ -130,23 +127,18 @@ final class SignUpViewModel: ViewModel {
             .do(onNext: { _ in
                 output.isLoadingSignUp.accept(true)
             })
-            .flatMap { [weak self] () -> Observable<Void> in
-                guard let self else { return .empty() }
-                return .fromAsync {
-                    try await self.authRepository.signUpWithEmail(self.signUpForm)
+            .withAsyncResult(with: self, { owner, _ in
+                try await owner.authRepository.signUpWithEmail(owner.signUpForm)
+            })
+            .subscribe(with: self, onNext: { owner, result in
+                switch result {
+                case .success:
+                    print("SignUp Success")
+                case .failure(let error):
+                    print("SignUp Error: \(error)")
                 }
-                .catch { error in
-                    print(error)
-                    return .empty()
-                }
-            }
-            .subscribe(with: self) { owner, _ in
-                print("SignUp Success")
                 output.isLoadingSignUp.accept(false)
-            } onError: { owner, error in
-                print("SignUp Error: \(error)")
-                output.isLoadingSignUp.accept(false)
-            }
+            })
             .disposed(by: disposeBag)
         
         // 회원가입 버튼 활성화 상태
