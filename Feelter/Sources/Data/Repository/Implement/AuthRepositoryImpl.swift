@@ -26,10 +26,14 @@ struct AuthRepositoryImpl: AuthRepository {
     func validationEmail(email: String) async throws {
         let requestDTO = ValidationEmailRequestDTO(email: email)
         
-        _ = try await networkProvider.request(
-            endpoint: AuthAPI.validationEmail(requestDTO),
-            type: ValidationEmailResponseDTO.self
-        )
+        do {
+            _ = try await networkProvider.request(
+                endpoint: AuthAPI.validationEmail(requestDTO),
+                type: ValidationEmailResponseDTO.self
+            )
+        } catch {
+            try handleAuthError(error)
+        }
     }
     
     func signUpWithEmail(_ form: SignUpForm) async throws {
@@ -44,12 +48,16 @@ struct AuthRepositoryImpl: AuthRepository {
             deviceToken: nil
         )
         
-        let response = try await networkProvider.request(
-            endpoint: AuthAPI.emailSignUp(requestDTO),
-            type: AuthTokenResponseDTO.self
-        )
-        
-        // TODO: 토큰 저장
+        do {
+            let response = try await networkProvider.request(
+                endpoint: AuthAPI.emailSignUp(requestDTO),
+                type: AuthTokenResponseDTO.self
+            )
+            
+            // TODO: 토큰 저장
+        } catch {
+            try handleAuthError(error)
+        }
     }
     
     func signInWithEmail(email: String, password: String) async throws {
@@ -59,12 +67,16 @@ struct AuthRepositoryImpl: AuthRepository {
             deviceToken: nil
         )
         
-        let response = try await networkProvider.request(
-            endpoint: AuthAPI.emailLogin(requestDTO),
-            type: AuthTokenResponseDTO.self
-        )
-        
-        // TODO: 토큰 저장
+        do {
+            let response = try await networkProvider.request(
+                endpoint: AuthAPI.emailLogin(requestDTO),
+                type: AuthTokenResponseDTO.self
+            )
+            
+            // TODO: 토큰 저장
+        } catch {
+            try handleAuthError(error)
+        }
     }
     
     func signInWithApple() async throws {
@@ -77,12 +89,16 @@ struct AuthRepositoryImpl: AuthRepository {
             nickname: appleAuthResult.nickname
         )
         
-        let response = try await networkProvider.request(
-            endpoint: AuthAPI.appleLogin(requestDTO),
-            type: AuthTokenResponseDTO.self
-        )
-        
-        // TODO: 토큰 저장
+        do {
+            let response = try await networkProvider.request(
+                endpoint: AuthAPI.appleLogin(requestDTO),
+                type: AuthTokenResponseDTO.self
+            )
+            
+            // TODO: 토큰 저장
+        } catch {
+            try handleAuthError(error)
+        }
     }
     
     func signInWithKakao() async throws {
@@ -94,13 +110,30 @@ struct AuthRepositoryImpl: AuthRepository {
             deviceToken: nil
         )
         
-        let response = try await networkProvider.request(
-            endpoint: AuthAPI.kakaoLogin(requestDTO),
-            type: AuthTokenResponseDTO.self
-        )
-        
-        // TODO: 토큰 저장
+        do {
+            let response = try await networkProvider.request(
+                endpoint: AuthAPI.kakaoLogin(requestDTO),
+                type: AuthTokenResponseDTO.self
+            )
+            
+            // TODO: 토큰 저장
+        } catch {
+            try handleAuthError(error)
+        }
     }
-    
-    
+}
+
+private extension AuthRepositoryImpl {
+    func handleAuthError(_ error: Error) throws {
+        switch error {
+        case HTTPResponseError.clientError(let code):
+            if code == 409 {
+                throw AuthError.alreadyExist
+            } else {
+                throw error
+            }
+        default:
+            throw error
+        }
+    }
 }

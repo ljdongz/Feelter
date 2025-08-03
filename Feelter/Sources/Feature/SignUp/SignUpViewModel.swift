@@ -31,6 +31,7 @@ final class SignUpViewModel: ViewModel {
         let deleteHashTag = PublishRelay<String>()
         let isSignUpButtonEnabled = BehaviorRelay<Bool>(value: false)
         let isLoadingSignUp = PublishRelay<Bool>()
+        let signUpError = PublishRelay<String>()
     }
     
     @Dependency private var authRepository: AuthRepository
@@ -58,17 +59,29 @@ final class SignUpViewModel: ViewModel {
         
         // 이메일 검증 버튼 클릭
         input.validEmailButtonTapped
-            .withAsyncResult(with: self, { owner, email in
-                try await owner.authRepository.validationEmail(email: email)
-            })
+            .map { email in
+                let validation = ValidationHelper.validateEmail(email)
+                return (email, validation)
+            }
+            .flatMap { email, validation in
+                if validation.isValid {
+                    return Observable.just(email)
+                        .withAsyncResult(with: self, { owner, email in
+                            try await owner.authRepository.validationEmail(email: email)
+                        })
+                } else {
+                    return Observable.just(.failure(ValidationError.invalidFormat))
+                }
+            }
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success:
                     owner.emailValidation.accept(true)
                     output.isValidEmail.accept(.valid)
-                case .failure:
+                case .failure(let error):
+                    let message = owner.handleError(error)
+                    output.signUpError.accept(message)
                     owner.emailValidation.accept(false)
-                    output.isValidEmail.accept(.invalid(message: "사용할 수 없는 이메일입니다."))
                 }
             }
             .disposed(by: disposeBag)
@@ -135,8 +148,11 @@ final class SignUpViewModel: ViewModel {
                 case .success:
                     print("SignUp Success")
                 case .failure(let error):
-                    print("SignUp Error: \(error)")
+                    let message = owner.handleError(error)
+                    output.signUpError.accept(message)
+                    owner.emailValidation.accept(false)
                 }
+                
                 output.isLoadingSignUp.accept(false)
             })
             .disposed(by: disposeBag)
@@ -153,5 +169,18 @@ final class SignUpViewModel: ViewModel {
         .disposed(by: disposeBag)
         
         return output
+    }
+}
+
+private extension SignUpViewModel {
+    func handleError(_ error: Error) -> String {
+        switch error {
+        case ValidationError.invalidFormat:
+            return "이메일 형식이 올바르지 않습니다."
+        case AuthError.alreadyExist:
+            return "이미 가입된 이메일입니다."
+        default:
+            return "죄송합니다. 잠시 후 다시 시도해주세요."
+        }
     }
 }

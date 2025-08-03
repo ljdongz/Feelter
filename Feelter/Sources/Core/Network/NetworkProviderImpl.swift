@@ -75,7 +75,7 @@ private extension NetworkProviderImpl {
     
     func mapStatusCodeToError(_ statusCode: Int) -> HTTPResponseError {
         switch statusCode {
-        case 401: .invalidToken
+        case 401: .invalidObject
         case 403: .forbidden
         case 419: .expiredAccessToken
         case 420: .invalidHeaderKey

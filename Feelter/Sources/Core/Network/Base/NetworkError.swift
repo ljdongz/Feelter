@@ -14,7 +14,7 @@ enum NetworkError: Error {
 }
 
 enum HTTPResponseError: Error {
-    case invalidToken // 401
+    case invalidObject // 401 (액세스, 리프래시, 계정 불일치 등의 오류)
     case forbidden // 403
     case expiredAccessToken // 419
     case invalidHeaderKey // 420

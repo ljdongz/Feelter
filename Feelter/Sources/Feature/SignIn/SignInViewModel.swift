@@ -23,6 +23,7 @@ final class SignInViewModel: ViewModel {
     struct Output {
         let isEmailSignInButtonEnabled = BehaviorRelay<Bool>(value: false)
         let isLoadingEmailSignIn = PublishRelay<Bool>()
+        let signInError = PublishRelay<String>()
     }
     
     @Dependency private var authRepository: AuthRepository
@@ -61,7 +62,13 @@ final class SignInViewModel: ViewModel {
                 try await owner.authRepository.signInWithEmail(email: email, password: password)
             })
             .subscribe(with: self) { owner, result in
-                print("Email Login :\(result)")
+                switch result {
+                case .success:
+                    print("Email Login :\(result)")
+                case .failure(let error):
+                    let message = owner.handleError(error)
+                    output.signInError.accept(message)
+                }
                 output.isLoadingEmailSignIn.accept(false)
             }
             .disposed(by: disposeBag)
@@ -76,7 +83,8 @@ final class SignInViewModel: ViewModel {
                 case .success:
                     print("Apple Login Success")
                 case .failure(let error):
-                    print("Apple Login Failed : \(error)")
+                    let message = owner.handleError(error)
+                    output.signInError.accept(message)
                 }
             }
             .disposed(by: disposeBag)
@@ -91,11 +99,25 @@ final class SignInViewModel: ViewModel {
                 case .success:
                     print("Kakao Login Success")
                 case .failure(let error):
-                    print("Kakao Login Failed : \(error)")
+                    let message = owner.handleError(error)
+                    output.signInError.accept(message)
                 }
             }
             .disposed(by: disposeBag)
         
         return output
+    }
+}
+
+private extension SignInViewModel {
+    func handleError(_ error: Error) -> String {
+        switch error {
+        case AuthError.alreadyExist:
+            return "이미 가입된 유저입니다."
+        case HTTPResponseError.invalidObject:
+            return "계정을 확인해주세요."
+        default:
+            return "죄송합니다. 잠시 후 다시 시도해주세요."
+        }
     }
 }
