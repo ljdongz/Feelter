@@ -153,6 +153,17 @@ final class SignUpViewController: RxBaseViewController {
                 owner.mainView.isSignUpLoading = isLoading
             }
             .disposed(by: disposeBag)
+        
+        output.signUpError
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, message in
+                ToastManager.shared.show(
+                    message: message,
+                    type: .error,
+                    in: owner
+                )
+            }
+            .disposed(by: disposeBag)
     }
 }
 

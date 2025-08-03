@@ -61,6 +61,17 @@ final class SignInViewController: RxBaseViewController {
             })
             .disposed(by: disposeBag)
         
+        output.signInError
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, message in
+                ToastManager.shared.show(
+                    message: message,
+                    type: .error,
+                    in: owner
+                )
+            }
+            .disposed(by: disposeBag)
+        
         mainView.signUpButton.rx.tap
             .subscribe { _ in
                 let vc = SignUpViewController()
