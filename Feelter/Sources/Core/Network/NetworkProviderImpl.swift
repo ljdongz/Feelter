@@ -35,13 +35,10 @@ struct NetworkProviderImpl: NetworkProvider {
             // API 요청
             return try await performRequest(request: request, type: type)
         } catch  {
-            // 토큰 인터셉터에 에러를 전달하여, 에러 상태에 따른 액세스 토큰 갱신 요청 처리
-            if let tokenInterceptor,
-               let retryRequest = try await tokenInterceptor.retry(request, for: error) {
-                return try await performRequest(request: retryRequest, type: type)
-            }
+            // 에러 응답인 경우, 액세스 토큰 만료 에러인지 확인 후 재요청
+            let retryRequest = try await handleTokenInterceptor(request: request, error: error)
             
-            throw error
+            return try await performRequest(request: retryRequest, type: type)
         }
     }
 }
@@ -70,6 +67,22 @@ private extension NetworkProviderImpl {
             return try JSONDecoder().decode(T.self, from: data)
         } catch {
             throw NetworkError.decodingError(error)
+        }
+    }
+    
+    func handleTokenInterceptor(request: URLRequest, error: Error) async throws -> URLRequest {
+        guard let tokenInterceptor else { throw error }
+        
+        // 토큰 인터셉터에 에러를 전달하여, 에러 상태에 따른 액세스 토큰 갱신 요청 처리
+        let retryResult = try await tokenInterceptor.retry(request, for: error)
+        
+        switch retryResult {
+        case .retry:
+            // 갱신된 토큰을 URLRequest 헤더에 등록
+            let retryRequest = try await tokenInterceptor.adapt(request)
+            return retryRequest
+        case .doNotRetry:
+            throw error
         }
     }
     
