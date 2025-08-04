@@ -12,18 +12,18 @@ struct AuthRepositoryImpl: AuthRepository {
     private let appleAuthService: AppleAuthService
     private let kakaoAuthService: KakaoAuthService
     private let networkProvider: NetworkProvider
-    private let keychainStorage: KeychainStorage
+    private let tokenManager: TokenManager
     
     init(
         appleAuthService: AppleAuthService,
         kakaoAuthService: KakaoAuthService,
         networkProvider: NetworkProvider,
-        keychainStorage: KeychainStorage
+        tokenManager: TokenManager
     ) {
         self.appleAuthService = appleAuthService
         self.kakaoAuthService = kakaoAuthService
         self.networkProvider = networkProvider
-        self.keychainStorage = keychainStorage
+        self.tokenManager = tokenManager
     }
     
     func validationEmail(email: String) async throws {
@@ -57,8 +57,10 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            try? keychainStorage.save(response.accessToken, forKey: .accessToken)
-            try? keychainStorage.save(response.refreshToken, forKey: .refreshToken)
+            await tokenManager.updateToken(
+                access: response.accessToken,
+                refresh: response.refreshToken
+            )
         } catch {
             try handleAuthError(error)
         }
@@ -77,8 +79,11 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            try? keychainStorage.save(response.accessToken, forKey: .accessToken)
-            try? keychainStorage.save(response.refreshToken, forKey: .refreshToken)
+            await tokenManager.updateToken(
+                access: response.accessToken,
+                refresh: response.refreshToken
+            )
+            
         } catch {
             try handleAuthError(error)
         }
@@ -100,8 +105,10 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            try? keychainStorage.save(response.accessToken, forKey: .accessToken)
-            try? keychainStorage.save(response.refreshToken, forKey: .refreshToken)
+            await tokenManager.updateToken(
+                access: response.accessToken,
+                refresh: response.refreshToken
+            )
         } catch {
             try handleAuthError(error)
         }
@@ -122,8 +129,10 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            try? keychainStorage.save(response.accessToken, forKey: .accessToken)
-            try? keychainStorage.save(response.refreshToken, forKey: .refreshToken)
+            await tokenManager.updateToken(
+                access: response.accessToken,
+                refresh: response.refreshToken
+            )
         } catch {
             try handleAuthError(error)
         }

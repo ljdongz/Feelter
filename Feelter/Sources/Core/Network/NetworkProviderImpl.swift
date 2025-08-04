@@ -36,8 +36,10 @@ struct NetworkProviderImpl: NetworkProvider {
             return try await performRequest(request: request, type: type)
         } catch  {
             // 에러 응답인 경우, 액세스 토큰 만료 에러인지 확인 후 재요청
-            let retryRequest = try await handleTokenInterceptor(request: request, error: error)
-            
+            let retryRequest = try await handleTokenInterceptor(
+                request: request,
+                error: error
+            )
             return try await performRequest(request: retryRequest, type: type)
         }
     }
