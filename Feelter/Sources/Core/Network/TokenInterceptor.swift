@@ -49,9 +49,10 @@ final class TokenInterceptor: RequestInterceptor {
         return .retry
     }
        
+    // TODO: 리팩토링 필요
     private func performTokenRefresh(api: APIEndpoint) async throws -> AuthTokenResponseDTO {
         
-        guard var request = api.asURLRequest() else { throw HTTPResponseError.overcallLimit }
+        guard var request = api.asURLRequest() else { throw HTTPResponseError.invalidAPI }
         request.setValue(dummyRefreshToken, forHTTPHeaderField: "RefreshToken")
         request.setValue(dummyAccessToken, forHTTPHeaderField: "Authorization")
         
