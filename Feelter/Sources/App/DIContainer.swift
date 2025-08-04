@@ -41,15 +41,20 @@ struct Dependency<T> {
 
 extension DIContainer {
     func registerDependencies() {
-        let tokenInterceptor = TokenInterceptor()
+        let keychainStorage = KeychainStorageImpl()
+        let tokenInterceptor = TokenInterceptor(keychainStorage: keychainStorage)
         let appleAuthService = AppleAuthServiceImpl()
         let kakaoAuthService = KakaoAuthServiceImpl()
         let networkProvider = NetworkProviderImpl(tokenInterceptor: tokenInterceptor)
         
+        register(keychainStorage, type: KeychainStorage.self)
+        register(networkProvider, type: NetworkProvider.self)
+        
         let authRepository = AuthRepositoryImpl(
             appleAuthService: appleAuthService,
             kakaoAuthService: kakaoAuthService,
-            networkProvider: networkProvider
+            networkProvider: networkProvider,
+            keychainStorage: keychainStorage
         )
         
         register(authRepository, type: AuthRepository.self)

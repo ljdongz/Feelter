@@ -12,15 +12,18 @@ struct AuthRepositoryImpl: AuthRepository {
     private let appleAuthService: AppleAuthService
     private let kakaoAuthService: KakaoAuthService
     private let networkProvider: NetworkProvider
+    private let keychainStorage: KeychainStorage
     
     init(
         appleAuthService: AppleAuthService,
         kakaoAuthService: KakaoAuthService,
-        networkProvider: NetworkProvider
+        networkProvider: NetworkProvider,
+        keychainStorage: KeychainStorage
     ) {
         self.appleAuthService = appleAuthService
         self.kakaoAuthService = kakaoAuthService
         self.networkProvider = networkProvider
+        self.keychainStorage = keychainStorage
     }
     
     func validationEmail(email: String) async throws {
@@ -54,7 +57,8 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            // TODO: 토큰 저장
+            try? keychainStorage.save(response.accessToken, forKey: .accessToken)
+            try? keychainStorage.save(response.refreshToken, forKey: .refreshToken)
         } catch {
             try handleAuthError(error)
         }
@@ -73,7 +77,8 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            // TODO: 토큰 저장
+            try? keychainStorage.save(response.accessToken, forKey: .accessToken)
+            try? keychainStorage.save(response.refreshToken, forKey: .refreshToken)
         } catch {
             try handleAuthError(error)
         }
@@ -95,7 +100,8 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            // TODO: 토큰 저장
+            try? keychainStorage.save(response.accessToken, forKey: .accessToken)
+            try? keychainStorage.save(response.refreshToken, forKey: .refreshToken)
         } catch {
             try handleAuthError(error)
         }
@@ -116,7 +122,8 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            // TODO: 토큰 저장
+            try? keychainStorage.save(response.accessToken, forKey: .accessToken)
+            try? keychainStorage.save(response.refreshToken, forKey: .refreshToken)
         } catch {
             try handleAuthError(error)
         }

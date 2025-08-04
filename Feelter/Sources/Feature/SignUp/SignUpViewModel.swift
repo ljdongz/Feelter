@@ -11,6 +11,9 @@ import RxCocoa
 import RxSwift
 
 final class SignUpViewModel: ViewModel {
+    
+    typealias SignUpResult = (isSuccess: Bool, message: String)
+    
     struct Input {
         let emailTextField: Observable<String>
         let validEmailButtonTapped: Observable<String>
@@ -31,7 +34,7 @@ final class SignUpViewModel: ViewModel {
         let deleteHashTag = PublishRelay<String>()
         let isSignUpButtonEnabled = BehaviorRelay<Bool>(value: false)
         let isLoadingSignUp = PublishRelay<Bool>()
-        let signUpError = PublishRelay<String>()
+        let signUpResult = PublishRelay<SignUpResult>()
     }
     
     @Dependency private var authRepository: AuthRepository
@@ -77,11 +80,13 @@ final class SignUpViewModel: ViewModel {
                 switch result {
                 case .success:
                     owner.emailValidation.accept(true)
+
                     output.isValidEmail.accept(.valid)
                 case .failure(let error):
                     let message = owner.handleError(error)
-                    output.signUpError.accept(message)
                     owner.emailValidation.accept(false)
+
+                    output.isValidEmail.accept(.invalid(message: message))
                 }
             }
             .disposed(by: disposeBag)
@@ -131,6 +136,7 @@ final class SignUpViewModel: ViewModel {
             .subscribe(with: self) { owner, index in
                 let hashTag = owner.signUpForm.hashTags[index]
                 owner.signUpForm.hashTags.remove(at: index)
+                
                 output.deleteHashTag.accept(hashTag)
             }
             .disposed(by: disposeBag)
@@ -146,11 +152,12 @@ final class SignUpViewModel: ViewModel {
             .subscribe(with: self, onNext: { owner, result in
                 switch result {
                 case .success:
-                    print("SignUp Success")
+                    output.signUpResult.accept((isSuccess: true, message: ""))
                 case .failure(let error):
                     let message = owner.handleError(error)
-                    output.signUpError.accept(message)
                     owner.emailValidation.accept(false)
+
+                    output.signUpResult.accept((isSuccess: false, message: message))
                 }
                 
                 output.isLoadingSignUp.accept(false)

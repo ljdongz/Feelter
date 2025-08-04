@@ -12,6 +12,8 @@ import RxSwift
 
 final class SignInViewModel: ViewModel {
     
+    typealias SignInResult = (isSuccess: Bool, message: String)
+    
     struct Input {
         let emailTextField: Observable<String>
         let passwordTextField: Observable<String>
@@ -23,7 +25,7 @@ final class SignInViewModel: ViewModel {
     struct Output {
         let isEmailSignInButtonEnabled = BehaviorRelay<Bool>(value: false)
         let isLoadingEmailSignIn = PublishRelay<Bool>()
-        let signInError = PublishRelay<String>()
+        let signInResult = PublishRelay<SignInResult>()
     }
     
     @Dependency private var authRepository: AuthRepository
@@ -64,10 +66,10 @@ final class SignInViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success:
-                    print("Email Login :\(result)")
+                    output.signInResult.accept((isSuccess: true, message: ""))
                 case .failure(let error):
                     let message = owner.handleError(error)
-                    output.signInError.accept(message)
+                    output.signInResult.accept((isSuccess: false, message: message))
                 }
                 output.isLoadingEmailSignIn.accept(false)
             }
@@ -81,10 +83,10 @@ final class SignInViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success:
-                    print("Apple Login Success")
+                    output.signInResult.accept((isSuccess: true, message: ""))
                 case .failure(let error):
                     let message = owner.handleError(error)
-                    output.signInError.accept(message)
+                    output.signInResult.accept((isSuccess: false, message: message))
                 }
             }
             .disposed(by: disposeBag)
@@ -97,10 +99,10 @@ final class SignInViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success:
-                    print("Kakao Login Success")
+                    output.signInResult.accept((isSuccess: true, message: ""))
                 case .failure(let error):
                     let message = owner.handleError(error)
-                    output.signInError.accept(message)
+                    output.signInResult.accept((isSuccess: false, message: message))
                 }
             }
             .disposed(by: disposeBag)
