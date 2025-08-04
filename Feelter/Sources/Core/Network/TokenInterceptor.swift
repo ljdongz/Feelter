@@ -10,18 +10,45 @@ import Foundation
 final class TokenInterceptor: RequestInterceptor {
     
     private let refreshCoordinator = RefreshCoordinator()
+    private let keychainStorage: KeychainStorage
     
-    var dummyAccessToken = ""
-    var dummyRefreshToken = ""
+    private var inMemoryAccessToken: String? {
+        didSet {
+            if let inMemoryAccessToken {
+                try? keychainStorage.save(inMemoryAccessToken, forKey: .accessToken)
+            } else {
+                try? keychainStorage.delete(forKey: .accessToken)
+            }
+        }
+    }
+    
+    private var inMemoryRefreshToken: String? {
+        didSet {
+            if let inMemoryRefreshToken {
+                try? keychainStorage.save(inMemoryRefreshToken, forKey: .refreshToken)
+            } else {
+                try? keychainStorage.delete(forKey: .refreshToken)
+            }
+        }
+    }
+    
+    init(keychainStorage: KeychainStorage) {
+        self.keychainStorage = keychainStorage
+        
+        self.inMemoryAccessToken = try? keychainStorage.load(forKey: .accessToken)
+        self.inMemoryRefreshToken = try? keychainStorage.load(forKey: .refreshToken)
+    }
     
     // 요청 전에 액세스 토큰 추가
     func adapt(_ request: URLRequest) async throws -> URLRequest {
-        // TODO: 키체인에 액세스 토큰이 저장되었는지 확인 (없으면 엑세스 토큰을 설정할 필요 없는 API)
+        // 액세스 토큰이 존재하는지 확인 (없으면 엑세스 토큰을 설정할 필요 없는 API)
+        guard let inMemoryAccessToken else { return request }
         
         var adaptedRequest = request
-        
-        // TODO: 액세스 토큰 가져와서 request 헤더에 추가
-        adaptedRequest.setValue(dummyAccessToken, forHTTPHeaderField: "Authorization")
+        adaptedRequest.setValue(
+            inMemoryAccessToken,
+            forHTTPHeaderField: "Authorization"
+        )
         
         return adaptedRequest
     }
@@ -35,11 +62,13 @@ final class TokenInterceptor: RequestInterceptor {
         }
         
         // 현재 진행중인 액세스 토큰 요청 작업을 가져옴 (만약 진행중인 작업이 없는 경우, 새로 생성)
-        let refreshTask = await refreshCoordinator.refreshTask(performing: {
-            let token = try await self.performTokenRefresh(api: AuthAPI.refresh)
+        let refreshTask = await refreshCoordinator.refreshTask(performing: { [weak self] in
+            guard let self else { return }
+            let token = try await self.performAccessTokenRefresh(api: AuthAPI.refresh)
             
-            // 토큰 저장
-            self.dummyAccessToken = token.accessToken
+            // 새롭게 갱신된 액세스, 리프레시 토큰 저장
+            self.inMemoryAccessToken = token.accessToken
+            self.inMemoryRefreshToken = token.refreshToken
         })
         
         // 여러 요청이 동시에 같은 Task를 대기
@@ -50,11 +79,11 @@ final class TokenInterceptor: RequestInterceptor {
     }
        
     // TODO: 리팩토링 필요
-    private func performTokenRefresh(api: APIEndpoint) async throws -> AuthTokenResponseDTO {
+    private func performAccessTokenRefresh(api: APIEndpoint) async throws -> AuthTokenResponseDTO {
         
         guard var request = api.asURLRequest() else { throw HTTPResponseError.invalidAPI }
-        request.setValue(dummyRefreshToken, forHTTPHeaderField: "RefreshToken")
-        request.setValue(dummyAccessToken, forHTTPHeaderField: "Authorization")
+        request.setValue(inMemoryAccessToken, forHTTPHeaderField: "Authorization")
+        request.setValue(inMemoryRefreshToken, forHTTPHeaderField: "RefreshToken")
         
         let (data, response): (Data, URLResponse)
         do {
@@ -66,6 +95,12 @@ final class TokenInterceptor: RequestInterceptor {
         // HTTP Response 코드 확인
         if let httpResponse = response as? HTTPURLResponse {
             guard 200...299 ~= httpResponse.statusCode else {
+                // 액세스 토큰 갱신 실패 = 리프레스 토큰 만료
+                // 키체인에 저장된 모든 토큰 제거
+                inMemoryAccessToken = nil
+                inMemoryRefreshToken = nil
+                
+                // TODO: 에러 타입 변경하기 (리프레시 토큰 만료)
                 throw HTTPResponseError.clientError(httpResponse.statusCode)
             }
         }
