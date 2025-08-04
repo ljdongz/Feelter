@@ -60,6 +60,33 @@ extension Observable {
             }
         }
     }
+    
+    func withAsync<T, Object: AnyObject>(
+        with object: Object,
+        _ operation: @escaping (Object, Element) async throws -> T
+    ) -> Observable<T> {
+        
+        return flatMap { [weak object] element -> Observable<T> in
+            
+            guard let object else { return .empty() }
+            
+            return .create { observer in
+                let task = Task {
+                    do {
+                        let result = try await operation(object, element)
+                        observer.onNext(result)
+                        observer.onCompleted()
+                    } catch {
+                        observer.onError(error)
+                    }
+                }
+                
+                return Disposables.create {
+                    task.cancel()
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Static Method
