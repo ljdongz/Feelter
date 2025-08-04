@@ -22,6 +22,8 @@ final class SignInViewModel: ViewModel {
     
     struct Output {
         let isEmailSignInButtonEnabled = BehaviorRelay<Bool>(value: false)
+        let isLoadingEmailSignIn = PublishRelay<Bool>()
+        let signInError = PublishRelay<String>()
     }
     
     @Dependency private var authRepository: AuthRepository
@@ -48,56 +50,74 @@ final class SignInViewModel: ViewModel {
         
         // 이메일 로그인
         input.emailSignInButtonTapped
+            .do(onNext: { _ in
+                output.isLoadingEmailSignIn.accept(true)
+            })
             .withLatestFrom(Observable.combineLatest(
                 input.emailTextField,
                 input.passwordTextField
             ))
-            .flatMap { [weak self] email, password in
-                guard let self else { return Observable<Void>.empty() }
-                
-                return Observable<Void>.fromAsync {
-                    try await self.authRepository.signInWithEmail(email: email, password: password)
+            .withAsyncResult(with: self, { owner, value in
+                let (email, password) = value
+                try await owner.authRepository.signInWithEmail(email: email, password: password)
+            })
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success:
+                    print("Email Login :\(result)")
+                case .failure(let error):
+                    let message = owner.handleError(error)
+                    output.signInError.accept(message)
                 }
-            }
-            .subscribe(with: self) { owner, _ in
-                print("Email Login Success")
-            } onError: { owner, error in
-                print("Email Login Error: \(error)")
+                output.isLoadingEmailSignIn.accept(false)
             }
             .disposed(by: disposeBag)
         
         // 애플 로그인
         input.appleSignInButtonTapped
-            .flatMap { [weak self] _ in
-                guard let self else { return Observable<Void>.empty() }
-                
-                return Observable<Void>.fromAsync {
-                    try await self.authRepository.signInWithApple()
+            .withAsyncResult(with: self, { owner, _ in
+                try await owner.authRepository.signInWithApple()
+            })
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success:
+                    print("Apple Login Success")
+                case .failure(let error):
+                    let message = owner.handleError(error)
+                    output.signInError.accept(message)
                 }
-            }
-            .subscribe(with: self) { owner, _ in
-                print("Apple Login Success")
-            } onError: { owner, error in
-                print(error)
             }
             .disposed(by: disposeBag)
 
         // 카카오 로그인
         input.kakaoSignInButtonTapped
-            .flatMap { [weak self] _ in
-                guard let self else { return Observable<Void>.empty() }
-                
-                return Observable<Void>.fromAsync {
-                    try await self.authRepository.signInWithKakao()
+            .withAsyncResult(with: self, { owner, _ in
+                try await owner.authRepository.signInWithKakao()
+            })
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success:
+                    print("Kakao Login Success")
+                case .failure(let error):
+                    let message = owner.handleError(error)
+                    output.signInError.accept(message)
                 }
-            }
-            .subscribe(with: self) { owner, _ in
-                print("Kakao Login Success")
-            } onError: { owner, error in
-                print(error)
             }
             .disposed(by: disposeBag)
         
         return output
+    }
+}
+
+private extension SignInViewModel {
+    func handleError(_ error: Error) -> String {
+        switch error {
+        case AuthError.alreadyExist:
+            return "이미 가입된 유저입니다."
+        case HTTPResponseError.invalidObject:
+            return "계정을 확인해주세요."
+        default:
+            return "죄송합니다. 잠시 후 다시 시도해주세요."
+        }
     }
 }

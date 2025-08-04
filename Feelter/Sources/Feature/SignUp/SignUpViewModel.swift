@@ -30,6 +30,8 @@ final class SignUpViewModel: ViewModel {
         let newHashTag = PublishRelay<String>()
         let deleteHashTag = PublishRelay<String>()
         let isSignUpButtonEnabled = BehaviorRelay<Bool>(value: false)
+        let isLoadingSignUp = PublishRelay<Bool>()
+        let signUpError = PublishRelay<String>()
     }
     
     @Dependency private var authRepository: AuthRepository
@@ -57,21 +59,30 @@ final class SignUpViewModel: ViewModel {
         
         // 이메일 검증 버튼 클릭
         input.validEmailButtonTapped
-            .flatMap { [weak self] email -> Observable<ValidationResult> in
-                guard let self else { return .empty() }
-                
-                return .fromAsync {
-                    try await self.authRepository.validationEmail(email: email)
-                    return ValidationResult.valid
-                }
-                .catch { error in
-                    return .just(.invalid(message: "사용할 수 없는 이메일입니다."))
+            .map { email in
+                let validation = ValidationHelper.validateEmail(email)
+                return (email, validation)
+            }
+            .flatMap { email, validation in
+                if validation.isValid {
+                    return Observable.just(email)
+                        .withAsyncResult(with: self, { owner, email in
+                            try await owner.authRepository.validationEmail(email: email)
+                        })
+                } else {
+                    return Observable.just(.failure(ValidationError.invalidFormat))
                 }
             }
             .subscribe(with: self) { owner, result in
-                owner.emailValidation.accept(result.isValid)
-                
-                output.isValidEmail.accept(result)
+                switch result {
+                case .success:
+                    owner.emailValidation.accept(true)
+                    output.isValidEmail.accept(.valid)
+                case .failure(let error):
+                    let message = owner.handleError(error)
+                    output.signUpError.accept(message)
+                    owner.emailValidation.accept(false)
+                }
             }
             .disposed(by: disposeBag)
 
@@ -126,19 +137,24 @@ final class SignUpViewModel: ViewModel {
         
         // 회원가입 버튼 클릭
         input.signUpButtonTapped
-            .flatMap { [weak self] () -> Observable<Void> in
-                guard let self else { return .empty() }
-                return .fromAsync {
-                    try await self.authRepository.signUpWithEmail(self.signUpForm)
+            .do(onNext: { _ in
+                output.isLoadingSignUp.accept(true)
+            })
+            .withAsyncResult(with: self, { owner, _ in
+                try await owner.authRepository.signUpWithEmail(owner.signUpForm)
+            })
+            .subscribe(with: self, onNext: { owner, result in
+                switch result {
+                case .success:
+                    print("SignUp Success")
+                case .failure(let error):
+                    let message = owner.handleError(error)
+                    output.signUpError.accept(message)
+                    owner.emailValidation.accept(false)
                 }
-                .catch { error in
-                    print(error)
-                    return .empty()
-                }
-            }
-            .subscribe(with: self) { owner, _ in
-                print("Sub")
-            }
+                
+                output.isLoadingSignUp.accept(false)
+            })
             .disposed(by: disposeBag)
         
         // 회원가입 버튼 활성화 상태
@@ -153,5 +169,18 @@ final class SignUpViewModel: ViewModel {
         .disposed(by: disposeBag)
         
         return output
+    }
+}
+
+private extension SignUpViewModel {
+    func handleError(_ error: Error) -> String {
+        switch error {
+        case ValidationError.invalidFormat:
+            return "이메일 형식이 올바르지 않습니다."
+        case AuthError.alreadyExist:
+            return "이미 가입된 이메일입니다."
+        default:
+            return "죄송합니다. 잠시 후 다시 시도해주세요."
+        }
     }
 }

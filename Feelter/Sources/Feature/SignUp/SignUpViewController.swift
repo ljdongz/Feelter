@@ -15,7 +15,7 @@ final class SignUpViewController: RxBaseViewController {
     private let mainView = SignUpView()
     
     private let viewModel = SignUpViewModel()
-
+    
     override func loadView() {
         self.view = mainView
     }
@@ -23,6 +23,18 @@ final class SignUpViewController: RxBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "회원가입"
+    }
+    
+    override func setupKeyboardObserver() -> KeyboardObserver.Configuration? {
+        .init(
+            defaultSpacing: 50,
+            customSpacings: [
+                .init(
+                    view: mainView.hashTagTextField.textField,
+                    spacing: 100
+                )
+            ]
+        )
     }
     
     override func bind() {
@@ -133,8 +145,29 @@ final class SignUpViewController: RxBaseViewController {
                 owner.mainView.isSignUpButtonEnabled = isEnabled
             }
             .disposed(by: disposeBag)
+        
+        output.isLoadingSignUp
+            .observe(on: MainScheduler.instance)
+            .distinctUntilChanged()
+            .subscribe(with: self) { owner, isLoading in
+                owner.mainView.isSignUpLoading = isLoading
+            }
+            .disposed(by: disposeBag)
+        
+        output.signUpError
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, message in
+                ToastManager.shared.show(
+                    message: message,
+                    type: .error,
+                    in: owner
+                )
+            }
+            .disposed(by: disposeBag)
     }
 }
+
+    
 
 #if DEBUG
 import SwiftUI

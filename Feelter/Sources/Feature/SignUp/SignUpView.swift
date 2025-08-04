@@ -125,11 +125,18 @@ final class SignUpView: BaseView {
         view.layer.cornerRadius = 12
         return view
     }()
+    
+    private let signUpLoadingIndicator: UIActivityIndicatorView = {
+        let view = UIActivityIndicatorView(style: .medium)
+        view.color = .gray0
+        view.hidesWhenStopped = true
+        return view
+    }()
 
     // MARK: - Properties
     private let gradientLayer = CAGradientLayer()
     
-    var dataSource: DataSourceType!
+    private var dataSource: DataSourceType!
     
     var isSignUpButtonEnabled: Bool = false {
         didSet {
@@ -137,6 +144,20 @@ final class SignUpView: BaseView {
             
             let alpha = isSignUpButtonEnabled ? 1.0 : 0.2
             signUpButton.backgroundColor = .lightTurquoise.withAlphaComponent(alpha)
+        }
+    }
+    
+    var isSignUpLoading: Bool = false {
+        didSet {
+            if isSignUpLoading {
+                signUpButton.setTitle("", for: .normal)
+                signUpLoadingIndicator.startAnimating()
+                signUpButton.isUserInteractionEnabled = false
+            } else {
+                signUpButton.setTitle("회원가입", for: .normal)
+                signUpLoadingIndicator.stopAnimating()
+                signUpButton.isUserInteractionEnabled = isSignUpButtonEnabled
+            }
         }
     }
     
@@ -166,12 +187,17 @@ final class SignUpView: BaseView {
     }
     
     override func setupSubviews() {
-        [emailTextField, emailDescriptLabel,
-         passwordTextField, passwordDescriptLabel,
-         nicknameTextField, nicknameDescriptLabel,
-         nameTextField, phoneTextField, introduceTextView,
-         hashTagTextField, hashTagCollectionView,
-        signUpButton].forEach { addSubview($0) }
+        [
+            emailTextField, emailDescriptLabel,
+            passwordTextField, passwordDescriptLabel,
+            nicknameTextField, nicknameDescriptLabel,
+            nameTextField, phoneTextField, introduceTextView,
+            hashTagTextField, hashTagCollectionView,
+            signUpButton
+        ]
+            .forEach { addSubview($0) }
+        
+        signUpButton.addSubview(signUpLoadingIndicator)
     }
     
     override func setupConstraints() {
@@ -242,6 +268,10 @@ final class SignUpView: BaseView {
             make.bottom.equalTo(safeAreaLayoutGuide.snp.bottom).offset(-15)
             make.horizontalEdges.equalToSuperview().inset(30)
             make.height.equalTo(45)
+        }
+        
+        signUpLoadingIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
 }

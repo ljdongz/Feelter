@@ -15,6 +15,9 @@ enum RightBarButtonType {
 }
 
 class BaseViewController: UIViewController {
+    
+    private var keyboardHelper: KeyboardObserver?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -31,6 +34,13 @@ class BaseViewController: UIViewController {
         
         setupNavigationBarStyle()
         setupNavigationBarBackButton()
+        setupKeyboardAdjustmentIfNeeded()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        keyboardHelper = nil
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -38,10 +48,19 @@ class BaseViewController: UIViewController {
         view.endEditing(true)
     }
     
+    deinit {
+        keyboardHelper = nil
+    }
+    
     func setupView() {}
     func setupSubviews() {}
     func setupConstraints() {}
     func setupActions() {}
+    
+    
+    func setupKeyboardObserver() -> KeyboardObserver.Configuration? {
+        return nil
+    }
     
     func setupNavigationBarRightButton(type: RightBarButtonType) {
         guard navigationController != nil else { return }
@@ -71,8 +90,8 @@ class BaseViewController: UIViewController {
 }
 
 // MARK: - Private
-extension BaseViewController {
-    private func setupNavigationBarStyle() {
+private extension BaseViewController {
+    func setupNavigationBarStyle() {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground()
         appearance.backgroundColor = .clear
@@ -87,7 +106,7 @@ extension BaseViewController {
         navigationController?.navigationBar.compactAppearance = appearance
     }
     
-    private func setupNavigationBarBackButton() {
+    func setupNavigationBarBackButton() {
         guard navigationController != nil else { return }
         
         navigationItem.hidesBackButton = true
@@ -102,7 +121,16 @@ extension BaseViewController {
         navigationItem.leftBarButtonItem = backBarButtonItem
     }
     
-    @objc private func backButtonTapped() {
+    func setupKeyboardAdjustmentIfNeeded() {
+        guard let configuration = setupKeyboardObserver() else { return }
+        
+        keyboardHelper = KeyboardObserver(
+            viewController: self,
+            configuration: configuration
+        )
+    }
+    
+    @objc func backButtonTapped() {
         navigationController?.popViewController(animated: true)
     }
 }

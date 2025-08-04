@@ -7,6 +7,12 @@
 
 import Foundation
 
+// MARK: - Validation Error
+
+enum ValidationError: Error {
+    case invalidFormat
+}
+
 // MARK: - Validation Result
 
 enum ValidationResult: Equatable {
