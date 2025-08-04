@@ -12,6 +12,8 @@ final class TokenInterceptor: RequestInterceptor {
     private let refreshCoordinator = RefreshCoordinator()
     private let keychainStorage: KeychainStorage
     
+    // TODO: 동시성 문제 수정하기
+    // (adapt 메서드 내부에서 읽기 동작과 동시에 retry 메서드에서 쓰기 동작이 이뤄질 수 있음)
     private var inMemoryAccessToken: String? {
         didSet {
             if let inMemoryAccessToken {

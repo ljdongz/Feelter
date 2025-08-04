@@ -20,7 +20,7 @@ enum KeychainKey: String {
 }
 
 protocol KeychainStorage {
-    func save<T: Codable>(_ value: T, forKey key: KeychainKey) throws
-    func load<T: Codable>(forKey key: KeychainKey) throws -> T?
+    func save(_ value: String, forKey key: KeychainKey) throws
+    func load(forKey key: KeychainKey) throws -> String?
     func delete(forKey key: KeychainKey) throws
 }

@@ -2,7 +2,7 @@
 //  KeychainStorageImpl.swift
 //  Feelter
 //
-//  Created by Claude on 8/4/25.
+//  Created by 이정동 on 8/4/25.
 //
 
 import Foundation
@@ -10,11 +10,8 @@ import Security
 
 struct KeychainStorageImpl: KeychainStorage {
     
-    func save<T: Codable>(_ value: T, forKey key: KeychainKey) throws {
-        let data: Data
-        do {
-            data = try JSONEncoder().encode(value)
-        } catch {
+    func save(_ value: String, forKey key: KeychainKey) throws {
+        guard let data = value.data(using: .utf8) else {
             throw KeychainError.encodingFailed
         }
         
@@ -33,7 +30,7 @@ struct KeychainStorageImpl: KeychainStorage {
         }
     }
     
-    func load<T: Codable>(forKey key: KeychainKey) throws -> T? {
+    func load(forKey key: KeychainKey) throws -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key.rawValue,
@@ -50,11 +47,7 @@ struct KeychainStorageImpl: KeychainStorage {
         
         guard let data = result as? Data else { return nil }
         
-        do {
-            return try JSONDecoder().decode(T.self, from: data)
-        } catch {
-            throw KeychainError.decodingFailed
-        }
+        return String(data: data, encoding: .utf8)
     }
     
     func delete(forKey key: KeychainKey) throws {
