@@ -61,14 +61,18 @@ final class SignInViewController: RxBaseViewController {
             })
             .disposed(by: disposeBag)
         
-        output.signInError
+        output.signInResult
             .observe(on: MainScheduler.instance)
-            .subscribe(with: self) { owner, message in
-                ToastManager.shared.show(
-                    message: message,
-                    type: .error,
-                    in: owner
-                )
+            .subscribe(with: self) { owner, result in
+                if result.isSuccess {
+                    owner.changeRootView(to: .main)
+                } else {
+                    ToastManager.shared.show(
+                        message: result.message,
+                        type: .error,
+                        in: owner
+                    )
+                }
             }
             .disposed(by: disposeBag)
         
