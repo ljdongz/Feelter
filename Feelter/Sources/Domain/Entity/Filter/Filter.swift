@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Filter {
+struct Filter: Hashable {
     let filterID: String?
     let category: String?
     let title: String?

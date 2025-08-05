@@ -7,12 +7,13 @@
 
 import Foundation
 
-struct Profile {
+struct Profile: Hashable {
     let userID: String
     let email: String?
     let nickname: String
     let name: String?
     let introduction: String?
+    let description: String?
     let profileImageURL: String?
     let phoneNumber: String?
     let hashTags: [String]

@@ -37,6 +37,7 @@ struct ProfileDTO: Codable {
             nickname: nickname ?? "",
             name: name,
             introduction: introduction,
+            description: description,
             profileImageURL: profileImageURL,
             phoneNumber: phoneNumber,
             hashTags: hashTags ?? []
