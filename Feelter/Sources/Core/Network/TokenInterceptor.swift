@@ -9,7 +9,7 @@ import Foundation
 
 final class TokenInterceptor: RequestInterceptor {
     
-    private let refreshCoordinator = RefreshCoordinator()
+    private let tokenRefreshTasker = TokenRefreshTasker()
     private let tokenManager: TokenManager
     
     init(tokenManager: TokenManager) {
@@ -50,8 +50,8 @@ final class TokenInterceptor: RequestInterceptor {
         }
         
         // 현재 진행중인 액세스 토큰 요청 작업을 가져옴 (만약 진행중인 작업이 없는 경우, 새로 생성)
-        let refreshTask = await refreshCoordinator.refreshTask(performing: { [weak self] in
-            guard let self else { print("return"); return }
+        let refreshTask = await tokenRefreshTasker.task(performing: { [weak self] in
+            guard let self else { return }
             
             do {
                 let token = try await self.performAccessTokenRefresh(api: AuthAPI.refresh)
@@ -82,7 +82,7 @@ final class TokenInterceptor: RequestInterceptor {
     private func performAccessTokenRefresh(api: APIEndpoint) async throws -> AuthTokenResponseDTO {
         
         guard var request = api.asURLRequest() else {
-            throw HTTPResponseError.invalidAPI
+            throw NetworkError.notCreatedURLRequest
         }
         
         // 헤더에 액세스, 리프레시 토큰 설정
@@ -99,8 +99,7 @@ final class TokenInterceptor: RequestInterceptor {
         if let httpResponse = response as? HTTPURLResponse {
             guard 200...299 ~= httpResponse.statusCode else {
                 
-                // TODO: 에러 타입 변경하기 (리프레시 토큰 만료)
-                throw HTTPResponseError.clientError(httpResponse.statusCode)
+                throw AuthError.expiredRefreshToken
             }
         }
         
@@ -114,13 +113,13 @@ final class TokenInterceptor: RequestInterceptor {
 }
 
 // 액세스 토큰 갱신 요청이 동시에 들어올 수 있기 때문에, 이에 대한 동시성 처리를 담당하는 Actor
-fileprivate actor RefreshCoordinator {
+fileprivate actor TokenRefreshTasker {
     
     private var refreshTask: Task<Void, Error>?
     private var lastRefreshTime: Date?
     private let refreshCooldown: TimeInterval = 1.0 // 1초 쿨다운
     
-    func refreshTask(
+    func task(
         performing operation: @escaping () async throws -> Void
     ) async -> Task<Void, Error> {
         
