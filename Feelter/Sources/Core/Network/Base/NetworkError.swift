@@ -29,7 +29,7 @@ enum HTTPResponseError: Error {
     /// 429 (과호출)
     case overcallLimit
     
-    /// 444 (비정상 API 호출0
+    /// 444 (비정상 API 호출)
     case invalidAPI
     
     case clientError(Int)
