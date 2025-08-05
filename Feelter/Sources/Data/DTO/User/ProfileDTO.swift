@@ -9,6 +9,7 @@ import Foundation
 
 struct ProfileDTO: Codable {
     let userID: String?
+    let email: String?
     let name: String?
     let nickname: String?
     let profileImageURL: String?
@@ -19,6 +20,7 @@ struct ProfileDTO: Codable {
     
     enum CodingKeys: String, CodingKey {
         case userID = "user_id"
+        case email
         case name
         case nickname = "nick"
         case profileImageURL = "profileImage"
@@ -26,5 +28,18 @@ struct ProfileDTO: Codable {
         case hashTags
         case introduction
         case description
+    }
+    
+    func toDomain() -> Profile {
+        return .init(
+            userID: userID ?? "",
+            email: email,
+            nickname: nickname ?? "",
+            name: name,
+            introduction: introduction,
+            profileImageURL: profileImageURL,
+            phoneNumber: phoneNumber,
+            hashTags: hashTags ?? []
+        )
     }
 }

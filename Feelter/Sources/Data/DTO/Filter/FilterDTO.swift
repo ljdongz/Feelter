@@ -28,4 +28,17 @@ struct FilterDTO: Codable {
         case createdAt
         case updatedAt
     }
+    
+    func toDomain() -> Filter {
+        return .init(
+            filterID: filterID,
+            category: category,
+            title: title,
+            description: description,
+            files: files,
+            creator: creator?.toDomain(),
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+    }
 }

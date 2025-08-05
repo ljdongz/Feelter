@@ -9,7 +9,7 @@ import Foundation
 
 struct Profile {
     let userID: String
-    let email: String
+    let email: String?
     let nickname: String
     let name: String?
     let introduction: String?
