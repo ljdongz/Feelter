@@ -12,7 +12,7 @@ final class SplashViewController: UIViewController {
     private let gradientLayer = CAGradientLayer()
     
     @Dependency private var networkProvider: NetworkProvider
-    @Dependency private var keychainStorage: KeychainStorage
+    @Dependency private var tokenManager: TokenManager
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,8 +40,9 @@ private extension SplashViewController {
     
     func setupRootView() {
         
-        if let _ = try? keychainStorage.load(forKey: .accessToken) {
-            Task {
+        Task {
+            if let _ = await tokenManager.accessToken {
+                
                 do {
                     async let sleep: Void = Task.sleep(nanoseconds: 1_000_000_000)
                     async let response = networkProvider.request(
@@ -51,22 +52,27 @@ private extension SplashViewController {
                     
                     let (token, _) = try await (response, sleep)
                     
+                    await tokenManager.updateToken(
+                        access: token.accessToken,
+                        refresh: token.refreshToken
+                    )
+                    
                     await MainActor.run {
-                        try? keychainStorage.save(token.accessToken, forKey: .accessToken)
-                        try? keychainStorage.save(token.refreshToken, forKey: .refreshToken)
-                        
-                        changeRootView(to: .main)
+                        RootViewSwitcher.shared.changeRootView(to: .main)
                     }
                     
                 } catch {
-                    // FIXME: 각 에러상황 별 화면 분기 처리 고민
+                    // TODO: 각 에러상황 별 화면 분기 처리 고민
                     await MainActor.run {
-                        changeRootView(to: .signIn)
+                        RootViewSwitcher.shared.changeRootView(to: .signIn)
                     }
                 }
             }
-        } else {
-            changeRootView(to: .signIn)
+            else {
+                await MainActor.run {
+                    RootViewSwitcher.shared.changeRootView(to: .signIn)
+                }
+            }
         }
     }
 }

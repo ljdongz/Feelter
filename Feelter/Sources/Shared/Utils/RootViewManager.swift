@@ -7,18 +7,22 @@
 
 import UIKit
 
-enum RootViewManager {
+struct RootViewSwitcher {
     
     enum RootViewType {
         case signIn
         case main
     }
     
+    static let shared = RootViewSwitcher()
+    
+    private init() {}
+    
     /// 루트 뷰컨트롤러를 변경합니다
     /// - Parameters:
     ///   - type: 변경할 루트뷰 타입
     ///   - animated: 애니메이션 여부 (기본값: true)
-    static func changeRootView(to type: RootViewType, animated: Bool = true) {
+    func changeRootView(to type: RootViewType, animated: Bool = true) {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let sceneDelegate = windowScene.delegate as? SceneDelegate,
               let window = sceneDelegate.window else {
@@ -44,8 +48,10 @@ enum RootViewManager {
         
         window.makeKeyAndVisible()
     }
-    
-    private static func createViewController(for type: RootViewType) -> UIViewController {
+}
+
+private extension RootViewSwitcher {
+    func createViewController(for type: RootViewType) -> UIViewController {
         switch type {
         case .signIn:
             let signInViewController = SignInViewController()
@@ -57,15 +63,5 @@ enum RootViewManager {
             mainViewController.view.backgroundColor = .green
             return UINavigationController(rootViewController: mainViewController)
         }
-    }
-}
-
-// MARK: - UIViewController Extension
-
-extension UIViewController {
-    
-    /// 현재 뷰컨트롤러에서 루트뷰를 변경합니다
-    func changeRootView(to type: RootViewManager.RootViewType, animated: Bool = true) {
-        RootViewManager.changeRootView(to: type, animated: animated)
     }
 }

@@ -23,7 +23,7 @@ struct NetworkProviderImpl: NetworkProvider {
     func request<T: Decodable>(endpoint: APIEndpoint, type: T.Type) async throws -> T {
         // URLRequest 객체 생성
         guard var request = endpoint.asURLRequest() else {
-            throw NetworkError.invalidURL
+            throw NetworkError.notCreatedURLRequest
         }
         
         // 토큰 인터셉터를 설정한 경우, adapt 호출
@@ -36,8 +36,10 @@ struct NetworkProviderImpl: NetworkProvider {
             return try await performRequest(request: request, type: type)
         } catch  {
             // 에러 응답인 경우, 액세스 토큰 만료 에러인지 확인 후 재요청
-            let retryRequest = try await handleTokenInterceptor(request: request, error: error)
-            
+            let retryRequest = try await handleTokenInterceptor(
+                request: request,
+                error: error
+            )
             return try await performRequest(request: retryRequest, type: type)
         }
     }

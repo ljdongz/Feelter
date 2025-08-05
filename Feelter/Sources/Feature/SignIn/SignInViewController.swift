@@ -65,7 +65,7 @@ final class SignInViewController: RxBaseViewController {
             .observe(on: MainScheduler.instance)
             .subscribe(with: self) { owner, result in
                 if result.isSuccess {
-                    owner.changeRootView(to: .main)
+                    RootViewSwitcher.shared.changeRootView(to: .main)
                 } else {
                     ToastManager.shared.show(
                         message: result.message,
