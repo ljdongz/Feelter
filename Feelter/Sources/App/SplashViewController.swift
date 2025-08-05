@@ -58,19 +58,19 @@ private extension SplashViewController {
                     )
                     
                     await MainActor.run {
-                        changeRootView(to: .main)
+                        RootViewSwitcher.shared.changeRootView(to: .main)
                     }
                     
                 } catch {
-                    // FIXME: 각 에러상황 별 화면 분기 처리 고민
+                    // TODO: 각 에러상황 별 화면 분기 처리 고민
                     await MainActor.run {
-                        changeRootView(to: .signIn)
+                        RootViewSwitcher.shared.changeRootView(to: .signIn)
                     }
                 }
             }
             else {
                 await MainActor.run {
-                    changeRootView(to: .signIn)
+                    RootViewSwitcher.shared.changeRootView(to: .signIn)
                 }
             }
         }
