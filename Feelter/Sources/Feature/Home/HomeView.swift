@@ -21,7 +21,7 @@ final class HomeView: BaseView {
         case authorIntroduction
     }
     
-    typealias DataSourceType = UICollectionViewDiffableDataSource<Section, String>
+    typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
     
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(
@@ -34,12 +34,12 @@ final class HomeView: BaseView {
         return view
     }()
     
-    private var dataSource: DataSourceType?
+    private var dataSource: DataSourceType!
     
     override func setupView() {
         setupCollectionView()
     }
-
+    
     override func setupSubviews() {
         addSubview(collectionView)
     }
@@ -48,6 +48,35 @@ final class HomeView: BaseView {
         collectionView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+    }
+    
+    func applyTodayFilterSnapShot(_ filter: Filter) {
+        var snapShot = dataSource.snapshot(for: .todayFilter)
+        snapShot.append([filter])
+        dataSource.apply(snapShot, to: .todayFilter)
+    }
+    
+    func applyHotTrendFiltersSnapShot(_ filters: [Filter]) {
+        var snapShot = dataSource.snapshot(for: .hotTrend)
+        snapShot.append(filters)
+        dataSource.apply(snapShot, to: .hotTrend)
+    }
+    
+    func applyTodayAuthorSnapShot(_ author: Profile) {
+        var headerSnapShot = dataSource.snapshot(for: .authorHeader)
+        var photosSnapShot = dataSource.snapshot(for: .authorPhotos)
+        var hashTagsSnapShot = dataSource.snapshot(for: .authorHashTags)
+        var introductionSnapShot = dataSource.snapshot(for: .authorIntroduction)
+        
+        headerSnapShot.append([author])
+        photosSnapShot.append([author])
+        hashTagsSnapShot.append([author])
+        introductionSnapShot.append([author])
+        
+        dataSource.apply(headerSnapShot, to: .authorHeader)
+        dataSource.apply(photosSnapShot, to: .authorPhotos)
+        dataSource.apply(hashTagsSnapShot, to: .authorHashTags)
+        dataSource.apply(introductionSnapShot, to: .authorIntroduction)
     }
 }
 
@@ -62,29 +91,6 @@ private extension HomeView {
         
         // 3) DiffableDataSource 설정
         configureDiffableDataSource()
-        
-        // 4) DiffableDataSource Snapshot 설정
-        var snapShot = NSDiffableDataSourceSnapshot<Section, String>()
-        
-        snapShot.appendSections([.todayFilter])
-        snapShot.appendItems(["123"], toSection: .todayFilter)
-        
-        snapShot.appendSections([.hotTrend])
-        snapShot.appendItems(["", "1", "2", "3"], toSection: .hotTrend)
-        
-        snapShot.appendSections([.authorHeader])
-        snapShot.appendItems(["a"], toSection: .authorHeader)
-        
-        snapShot.appendSections([.authorPhotos])
-        snapShot.appendItems(["b", "c", "d"], toSection: .authorPhotos)
-        
-        snapShot.appendSections([.authorHashTags])
-        snapShot.appendItems(["섬세함섬세함", "자연자연", "풍경풍경", "미니멀리즘미니멀리즘", "아르떼아르떼"], toSection: .authorHashTags)
-        
-        snapShot.appendSections([.authorIntroduction])
-        snapShot.appendItems(["ccc"], toSection: .authorIntroduction)
-        
-        dataSource?.apply(snapShot)
     }
     
     func configureCompositionalLayout() {
@@ -162,7 +168,7 @@ private extension HomeView {
                 
                 switch Section(rawValue: indexPath.section) {
                 case .todayFilter:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? Filter,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: TodayFilterCollectionViewCell.identifier,
                             for: indexPath
@@ -171,64 +177,69 @@ private extension HomeView {
                         return .init()
                     }
                     cell.configureCell()
+                    print("TodayFilter: \(indexPath.item)------")
                     return cell
                     
                 case .hotTrend:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? Filter,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: HotTrendCollectionViewCell.identifier,
                             for: indexPath
                           ) as? HotTrendCollectionViewCell else {
                         return .init()
                     }
+                    print("HotFilter: \(indexPath.item)------")
                     return cell
                     
                 case .authorHeader:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? Profile,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: TodayAuthorProfileCollectionViewCell.identifier,
                             for: indexPath
                           ) as? TodayAuthorProfileCollectionViewCell else {
                         return .init()
                     }
+                    print("AuthorHeader: \(indexPath.item)------")
                     cell.configureCell()
                     return cell
                     
                 case .authorPhotos:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? Profile,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: TodayAuthorPhotosCollectionViewCell.identifier,
                             for: indexPath
                           ) as? TodayAuthorPhotosCollectionViewCell else {
                         return .init()
                     }
+                    print("AuthorPhotos: \(indexPath.item)------")
                     cell.configureCell()
                     return cell
                     
                 case .authorHashTags:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? Profile,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: HashTagCollectionViewCell.identifier,
                             for: indexPath
                           ) as? HashTagCollectionViewCell else {
                         return .init()
                     }
-                    cell.configure(text: item, xmarkIsHidden: true)
+                    print("AuthorHashTags: \(indexPath.item)------")
+                    let hashTag = item.hashTags[indexPath.item]
+                    cell.configure(text: hashTag, xmarkIsHidden: true)
                     return cell
                     
                 case .authorIntroduction:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? Profile,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: TodayAuthorIntroductionCollectionViewCell.identifier,
                             for: indexPath
                           ) as? TodayAuthorIntroductionCollectionViewCell else {
                         return .init()
                     }
+                    print("AuthorIntroduction: \(indexPath.item)------")
                     cell.configureCell(
-                        header: "자연의 섬세함을 담아내는 감성 사진작가",
-                        body: """
-                            윤새싹은 자연의 섬세한 아름다움을 포착하는 데 탁월한 감각을 지닌 사진작가입니다. 그녀의 작품은 일상 속에서 쉽게 지나칠 수 있는 순간들을 특별하게 담아내며, 관람객들에게 새로운 시각을 선사합니다.
-                            """
+                        header: item.introduction,
+                        body: item.description ?? ""
                     )
                     return cell
                     
