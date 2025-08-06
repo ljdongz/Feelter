@@ -14,7 +14,9 @@ struct Filter: Hashable {
     let description: String?
     let files: [String]?
     let creator: Profile?
-    
+    let isLiked: Bool?
+    let likeCount: Int?
+    let buyerCount: Int?
     let createdAt: String?
     let updatedAt: String?
 }

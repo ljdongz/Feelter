@@ -14,7 +14,9 @@ struct FilterDTO: Codable {
     let description: String?
     let files: [String]?
     let creator: ProfileDTO?
-    
+    let isLiked: Bool?
+    let likeCount: Int?
+    let buyerCount: Int?
     let createdAt: String?
     let updatedAt: String?
     
@@ -25,6 +27,9 @@ struct FilterDTO: Codable {
         case description
         case files
         case creator
+        case isLiked = "is_liked"
+        case likeCount = "like_count"
+        case buyerCount = "buyer_count"
         case createdAt
         case updatedAt
     }
@@ -37,6 +42,9 @@ struct FilterDTO: Codable {
             description: description,
             files: files,
             creator: creator?.toDomain(),
+            isLiked: isLiked,
+            likeCount: likeCount,
+            buyerCount: buyerCount,
             createdAt: createdAt,
             updatedAt: updatedAt
         )
