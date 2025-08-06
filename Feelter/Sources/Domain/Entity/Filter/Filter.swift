@@ -11,6 +11,7 @@ struct Filter: Hashable {
     let filterID: String?
     let category: String?
     let title: String?
+    let introduction: String?
     let description: String?
     let files: [String]?
     let creator: Profile?

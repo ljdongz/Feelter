@@ -9,4 +9,5 @@ import Foundation
 
 struct TodayAuthorResponseDTO: Decodable {
     let author: ProfileDTO
+    let filters: [FilterDTO]
 }

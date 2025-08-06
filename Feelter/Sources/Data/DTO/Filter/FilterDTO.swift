@@ -11,6 +11,7 @@ struct FilterDTO: Codable {
     let filterID: String?
     let category: String?
     let title: String?
+    let introduction: String?
     let description: String?
     let files: [String]?
     let creator: ProfileDTO?
@@ -24,6 +25,7 @@ struct FilterDTO: Codable {
         case filterID = "filter_id"
         case category
         case title
+        case introduction
         case description
         case files
         case creator
@@ -39,6 +41,7 @@ struct FilterDTO: Codable {
             filterID: filterID,
             category: category,
             title: title,
+            introduction: introduction,
             description: description,
             files: files,
             creator: creator?.toDomain(),
