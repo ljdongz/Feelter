@@ -23,7 +23,7 @@ final class HomeView: BaseView {
     
     typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
     
-    private lazy var collectionView: UICollectionView = {
+    let collectionView: UICollectionView = {
         let view = UICollectionView(
             frame: .zero,
             collectionViewLayout: UICollectionViewLayout()
@@ -31,6 +31,7 @@ final class HomeView: BaseView {
         view.contentInsetAdjustmentBehavior = .never
         view.showsVerticalScrollIndicator = false
         view.backgroundColor = .clear
+        view.bounces = false
         return view
     }()
     
@@ -57,7 +58,11 @@ final class HomeView: BaseView {
             make.edges.equalToSuperview()
         }
     }
-    
+}
+
+// MARK: - Public Method
+
+extension HomeView {
     func applyTodayFilterSnapShot(_ filter: Filter) {
         var snapShot = dataSource.snapshot(for: .todayFilter)
         snapShot.append([filter])
@@ -99,6 +104,12 @@ final class HomeView: BaseView {
         dataSource.apply(photosSnapShot, to: .authorPhotos)
         dataSource.apply(hashTagsSnapShot, to: .authorHashTags)
         dataSource.apply(introductionSnapShot, to: .authorIntroduction)
+    }
+    
+    func getBanner(item: Int) -> Banner {
+        let snapShot = dataSource.snapshot(for: .banner)
+        let banner = snapShot.items[item] as! Banner
+        return banner
     }
 }
 
@@ -342,8 +353,6 @@ extension HomeView: UICollectionViewDelegate {
 private extension HomeView {
     func startBannerAutoScroll() {
         guard bannerCount > 1 else { return }
-        
-        stopBannerAutoScroll()
         
         bannerTimer = Timer.scheduledTimer(
             withTimeInterval: 2.0,
