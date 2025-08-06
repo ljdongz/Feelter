@@ -11,6 +11,7 @@ import RxCocoa
 import RxSwift
 
 final class HomeViewModel: ViewModel {
+    
     struct Input {
         let viewDidLoad: Observable<Void>
     }
@@ -18,13 +19,16 @@ final class HomeViewModel: ViewModel {
     struct Output {
         let isLoading = BehaviorRelay<Bool>(value: false)
         
-        let todayFilter = PublishRelay<Filter>()
-        let hotTrendFilters = PublishRelay<[Filter]>()
-        let todayAuthor = PublishRelay<TodayAuthor>()
+        let homeModel = PublishRelay<HomeModel>()
+//        let todayFilter = PublishRelay<Filter>()
+//        let banners = PublishRelay<[Banner]>()
+//        let hotTrendFilters = PublishRelay<[Filter]>()
+//        let todayAuthor = PublishRelay<TodayAuthor>()
     }
     
     @Dependency private var userRepository: UserRepository
     @Dependency private var filterRepository: FilterRepository
+    @Dependency private var bannerRepository: BannerRepository
     
     var disposeBag: DisposeBag = .init()
     
@@ -36,19 +40,27 @@ final class HomeViewModel: ViewModel {
                 output.isLoading.accept(true)
             })
             .withAsyncResult(with: self) { owner, _ in
-                async let todayAuthor = owner.userRepository.fetchTodayAuthor()
                 async let todayFilter = owner.filterRepository.fetchTodayFilter()
+                async let banners = owner.bannerRepository.fetchBanners()
                 async let hotTrendFilters = owner.filterRepository.fetchHotTrendFilters()
+                async let todayAuthor = owner.userRepository.fetchTodayAuthor()
                 
-                let result = try await (todayFilter, hotTrendFilters, todayAuthor)
-                return result
+                let result = try await (todayFilter, banners, hotTrendFilters, todayAuthor)
+                return HomeModel(
+                    todayFilter: result.0,
+                    banners: result.1,
+                    hotTrendFilters: result.2,
+                    todayAuthor: result.3
+                )
             }
             .subscribe(with: self) { owner, result in
                 switch result {
-                case let .success((todayFilter, hotTrendFilters, todayAuthor)):
-                    output.todayFilter.accept(todayFilter)
-                    output.hotTrendFilters.accept(hotTrendFilters)
-                    output.todayAuthor.accept(todayAuthor)
+                case let .success(data):
+                    output.homeModel.accept(data)
+//                    output.todayFilter.accept(todayFilter)
+//                    output.banners.accept(banners)
+//                    output.hotTrendFilters.accept(hotTrendFilters)
+//                    output.todayAuthor.accept(todayAuthor)
                 case let .failure(error):
                     print(error)
                     // TODO: 홈 화면에서 재요청 버튼 생성되도록
@@ -62,4 +74,11 @@ final class HomeViewModel: ViewModel {
     }
 }
 
-
+extension HomeViewModel {
+    struct HomeModel {
+        let todayFilter: Filter
+        let banners: [Banner]
+        let hotTrendFilters: [Filter]
+        let todayAuthor: TodayAuthor
+    }
+}

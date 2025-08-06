@@ -13,8 +13,8 @@ final class HomeView: BaseView {
     
     enum Section: Int {
         case todayFilter
+        case banner
         case hotTrend
-        
         case authorHeader
         case authorPhotos
         case authorHashTags
@@ -54,6 +54,12 @@ final class HomeView: BaseView {
         var snapShot = dataSource.snapshot(for: .todayFilter)
         snapShot.append([filter])
         dataSource.apply(snapShot, to: .todayFilter)
+    }
+    
+    func applyBannerSnapShot(_ banners: [Banner]) {
+        var snapShot = dataSource.snapshot(for: .banner)
+        snapShot.append(banners)
+        dataSource.apply(snapShot, to: .banner)
     }
     
     func applyHotTrendFiltersSnapShot(_ filters: [Filter]) {
@@ -99,6 +105,8 @@ private extension HomeView {
             switch Section(rawValue: sectionIndex) {
             case .todayFilter:
                 return TodayFilterCollectionViewCell.layoutSection()
+            case .banner:
+                return BannerCollectionViewCell.layoutSection()
             case .hotTrend:
                 return HotTrendCollectionViewCell.layoutSection()
             case .authorHeader:
@@ -128,6 +136,12 @@ private extension HomeView {
             BaseSectionHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: BaseSectionHeaderView.identifier
+        )
+        
+        // 배너
+        collectionView.register(
+            BannerCollectionViewCell.self,
+            forCellWithReuseIdentifier: BannerCollectionViewCell.identifier
         )
         
         // 핫 트랜드
@@ -177,6 +191,17 @@ private extension HomeView {
                         return .init()
                     }
                     cell.configureCell(filter: item)
+                    return cell
+                    
+                case .banner:
+                    guard let item = itemIdentifier as? Banner,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: BannerCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? BannerCollectionViewCell else {
+                        return .init()
+                    }
+                    cell.configureCell(item)
                     return cell
                     
                 case .hotTrend:

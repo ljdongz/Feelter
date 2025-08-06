@@ -26,6 +26,16 @@ final class HomeViewController: RxBaseViewController {
         
         self.view.backgroundColor = .gray100
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
 
     override func bind() {
         let input = HomeViewModel.Input(
@@ -34,24 +44,35 @@ final class HomeViewController: RxBaseViewController {
         
         let output = viewModel.transform(input: input)
         
-        output.todayFilter
+//        output.todayFilter
+//            .observe(on: MainScheduler.instance)
+//            .subscribe(with: self) { owner, filter in
+//                owner.mainView.applyTodayFilterSnapShot(filter)
+//            }
+//            .disposed(by: disposeBag)
+//        
+//        
+//        
+//        output.hotTrendFilters
+//            .observe(on: MainScheduler.instance)
+//            .subscribe(with: self) { owner, filters in
+//                owner.mainView.applyHotTrendFiltersSnapShot(filters)
+//            }
+//            .disposed(by: disposeBag)
+//        
+//        output.todayAuthor
+//            .observe(on: MainScheduler.instance)
+//            .subscribe(with: self) { owner, todayAuthor in
+//                owner.mainView.applyTodayAuthorSnapShot(todayAuthor)
+//            }
+//            .disposed(by: disposeBag)
+        output.homeModel
             .observe(on: MainScheduler.instance)
-            .subscribe(with: self) { owner, filter in
-                owner.mainView.applyTodayFilterSnapShot(filter)
-            }
-            .disposed(by: disposeBag)
-        
-        output.hotTrendFilters
-            .observe(on: MainScheduler.instance)
-            .subscribe(with: self) { owner, filters in
-                owner.mainView.applyHotTrendFiltersSnapShot(filters)
-            }
-            .disposed(by: disposeBag)
-        
-        output.todayAuthor
-            .observe(on: MainScheduler.instance)
-            .subscribe(with: self) { owner, todayAuthor in
-                owner.mainView.applyTodayAuthorSnapShot(todayAuthor)
+            .subscribe(with: self) { owner, data in
+                owner.mainView.applyTodayFilterSnapShot(data.todayFilter)
+                owner.mainView.applyBannerSnapShot(data.banners)
+                owner.mainView.applyHotTrendFiltersSnapShot(data.hotTrendFilters)
+                owner.mainView.applyTodayAuthorSnapShot(data.todayAuthor)
             }
             .disposed(by: disposeBag)
     }
