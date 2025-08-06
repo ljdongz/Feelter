@@ -62,16 +62,16 @@ final class HomeView: BaseView {
         dataSource.apply(snapShot, to: .hotTrend)
     }
     
-    func applyTodayAuthorSnapShot(_ author: Profile) {
+    func applyTodayAuthorSnapShot(_ author: TodayAuthor) {
         var headerSnapShot = dataSource.snapshot(for: .authorHeader)
         var photosSnapShot = dataSource.snapshot(for: .authorPhotos)
         var hashTagsSnapShot = dataSource.snapshot(for: .authorHashTags)
         var introductionSnapShot = dataSource.snapshot(for: .authorIntroduction)
         
-        headerSnapShot.append([ProfileSectionItem(profile: author)])
-        photosSnapShot.append([ProfileSectionItem(profile: author)])
-        hashTagsSnapShot.append([ProfileSectionItem(profile: author)])
-        introductionSnapShot.append([ProfileSectionItem(profile: author)])
+        headerSnapShot.append([ProfileSectionItem(profile: author.profile)])
+        photosSnapShot.append(author.filters)
+        hashTagsSnapShot.append([ProfileSectionItem(profile: author.profile)])
+        introductionSnapShot.append([ProfileSectionItem(profile: author.profile)])
         
         dataSource.apply(headerSnapShot, to: .authorHeader)
         dataSource.apply(photosSnapShot, to: .authorPhotos)
@@ -176,7 +176,7 @@ private extension HomeView {
                         
                         return .init()
                     }
-                    cell.configureCell()
+                    cell.configureCell(filter: item)
                     return cell
                     
                 case .hotTrend:
@@ -187,7 +187,7 @@ private extension HomeView {
                           ) as? HotTrendCollectionViewCell else {
                         return .init()
                     }
-                    cell.configureCell(item)
+                    cell.configureCell(filter: item)
                     return cell
                     
                 case .authorHeader:
@@ -199,11 +199,11 @@ private extension HomeView {
                         return .init()
                     }
                     
-                    cell.configureCell(item.profile)
+                    cell.configureCell(profile: item.profile)
                     return cell
                     
                 case .authorPhotos:
-                    guard let item = itemIdentifier as? ProfileSectionItem,
+                    guard let item = itemIdentifier as? Filter,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: TodayAuthorPhotosCollectionViewCell.identifier,
                             for: indexPath
@@ -211,7 +211,7 @@ private extension HomeView {
                         return .init()
                     }
                     
-                    cell.configureCell()
+                    cell.configureCell(imageFiles: item.files ?? [])
                     return cell
                     
                 case .authorHashTags:

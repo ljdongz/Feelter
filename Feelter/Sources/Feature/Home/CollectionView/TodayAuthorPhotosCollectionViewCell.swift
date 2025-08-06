@@ -31,8 +31,12 @@ final class TodayAuthorPhotosCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
-    func configureCell() {
-        photoImageView.image = .sample
+    func configureCell(imageFiles: [String]) {
+        // TODO: 원본, 필터 이미지 중 어느것을 보여줄지 고민
+        ImageLoader.applyAuthenticatedImage(
+            at: photoImageView,
+            path: imageFiles[0]
+        )
     }
 }
 

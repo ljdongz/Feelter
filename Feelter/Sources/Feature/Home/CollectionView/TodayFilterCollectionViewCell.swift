@@ -34,6 +34,7 @@ final class TodayFilterCollectionViewCell: BaseCollectionViewCell {
 
     private let todayFilterHeaderLabel: UILabel = {
         let view = UILabel()
+        view.text = "오늘의 필터 소개"
         view.textColor = .gray60
         view.font = .pretendard(size: 13, weight: .medium)
         return view
@@ -161,14 +162,16 @@ final class TodayFilterCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
-    func configureCell() {
-        todayFilterImageView.image = .sample
-        todayFilterHeaderLabel.text = "오늘의 필터 소개"
-        todayFilterIntroductionLabel.text = "하루를 담은 필터"
-        todayFilterTitleLabel.text = "청록 새록"
-        todayFilterDescriptionLabel.text = """
-            햇살 아래 돋아나는 새싹처럼, 맑고 투명한 빛을 담은 자연 감성 필터입니다. 너무 과하지 않게, 부드러운 색감으로 분위기를 살려줍니다. 새로운 시작, 순수한 감정을 담고 싶을 때 이 필터를 사용해보세요.
-            """
+    func configureCell(filter: Filter) {
+        // TODO: 원본, 필터 이미지 중 어느것을 보여줄지 고민
+        ImageLoader.applyAuthenticatedImage(
+            at: todayFilterImageView,
+            path: filter.files?[0] ?? ""
+        )
+        
+        todayFilterIntroductionLabel.text = filter.introduction
+        todayFilterTitleLabel.text = filter.title
+        todayFilterDescriptionLabel.text = filter.description
     }
 }
 

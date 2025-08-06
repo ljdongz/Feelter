@@ -20,7 +20,7 @@ final class HomeViewModel: ViewModel {
         
         let todayFilter = PublishRelay<Filter>()
         let hotTrendFilters = PublishRelay<[Filter]>()
-        let todayAuthor = PublishRelay<Profile>()
+        let todayAuthor = PublishRelay<TodayAuthor>()
     }
     
     @Dependency private var userRepository: UserRepository

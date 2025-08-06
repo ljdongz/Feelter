@@ -7,6 +7,9 @@
 
 import UIKit
 
+import Kingfisher
+import SnapKit
+
 final class HotTrendCollectionViewCell: BaseCollectionViewCell {
     static let identifier = "HotTrendCollectionViewCell"
     
@@ -17,6 +20,8 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
         return view
     }()
 
+    @Dependency private var tokenManager: TokenManager
+    
     override func prepareForReuse() {
         super.prepareForReuse()
         
@@ -33,11 +38,16 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
-    func configureCell(_ filter: Filter) {
+    func configureCell(filter: Filter) {
         filterFeedView.titleLabel.text = filter.title
-        filterFeedView.imageView.image = .sample
         filterFeedView.likeImageView.image = filter.isLiked == true ? .likeFill : .likeEmpty
         filterFeedView.likeCountLabel.text = "\(filter.likeCount ?? 0)"
+        
+        // TODO: 원본, 필터 이미지 중 어느것을 보여줄지 고민
+        ImageLoader.applyAuthenticatedImage(
+            at: filterFeedView.imageView,
+            path: filter.files?[0] ?? ""
+        )
     }
 }
 

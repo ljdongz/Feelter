@@ -8,5 +8,5 @@
 import Foundation
 
 protocol UserRepository {
-    func fetchTodayAuthor() async throws -> Profile
+    func fetchTodayAuthor() async throws -> TodayAuthor
 }

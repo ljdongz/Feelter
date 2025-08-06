@@ -70,8 +70,12 @@ final class TodayAuthorProfileCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
-    func configureCell(_ profile: Profile) {
-        profileImageView.image = .sample
+    func configureCell(profile: Profile) {
+        
+        ImageLoader.applyAuthenticatedImage(
+            at: profileImageView,
+            path: profile.profileImageURL ?? ""
+        )
         authorName.text = profile.name
         authorNickname.text = profile.nickname
     }

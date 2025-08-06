@@ -37,7 +37,6 @@ final class HomeViewController: RxBaseViewController {
         output.todayFilter
             .observe(on: MainScheduler.instance)
             .subscribe(with: self) { owner, filter in
-                print(filter)
                 owner.mainView.applyTodayFilterSnapShot(filter)
             }
             .disposed(by: disposeBag)
@@ -45,16 +44,14 @@ final class HomeViewController: RxBaseViewController {
         output.hotTrendFilters
             .observe(on: MainScheduler.instance)
             .subscribe(with: self) { owner, filters in
-                print(filters)
                 owner.mainView.applyHotTrendFiltersSnapShot(filters)
             }
             .disposed(by: disposeBag)
         
         output.todayAuthor
             .observe(on: MainScheduler.instance)
-            .subscribe(with: self) { owner, author in
-                print(author)
-                owner.mainView.applyTodayAuthorSnapShot(author)
+            .subscribe(with: self) { owner, todayAuthor in
+                owner.mainView.applyTodayAuthorSnapShot(todayAuthor)
             }
             .disposed(by: disposeBag)
     }

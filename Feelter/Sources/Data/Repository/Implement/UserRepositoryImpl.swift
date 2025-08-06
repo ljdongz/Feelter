@@ -14,12 +14,15 @@ struct UserRepositoryImpl: UserRepository {
         self.networkProvider = networkProvider
     }
     
-    func fetchTodayAuthor() async throws -> Profile {
+    func fetchTodayAuthor() async throws -> TodayAuthor {
         let response = try await networkProvider.request(
             endpoint: UserAPI.todayAuthor,
             type: TodayAuthorResponseDTO.self
         )
         
-        return response.author.toDomain()
+        let profile = response.author.toDomain()
+        let filters = response.filters.map { $0.toDomain() }
+        
+        return (profile, filters)
     }
 }
