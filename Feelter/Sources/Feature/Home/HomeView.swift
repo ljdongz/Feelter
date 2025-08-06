@@ -35,6 +35,14 @@ final class HomeView: BaseView {
     }()
     
     private var dataSource: DataSourceType!
+    private var bannerTimer: Timer?
+    private var currentBannerPage: Int = 0
+    private var bannerCount: Int = 0
+    private weak var bannerPageIndicator: BannerPageIndicatorDecorationView?
+    
+    deinit {
+        stopBannerAutoScroll()
+    }
     
     override func setupView() {
         setupCollectionView()
@@ -60,6 +68,14 @@ final class HomeView: BaseView {
         var snapShot = dataSource.snapshot(for: .banner)
         snapShot.append(banners)
         dataSource.apply(snapShot, to: .banner)
+        
+        bannerCount = banners.count
+        currentBannerPage = 0
+        
+        // 레이아웃 완료 후 DecorationView 캐싱 및 업데이트
+        cachingBannerPageIndicatorView()
+        updateBannerPageIndicator()
+        startBannerAutoScroll()
     }
     
     func applyHotTrendFiltersSnapShot(_ filters: [Filter]) {
@@ -86,7 +102,9 @@ final class HomeView: BaseView {
     }
 }
 
+
 // MARK: - CollectionView Setup
+
 private extension HomeView {
     func setupCollectionView() {
         // 1) Compositional Layout 설정
@@ -121,6 +139,13 @@ private extension HomeView {
                 return TodayFilterCollectionViewCell.layoutSection()
             }
         }
+        
+        // 데코레이션 뷰 등록
+        layout.register(
+            BannerPageIndicatorDecorationView.self,
+            forDecorationViewOfKind: BannerPageIndicatorDecorationView.identifier
+        )
+        
         collectionView.collectionViewLayout = layout
     }
     
@@ -299,10 +324,77 @@ private extension HomeView {
 // MARK: - UICollectionViewDelegate
 
 extension HomeView: UICollectionViewDelegate {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        // 사용자가 스크롤을 시작하면 자동 스크롤 중지
+        stopBannerAutoScroll()
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        // 드래그가 끝나면 자동 스크롤 재시작
+        startBannerAutoScroll()
     }
 }
+
+
+// MARK: - Banner Auto Scroll
+
+private extension HomeView {
+    func startBannerAutoScroll() {
+        guard bannerCount > 1 else { return }
+        
+        stopBannerAutoScroll()
+        
+        bannerTimer = Timer.scheduledTimer(
+            withTimeInterval: 2.0,
+            repeats: true
+        ) { [weak self] _ in
+            self?.scrollToNextBanner()
+        }
+    }
+    
+    func stopBannerAutoScroll() {
+        bannerTimer?.invalidate()
+        bannerTimer = nil
+    }
+    
+    func scrollToNextBanner() {
+        guard bannerCount > 0 else { return }
+        
+        currentBannerPage = (currentBannerPage + 1) % bannerCount
+        
+        let bannerIndexPath = IndexPath(
+            item: currentBannerPage,
+            section: Section.banner.rawValue
+        )
+        
+        collectionView.scrollToItem(
+            at: bannerIndexPath,
+            at: .centeredHorizontally,
+            animated: true
+        )
+        
+        updateBannerPageIndicator()
+    }
+    
+    func updateBannerPageIndicator() {
+        bannerPageIndicator?.updatePage(
+            current: currentBannerPage + 1,
+            total: bannerCount
+        )
+    }
+    
+    func cachingBannerPageIndicatorView() {
+        for subview in collectionView.subviews {
+            if let decorationView = subview as? BannerPageIndicatorDecorationView {
+                bannerPageIndicator = decorationView
+                break
+            }
+        }
+    }
+}
+
+// MARK: - Model
 
 private extension HomeView {
     struct ProfileSectionItem: Hashable {

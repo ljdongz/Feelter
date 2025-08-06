@@ -68,6 +68,14 @@ extension BannerCollectionViewCell {
         section.interGroupSpacing = 40
         section.orthogonalScrollingBehavior = .groupPagingCentered
         
+        let pageIndicatorDecoration = NSCollectionLayoutDecorationItem.background(
+            elementKind: BannerPageIndicatorDecorationView.identifier
+        )
+        pageIndicatorDecoration.contentInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
+        pageIndicatorDecoration.zIndex = 100  // 배너 위에 표시
+        
+        section.decorationItems = [pageIndicatorDecoration]
+        
         return section
     }
 }
