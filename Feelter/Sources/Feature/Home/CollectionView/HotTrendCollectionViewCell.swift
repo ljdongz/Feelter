@@ -10,12 +10,13 @@ import UIKit
 final class HotTrendCollectionViewCell: BaseCollectionViewCell {
     static let identifier = "HotTrendCollectionViewCell"
     
-    private let bodyContainerView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .green
+    private let filterFeedView: FilterFeedImageView = {
+        let view = FilterFeedImageView()
+        view.clipsToBounds = true
+        view.layer.cornerRadius = 8
         return view
     }()
-    
+
     override func prepareForReuse() {
         super.prepareForReuse()
         
@@ -23,13 +24,20 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
     
     // MARK: - Setup View
     override func setupSubviews() {
-        contentView.addSubview(bodyContainerView)
+        contentView.addSubview(filterFeedView)
     }
     
     override func setupConstraints() {
-        bodyContainerView.snp.makeConstraints { make in
+        filterFeedView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+    }
+    
+    func configureCell(_ filter: Filter) {
+        filterFeedView.titleLabel.text = filter.title
+        filterFeedView.imageView.image = .sample
+        filterFeedView.likeImageView.image = filter.isLiked == true ? .likeFill : .likeEmpty
+        filterFeedView.likeCountLabel.text = "\(filter.likeCount ?? 0)"
     }
 }
 

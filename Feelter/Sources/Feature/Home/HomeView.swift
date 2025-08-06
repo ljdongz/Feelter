@@ -177,7 +177,6 @@ private extension HomeView {
                         return .init()
                     }
                     cell.configureCell()
-                    print("TodayFilter: \(indexPath.item)------")
                     return cell
                     
                 case .hotTrend:
@@ -188,7 +187,7 @@ private extension HomeView {
                           ) as? HotTrendCollectionViewCell else {
                         return .init()
                     }
-                    print("HotFilter: \(indexPath.item)------")
+                    cell.configureCell(item)
                     return cell
                     
                 case .authorHeader:
@@ -199,7 +198,7 @@ private extension HomeView {
                           ) as? TodayAuthorProfileCollectionViewCell else {
                         return .init()
                     }
-                    print("AuthorHeader: \(indexPath.item)------")
+                    
                     cell.configureCell()
                     return cell
                     
@@ -211,7 +210,7 @@ private extension HomeView {
                           ) as? TodayAuthorPhotosCollectionViewCell else {
                         return .init()
                     }
-                    print("AuthorPhotos: \(indexPath.item)------")
+                    
                     cell.configureCell()
                     return cell
                     
@@ -223,7 +222,7 @@ private extension HomeView {
                           ) as? HashTagCollectionViewCell else {
                         return .init()
                     }
-                    print("AuthorHashTags: \(indexPath.item)------")
+                    
                     let hashTag = item.hashTags[indexPath.item]
                     cell.configure(text: hashTag, xmarkIsHidden: true)
                     return cell
@@ -236,7 +235,7 @@ private extension HomeView {
                           ) as? TodayAuthorIntroductionCollectionViewCell else {
                         return .init()
                     }
-                    print("AuthorIntroduction: \(indexPath.item)------")
+                    
                     cell.configureCell(
                         header: item.introduction,
                         body: item.description ?? ""
