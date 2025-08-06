@@ -13,10 +13,6 @@ import SnapKit
 
 final class WebViewController: UIViewController {
     
-    private let webView = WKWebView()
-    private let disposeBag = DisposeBag()
-    private let urlString: String
-    
     // MARK: - UI Components
     
     private let navigationBar: UIView = {
@@ -46,6 +42,22 @@ final class WebViewController: UIViewController {
         return indicator
     }()
     
+    private lazy var webView: WKWebView = {
+        let controller = WKUserContentController()
+        controller.add(self, name: "click_attendance_button")
+        controller.add(self, name: "complete_attendance")
+        let config = WKWebViewConfiguration()
+        config.userContentController = controller
+        let view = WKWebView(frame: .zero, configuration: config)
+        view.navigationDelegate = self
+        return view
+    }()
+    
+    @Dependency private var tokenManager: TokenManager
+    
+    private let disposeBag = DisposeBag()
+    private let urlString: String
+    
     // MARK: - Initializer
     
     init(urlString: String) {
@@ -65,7 +77,8 @@ final class WebViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupUI()
+        view.backgroundColor = .systemBackground
+        setupSubviews()
         setupConstraints()
         setupActions()
         loadURL()
@@ -73,11 +86,7 @@ final class WebViewController: UIViewController {
     
     // MARK: - Setup
     
-    private func setupUI() {
-        view.backgroundColor = .systemBackground
-        
-        webView.navigationDelegate = self
-        
+    private func setupSubviews() {
         view.addSubviews([
             navigationBar,
             webView,
@@ -126,7 +135,7 @@ final class WebViewController: UIViewController {
     
     private func loadURL() {
         guard let url = URL(string: urlString) else {
-            showErrorAndDismiss("잘못된 URL입니다.")
+            presentAlert(title: "잘못된 URL입니다.")
             return
         }
         
@@ -140,8 +149,8 @@ final class WebViewController: UIViewController {
         loadingIndicator.startAnimating()
     }
     
-    private func showErrorAndDismiss(_ message: String) {
-        let alert = UIAlertController(title: "오류", message: message, preferredStyle: .alert)
+    private func presentAlert(title: String, message: String? = nil) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "확인", style: .default) { _ in
             self.dismiss(animated: true)
         })
@@ -162,16 +171,39 @@ extension WebViewController: WKNavigationDelegate {
     
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         loadingIndicator.stopAnimating()
-        showErrorAndDismiss("페이지를 불러올 수 없습니다.\n\(error.localizedDescription)")
+        presentAlert(title: "페이지를 불러올 수 없습니다.", message: error.localizedDescription)
     }
     
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         loadingIndicator.stopAnimating()
-        showErrorAndDismiss("페이지를 불러올 수 없습니다.\n\(error.localizedDescription)")
+        presentAlert(title: "페이지를 불러올 수 없습니다.", message: error.localizedDescription)
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         // 필요시 특정 URL 차단이나 외부 앱 연동 처리
         decisionHandler(.allow)
+    }
+}
+
+extension WebViewController: WKScriptMessageHandler {
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        
+        switch message.name {
+            
+        case "click_attendance_button":
+            guard let accessToken = tokenManager.accessToken else {
+                return
+            }
+            webView.evaluateJavaScript("requestAttendance('\(accessToken)')")
+            
+        case "complete_attendance":
+            var alertMessage: String?
+            if let count = message.body as? Int {
+                alertMessage = "\(count)번째 출석 완료하셨습니다."
+            }
+            presentAlert(title: "출석 성공!", message: alertMessage)
+        default:
+            break
+        }
     }
 }
