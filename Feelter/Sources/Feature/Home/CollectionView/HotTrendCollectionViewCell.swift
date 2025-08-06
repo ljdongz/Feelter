@@ -24,7 +24,9 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        
+     
+        ImageLoader.cancelDownloadTask(at: filterFeedView.imageView)
+        filterFeedView.imageView.image = nil
     }
     
     // MARK: - Setup View

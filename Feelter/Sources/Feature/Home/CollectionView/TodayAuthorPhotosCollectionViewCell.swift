@@ -21,6 +21,13 @@ final class TodayAuthorPhotosCollectionViewCell: BaseCollectionViewCell {
         return view
     }()
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        ImageLoader.cancelDownloadTask(at: photoImageView)
+        photoImageView.image = nil
+    }
+    
     override func setupSubviews() {
         contentView.addSubview(photoImageView)
     }

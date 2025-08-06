@@ -7,7 +7,7 @@
 
 import Foundation
 
-actor TokenManager {
+final class TokenManager {
     private(set) var accessToken: String?
     private(set) var refreshToken: String?
     
