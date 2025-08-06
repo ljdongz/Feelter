@@ -70,10 +70,10 @@ final class TodayAuthorProfileCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
-    func configureCell() {
+    func configureCell(_ profile: Profile) {
         profileImageView.image = .sample
-        authorName.text = "윤새싹"
-        authorNickname.text = "SESAC YOON"
+        authorName.text = profile.name
+        authorNickname.text = profile.nickname
     }
 }
 

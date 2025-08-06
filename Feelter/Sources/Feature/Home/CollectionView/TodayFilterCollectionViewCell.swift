@@ -61,13 +61,13 @@ final class TodayFilterCollectionViewCell: BaseCollectionViewCell {
         return view
     }()
     
-    private let bannerView: UIView = {
-        let view = UIView()
-        view.clipsToBounds = true
-        view.layer.cornerRadius = 24
-        view.backgroundColor = .gray
-        return view
-    }()
+//    private let bannerView: UIView = {
+//        let view = UIView()
+//        view.clipsToBounds = true
+//        view.layer.cornerRadius = 24
+//        view.backgroundColor = .gray
+//        return view
+//    }()
     
     private let gradientLayer = CAGradientLayer()
     
@@ -95,7 +95,7 @@ final class TodayFilterCollectionViewCell: BaseCollectionViewCell {
         todayFilterGradientView.addSubviews([
             todayFilterHeaderStackView,
             todayFilterDescriptionLabel,
-            bannerView
+//            bannerView
         ])
         
         todayFilterHeaderStackView.addArrangedSubviews([
@@ -123,15 +123,16 @@ final class TodayFilterCollectionViewCell: BaseCollectionViewCell {
         }
         
         todayFilterDescriptionLabel.snp.makeConstraints { make in
-            make.bottom.equalTo(bannerView.snp.top).offset(-28)
+//            make.bottom.equalTo(bannerView.snp.top).offset(-28)
+            make.bottom.equalToSuperview().offset(-58)
             make.horizontalEdges.equalToSuperview().inset(20)
         }
         
-        bannerView.snp.makeConstraints { make in
-            make.bottom.equalToSuperview()
-            make.horizontalEdges.equalToSuperview().inset(20)
-            make.height.equalTo(100)
-        }
+//        bannerView.snp.makeConstraints { make in
+//            make.bottom.equalToSuperview()
+//            make.horizontalEdges.equalToSuperview().inset(20)
+//            make.height.equalTo(100)
+//        }
     }
     
     private func setupGradient() {

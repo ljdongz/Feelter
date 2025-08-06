@@ -43,7 +43,7 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    func configure(text: String, xmarkIsHidden: Bool = false) {
+    func configureCell(text: String, xmarkIsHidden: Bool = false) {
         hashTagButton.textLabel.text = text
         hashTagButton.xmarkImageView.isHidden = xmarkIsHidden
     }

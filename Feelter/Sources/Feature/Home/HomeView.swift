@@ -68,10 +68,10 @@ final class HomeView: BaseView {
         var hashTagsSnapShot = dataSource.snapshot(for: .authorHashTags)
         var introductionSnapShot = dataSource.snapshot(for: .authorIntroduction)
         
-        headerSnapShot.append([author])
-        photosSnapShot.append([author])
-        hashTagsSnapShot.append([author])
-        introductionSnapShot.append([author])
+        headerSnapShot.append([ProfileSectionItem(profile: author)])
+        photosSnapShot.append([ProfileSectionItem(profile: author)])
+        hashTagsSnapShot.append([ProfileSectionItem(profile: author)])
+        introductionSnapShot.append([ProfileSectionItem(profile: author)])
         
         dataSource.apply(headerSnapShot, to: .authorHeader)
         dataSource.apply(photosSnapShot, to: .authorPhotos)
@@ -191,7 +191,7 @@ private extension HomeView {
                     return cell
                     
                 case .authorHeader:
-                    guard let item = itemIdentifier as? Profile,
+                    guard let item = itemIdentifier as? ProfileSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: TodayAuthorProfileCollectionViewCell.identifier,
                             for: indexPath
@@ -199,11 +199,11 @@ private extension HomeView {
                         return .init()
                     }
                     
-                    cell.configureCell()
+                    cell.configureCell(item.profile)
                     return cell
                     
                 case .authorPhotos:
-                    guard let item = itemIdentifier as? Profile,
+                    guard let item = itemIdentifier as? ProfileSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: TodayAuthorPhotosCollectionViewCell.identifier,
                             for: indexPath
@@ -215,7 +215,7 @@ private extension HomeView {
                     return cell
                     
                 case .authorHashTags:
-                    guard let item = itemIdentifier as? Profile,
+                    guard let item = itemIdentifier as? ProfileSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: HashTagCollectionViewCell.identifier,
                             for: indexPath
@@ -223,12 +223,12 @@ private extension HomeView {
                         return .init()
                     }
                     
-                    let hashTag = item.hashTags[indexPath.item]
-                    cell.configure(text: hashTag, xmarkIsHidden: true)
+                    let hashTag = item.profile.hashTags[indexPath.item]
+                    cell.configureCell(text: hashTag, xmarkIsHidden: true)
                     return cell
                     
                 case .authorIntroduction:
-                    guard let item = itemIdentifier as? Profile,
+                    guard let item = itemIdentifier as? ProfileSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: TodayAuthorIntroductionCollectionViewCell.identifier,
                             for: indexPath
@@ -237,8 +237,8 @@ private extension HomeView {
                     }
                     
                     cell.configureCell(
-                        header: item.introduction,
-                        body: item.description ?? ""
+                        header: item.profile.introduction,
+                        body: item.profile.description ?? ""
                     )
                     return cell
                     
@@ -276,6 +276,13 @@ private extension HomeView {
 extension HomeView: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         
+    }
+}
+
+private extension HomeView {
+    struct ProfileSectionItem: Hashable {
+        let id = UUID()
+        let profile: Profile
     }
 }
 

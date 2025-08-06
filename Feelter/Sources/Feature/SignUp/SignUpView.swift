@@ -181,7 +181,7 @@ final class SignUpView: BaseView {
                     withReuseIdentifier: HashTagCollectionViewCell.identifier,
                     for: indexPath
                 ) as? HashTagCollectionViewCell else { return UICollectionViewCell() }
-                cell.configure(text: itemIdentifier)
+                cell.configureCell(text: itemIdentifier)
                 return cell
         })
     }
