@@ -25,7 +25,7 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
      
-        ImageLoader.cancelDownloadTask(at: filterFeedView.imageView)
+        ImageLoader.cancelDownloadTask(for: filterFeedView.imageView)
         filterFeedView.imageView.image = nil
     }
     
@@ -47,7 +47,7 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
         
         // TODO: 원본, 필터 이미지 중 어느것을 보여줄지 고민
         ImageLoader.applyAuthenticatedImage(
-            at: filterFeedView.imageView,
+            for: filterFeedView.imageView,
             path: filter.files?[0] ?? ""
         )
     }

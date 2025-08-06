@@ -15,7 +15,7 @@ struct ImageLoader {
     @Dependency static private var tokenManager: TokenManager
     
     static func applyAuthenticatedImage(
-        at imageView: UIImageView,
+        for imageView: UIImageView,
         path: String
     ) {
         let token = tokenManager.accessToken
@@ -45,7 +45,7 @@ struct ImageLoader {
         )
     }
     
-    static func cancelDownloadTask(at imageView: UIImageView) {
+    static func cancelDownloadTask(for imageView: UIImageView) {
         imageView.kf.cancelDownloadTask()
     }
 }

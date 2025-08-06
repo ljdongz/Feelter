@@ -165,7 +165,7 @@ final class TodayFilterCollectionViewCell: BaseCollectionViewCell {
     func configureCell(filter: Filter) {
         // TODO: 원본, 필터 이미지 중 어느것을 보여줄지 고민
         ImageLoader.applyAuthenticatedImage(
-            at: todayFilterImageView,
+            for: todayFilterImageView,
             path: filter.files?[0] ?? ""
         )
         

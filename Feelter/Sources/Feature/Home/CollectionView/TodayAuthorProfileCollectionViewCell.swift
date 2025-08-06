@@ -73,7 +73,7 @@ final class TodayAuthorProfileCollectionViewCell: BaseCollectionViewCell {
     func configureCell(profile: Profile) {
         
         ImageLoader.applyAuthenticatedImage(
-            at: profileImageView,
+            for: profileImageView,
             path: profile.profileImageURL ?? ""
         )
         authorName.text = profile.name
