@@ -11,15 +11,27 @@ import SnapKit
 
 final class FilterFeedView: BaseView {
     
+    typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
+
     enum Section: Int {
         case topRanking
         case feed
     }
+        
+    private let categoryButtonContainerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .gray100
+        return view
+    }()
     
-    typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
+    let categoryButtonView: CategoryButtonView = {
+        let view = CategoryButtonView()
+        return view
+    }()
     
-    let categoryListView: CategoryButtonListView = {
-        let view = CategoryButtonListView()
+    private let divider: UIView = {
+        let view = UIView()
+        view.backgroundColor = .gray90.withAlphaComponent(0.5)
         return view
     }()
     
@@ -31,7 +43,6 @@ final class FilterFeedView: BaseView {
         view.contentInsetAdjustmentBehavior = .never
         view.showsVerticalScrollIndicator = false
         view.backgroundColor = .clear
-        view.bounces = false
         return view
     }()
     
@@ -43,20 +54,34 @@ final class FilterFeedView: BaseView {
 
     override func setupSubviews() {
         addSubviews([
-            categoryListView,
+            categoryButtonContainerView,
+            divider,
             collectionView
         ])
+        
+        categoryButtonContainerView.addSubview(categoryButtonView)
     }
     
     override func setupConstraints() {
-        categoryListView.snp.makeConstraints { make in
+        categoryButtonContainerView.snp.makeConstraints { make in
             make.top.equalTo(safeAreaLayoutGuide.snp.top)
-            make.horizontalEdges.equalToSuperview().inset(20)
-            
+            make.horizontalEdges.equalToSuperview()
+        }
+        
+        categoryButtonView.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(10)
+            make.centerX.equalToSuperview()
+            make.bottom.equalToSuperview().inset(10)
+        }
+        
+        divider.snp.makeConstraints { make in
+            make.top.equalTo(categoryButtonContainerView.snp.bottom)
+            make.horizontalEdges.equalToSuperview()
+            make.height.equalTo(0.5)
         }
         
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(categoryListView.snp.bottom)
+            make.top.equalTo(divider.snp.bottom)
             make.horizontalEdges.bottom.equalToSuperview()
         }
         
@@ -185,6 +210,6 @@ private extension FilterFeedView {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    FilterFeedView()
+    UINavigationController(rootViewController: FilterFeedViewController())
 }
 #endif

@@ -9,7 +9,7 @@ import UIKit
 
 import SnapKit
 
-final class CategoryButtonListView: BaseView {
+final class CategoryButtonView: BaseView {
     private let stackView: UIStackView = {
         let view = UIStackView()
         view.axis = .horizontal
