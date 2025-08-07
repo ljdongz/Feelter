@@ -37,6 +37,12 @@ final class CapsuleButton: BaseView {
         }
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        containerView.layer.cornerRadius = containerView.bounds.height / 2
+    }
+    
     override func setupSubviews() {
         addSubview(containerView)
         containerView.addSubview(titleLabel)
