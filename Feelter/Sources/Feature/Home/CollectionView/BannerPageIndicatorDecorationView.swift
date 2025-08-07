@@ -30,6 +30,8 @@ final class BannerPageIndicatorDecorationView: UICollectionReusableView {
         return view
     }()
     
+    private var total: Int = 0
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -64,7 +66,12 @@ final class BannerPageIndicatorDecorationView: UICollectionReusableView {
         }
     }
     
-    func updatePage(current: Int, total: Int) {
+    func configureView(total: Int) {
+        self.total = total
+        pageLabel.text = "1 / \(total)"
+    }
+    
+    func updatePage(current: Int) {
         pageLabel.text = "\(current) / \(total)"
     }
 }

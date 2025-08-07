@@ -46,7 +46,7 @@ final class BannerCollectionViewCell: BaseCollectionViewCell {
 }
 
 extension BannerCollectionViewCell {
-    static func layoutSection() -> NSCollectionLayoutSection {
+    static func layoutSection(visibleHandler: @escaping ([any NSCollectionLayoutVisibleItem], CGPoint, any NSCollectionLayoutEnvironment) -> Void) -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(layoutSize: .init(
             widthDimension: .fractionalWidth(1),
             heightDimension: .fractionalHeight(1)
@@ -75,7 +75,7 @@ extension BannerCollectionViewCell {
         pageIndicatorDecoration.zIndex = 100  // 배너 위에 표시
         
         section.decorationItems = [pageIndicatorDecoration]
-        
+        section.visibleItemsInvalidationHandler = visibleHandler
         return section
     }
 }
