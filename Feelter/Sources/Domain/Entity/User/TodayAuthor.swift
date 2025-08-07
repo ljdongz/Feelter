@@ -7,4 +7,7 @@
 
 import Foundation
 
-typealias TodayAuthor = (profile: Profile, filters: [Filter])
+struct TodayAuthor {
+    let profile: Profile
+    let filters: [Filter]
+}

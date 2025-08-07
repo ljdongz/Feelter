@@ -23,6 +23,6 @@ struct UserRepositoryImpl: UserRepository {
         let profile = response.author.toDomain()
         let filters = response.filters.map { $0.toDomain() }
         
-        return (profile, filters)
+        return .init(profile: profile, filters: filters)
     }
 }

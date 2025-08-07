@@ -20,10 +20,6 @@ final class HomeViewModel: ViewModel {
         let isLoading = BehaviorRelay<Bool>(value: false)
         
         let homeModel = PublishRelay<HomeModel>()
-//        let todayFilter = PublishRelay<Filter>()
-//        let banners = PublishRelay<[Banner]>()
-//        let hotTrendFilters = PublishRelay<[Filter]>()
-//        let todayAuthor = PublishRelay<TodayAuthor>()
     }
     
     @Dependency private var userRepository: UserRepository
@@ -57,10 +53,6 @@ final class HomeViewModel: ViewModel {
                 switch result {
                 case let .success(data):
                     output.homeModel.accept(data)
-//                    output.todayFilter.accept(todayFilter)
-//                    output.banners.accept(banners)
-//                    output.hotTrendFilters.accept(hotTrendFilters)
-//                    output.todayAuthor.accept(todayAuthor)
                 case let .failure(error):
                     print(error)
                     // TODO: 홈 화면에서 재요청 버튼 생성되도록
