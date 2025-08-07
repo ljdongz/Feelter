@@ -28,27 +28,7 @@ final class FilterFeedViewController: RxBaseViewController {
 
     override func bind() {
         
-        Observable.merge([
-            mainView.categoryButtonView.foodButton.rx
-                .tap
-                .map { _ in FilterCategory.food },
-            mainView.categoryButtonView.characterButton.rx
-                .tap
-                .map { _ in FilterCategory.character },
-            mainView.categoryButtonView.sceneryButton.rx
-                .tap
-                .map { _ in FilterCategory.scenery },
-            mainView.categoryButtonView.nightButton.rx
-                .tap
-                .map { _ in FilterCategory.night },
-            mainView.categoryButtonView.starButton.rx
-                .tap
-                .map { _ in FilterCategory.star }
-        ])
-        .subscribe(with: self) { owner, category in
-            owner.mainView.categoryButtonView.select(category: category)
-        }
-        .disposed(by: disposeBag)
+        
     }
 }
 

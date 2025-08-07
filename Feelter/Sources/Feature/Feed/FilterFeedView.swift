@@ -14,26 +14,10 @@ final class FilterFeedView: BaseView {
     typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
 
     enum Section: Int {
+        case category
         case topRanking
         case feed
     }
-        
-    private let categoryButtonContainerView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .gray100
-        return view
-    }()
-    
-    let categoryButtonView: CategoryButtonView = {
-        let view = CategoryButtonView()
-        return view
-    }()
-    
-    private let divider: UIView = {
-        let view = UIView()
-        view.backgroundColor = .gray90.withAlphaComponent(0.5)
-        return view
-    }()
     
     let collectionView: UICollectionView = {
         let view = UICollectionView(
@@ -49,39 +33,18 @@ final class FilterFeedView: BaseView {
     private var dataSource: DataSourceType!
     
     override func setupView() {
+        
         setupCollectionView()
     }
 
     override func setupSubviews() {
-        addSubviews([
-            categoryButtonContainerView,
-            divider,
-            collectionView
-        ])
-        
-        categoryButtonContainerView.addSubview(categoryButtonView)
+        addSubview(collectionView)
     }
     
     override func setupConstraints() {
-        categoryButtonContainerView.snp.makeConstraints { make in
-            make.top.equalTo(safeAreaLayoutGuide.snp.top)
-            make.horizontalEdges.equalToSuperview()
-        }
-        
-        categoryButtonView.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(10)
-            make.centerX.equalToSuperview()
-            make.bottom.equalToSuperview().inset(10)
-        }
-        
-        divider.snp.makeConstraints { make in
-            make.top.equalTo(categoryButtonContainerView.snp.bottom)
-            make.horizontalEdges.equalToSuperview()
-            make.height.equalTo(0.5)
-        }
         
         collectionView.snp.makeConstraints { make in
-            make.top.equalTo(divider.snp.bottom)
+            make.top.equalTo(safeAreaLayoutGuide.snp.top)
             make.horizontalEdges.bottom.equalToSuperview()
         }
         
@@ -90,6 +53,10 @@ final class FilterFeedView: BaseView {
     }
     
     func applyFeedSnapShot() {
+        var snapShot1 = dataSource.snapshot(for: .category)
+        snapShot1.append(["122223", "42223", "22213", "5222353", "2222214"])
+        dataSource.apply(snapShot1, to: .category)
+        
         var snapShot = dataSource.snapshot(for: .topRanking)
         snapShot.append(["123", "43", "13", "5353"])
         dataSource.apply(snapShot, to: .topRanking)
@@ -118,6 +85,8 @@ private extension FilterFeedView {
         
         let layout = UICollectionViewCompositionalLayout { sectionIndex, environment in
             switch Section(rawValue: sectionIndex) {
+            case .category:
+                return FilterCategoryCollectionViewCell.layoutSection()
             case .topRanking:
                 return TopRankingFeedCollectionViewCell.layoutSection()
             case .feed:
@@ -137,6 +106,18 @@ private extension FilterFeedView {
             BaseSectionHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: BaseSectionHeaderView.identifier
+        )
+        
+        // 푸터 뷰
+        collectionView.register(
+            FilterCategoryFooterView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
+            withReuseIdentifier: FilterCategoryFooterView.identifier
+        )
+        
+        collectionView.register(
+            FilterCategoryCollectionViewCell.self,
+            forCellWithReuseIdentifier: FilterCategoryCollectionViewCell.identifier
         )
         
         // Top Ranking
@@ -159,6 +140,15 @@ private extension FilterFeedView {
             cellProvider: { collectionView, indexPath, itemIdentifier in
                 
                 switch Section(rawValue: indexPath.section) {
+                case .category:
+                    guard let item = itemIdentifier as? String,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: FilterCategoryCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? FilterCategoryCollectionViewCell else { return .init() }
+                    
+                    cell.configureCell(category: .character)
+                    return cell
                 case .topRanking:
                     guard let item = itemIdentifier as? String,
                           let cell = collectionView.dequeueReusableCell(
@@ -184,24 +174,36 @@ private extension FilterFeedView {
         )
         
         dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
-            guard kind == UICollectionView.elementKindSectionHeader,
-                  let headerView = collectionView.dequeueReusableSupplementaryView(
+            
+            if kind == UICollectionView.elementKindSectionHeader {
+                guard let headerView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
                     withReuseIdentifier: BaseSectionHeaderView.identifier,
                     for: indexPath
-                  ) as? BaseSectionHeaderView else { return nil }
-            
-            let section = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section]
-            switch section {
-            case .topRanking:
-                headerView.configure(leading: "Top Ranking")
-            case .feed:
-                headerView.configure(leading: "Filter Feed", trailing: "List Mode")
-            default:
-                break
+                ) as? BaseSectionHeaderView else { return nil }
+                
+                let section = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section]
+                switch section {
+                case .topRanking:
+                    headerView.configure(leading: "Top Ranking")
+                case .feed:
+                    headerView.configure(leading: "Filter Feed", trailing: "List Mode")
+                default:
+                    break
+                }
+                
+                return headerView
+            } else if kind == UICollectionView.elementKindSectionFooter {
+                guard let footerView = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: FilterCategoryFooterView.identifier,
+                    for: indexPath
+                ) as? FilterCategoryFooterView else { return nil }
+                
+                return footerView
+            } else {
+                return nil
             }
-            
-            return headerView
         }
     }
 }

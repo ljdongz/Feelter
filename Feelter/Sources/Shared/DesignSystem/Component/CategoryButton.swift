@@ -42,8 +42,6 @@ final class CategoryButton: BaseView {
         return view
     }()
     
-    let category: FilterCategory
-    
     var isSelected: Bool = false {
         didSet {
             if isSelected {
@@ -58,29 +56,23 @@ final class CategoryButton: BaseView {
         }
     }
     
-    init(category: FilterCategory) {
-        self.category = category
-        super.init(frame: .zero)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func setupView() {
-        titleLabel.text = category.rawValue
-        
-        switch category {
-        case .food:
-            iconImageView.image = .food
-        case .character:
-            iconImageView.image = .people
-        case .scenery:
-            iconImageView.image = .landscape
-        case .night:
-            iconImageView.image = .night
-        case .star:
-            iconImageView.image = .star
+    var category: FilterCategory? {
+        didSet {
+            titleLabel.text = category?.rawValue
+            
+            switch category {
+            case .food:
+                iconImageView.image = .food
+            case .character:
+                iconImageView.image = .people
+            case .scenery:
+                iconImageView.image = .landscape
+            case .night:
+                iconImageView.image = .night
+            case .star:
+                iconImageView.image = .star
+            case .none: return
+            }
         }
     }
     
@@ -111,6 +103,8 @@ final class CategoryButton: BaseView {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    CategoryButton(category: .character)
+    let view = CategoryButton()
+    view.category = .character
+    return view
 }
 #endif
