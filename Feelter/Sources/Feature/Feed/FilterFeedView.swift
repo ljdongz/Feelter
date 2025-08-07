@@ -68,6 +68,10 @@ final class FilterFeedView: BaseView {
         var snapShot = dataSource.snapshot(for: .topRanking)
         snapShot.append(["123", "43", "13", "5353"])
         dataSource.apply(snapShot, to: .topRanking)
+        
+        var feedSnapShot = dataSource.snapshot(for: .feed)
+        feedSnapShot.append(["aasdf", "fdasfsad", "asdfas", "fds", "vddas", "fadsfsf"])
+        dataSource.apply(feedSnapShot, to: .feed)
     }
 }
 
@@ -91,6 +95,8 @@ private extension FilterFeedView {
             switch Section(rawValue: sectionIndex) {
             case .topRanking:
                 return TopRankingFeedCollectionViewCell.layoutSection()
+            case .feed:
+                return FilterFeedListCollectionViewCell.layoutSection()
             default:
                 return TopRankingFeedCollectionViewCell.layoutSection()
             }
@@ -114,6 +120,12 @@ private extension FilterFeedView {
             forCellWithReuseIdentifier: TopRankingFeedCollectionViewCell.identifier
         )
         
+        // Feed
+        collectionView.register(
+            FilterFeedListCollectionViewCell.self,
+            forCellWithReuseIdentifier: FilterFeedListCollectionViewCell.identifier
+        )
+        
     }
     
     func configureDiffableDataSource() {
@@ -128,6 +140,15 @@ private extension FilterFeedView {
                             withReuseIdentifier: TopRankingFeedCollectionViewCell.identifier,
                             for: indexPath
                           ) as? TopRankingFeedCollectionViewCell else { return .init() }
+                    
+                    cell.configureCell()
+                    return cell
+                case .feed:
+                    guard let item = itemIdentifier as? String,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: FilterFeedListCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? FilterFeedListCollectionViewCell else { return .init() }
                     
                     cell.configureCell()
                     return cell
@@ -149,6 +170,8 @@ private extension FilterFeedView {
             switch section {
             case .topRanking:
                 headerView.configure(leading: "Top Ranking")
+            case .feed:
+                headerView.configure(leading: "Filter Feed", trailing: "List Mode")
             default:
                 break
             }

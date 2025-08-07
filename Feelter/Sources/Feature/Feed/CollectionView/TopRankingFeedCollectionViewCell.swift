@@ -143,7 +143,7 @@ extension TopRankingFeedCollectionViewCell {
         )
         
         section.boundarySupplementaryItems = [header]
-        section.contentInsets = .init(top: 0, leading: 20, bottom: 0, trailing: 20)
+        section.contentInsets = .init(top: 0, leading: 20, bottom: 30, trailing: 20)
         section.interGroupSpacing = 40
         section.orthogonalScrollingBehavior = .groupPagingCentered
         section.visibleItemsInvalidationHandler = visibleHandler

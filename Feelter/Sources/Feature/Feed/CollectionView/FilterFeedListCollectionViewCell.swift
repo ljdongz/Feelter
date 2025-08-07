@@ -62,17 +62,16 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
 
     override func setupConstraints() {
         filterImageView.snp.makeConstraints { make in
-            make.leading.verticalEdges.equalToSuperview()
+            make.leading.equalToSuperview()
             make.width.equalTo(100)
             make.height.equalTo(120)
+            make.centerY.equalToSuperview()
         }
         
         labelStackView.snp.makeConstraints { make in
             make.leading.equalTo(filterImageView.snp.trailing).offset(20)
             make.centerY.equalTo(filterImageView.snp.centerY)
             make.trailing.equalToSuperview()
-            
-//            make.verticalEdges.lessThanOrEqualToSuperview()
         }
     }
     
@@ -96,10 +95,10 @@ extension FilterFeedListCollectionViewCell {
             heightDimension: .fractionalHeight(1)
         ))
         
-        let group = NSCollectionLayoutGroup.vertical(
+        let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: .init(
                 widthDimension: .fractionalWidth(1),
-                heightDimension: .absolute(1/4)
+                heightDimension: .absolute(152)
             ),
             subitems: [item]
         )
@@ -116,7 +115,7 @@ extension FilterFeedListCollectionViewCell {
         )
         
         section.boundarySupplementaryItems = [header]
-        section.contentInsets = .init(top: 16, leading: 20, bottom: 16, trailing: 20)
+        section.contentInsets = .init(top: 0, leading: 20, bottom: 0, trailing: 20)
         
         section.visibleItemsInvalidationHandler = visibleHandler
         return section
