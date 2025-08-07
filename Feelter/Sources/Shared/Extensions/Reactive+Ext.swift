@@ -21,3 +21,13 @@ extension Reactive where Base: UIViewController {
         return ControlEvent(events: source)
     }
 }
+
+extension Reactive where Base: UIView {
+    var tap: ControlEvent<Void> {
+        let tapGesture = UITapGestureRecognizer()
+        base.addGestureRecognizer(tapGesture)
+        base.isUserInteractionEnabled = true
+        
+        return ControlEvent(events: tapGesture.rx.event.map { _ in })
+    }
+}

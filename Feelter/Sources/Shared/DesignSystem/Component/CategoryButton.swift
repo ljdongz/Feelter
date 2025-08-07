@@ -27,7 +27,6 @@ final class CategoryButton: BaseView {
         view.alignment = .center
         return view
     }()
-
     
     private let iconImageView: UIImageView = {
         let view = UIImageView()
@@ -43,7 +42,21 @@ final class CategoryButton: BaseView {
         return view
     }()
     
-    private let category: FilterCategory
+    let category: FilterCategory
+    
+    var isSelected: Bool = false {
+        didSet {
+            if isSelected {
+                containerView.backgroundColor = .brightTurquoise
+                iconImageView.tintColor = .gray30
+                titleLabel.textColor = .gray30
+            } else {
+                containerView.backgroundColor = .gray75.withAlphaComponent(0.5)
+                iconImageView.tintColor = .gray60
+                titleLabel.textColor = .gray60
+            }
+        }
+    }
     
     init(category: FilterCategory) {
         self.category = category

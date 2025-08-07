@@ -60,4 +60,17 @@ final class CategoryButtonView: BaseView {
             make.edges.equalToSuperview()
         }
     }
+    
+    func select(category: FilterCategory) {
+        [
+            foodButton,
+            characterButton,
+            sceneryButton,
+            nightButton,
+            starButton
+        ]
+            .forEach {
+                $0.isSelected = $0.category == category
+            }
+    }
 }
