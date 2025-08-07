@@ -59,8 +59,7 @@ private extension RootViewSwitcher {
             
         case .main:
             // TODO: MainViewController 구현 후 변경
-            let mainViewController = UIViewController()
-            mainViewController.view.backgroundColor = .green
+            let mainViewController = HomeViewController()
             return UINavigationController(rootViewController: mainViewController)
         }
     }

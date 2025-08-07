@@ -57,7 +57,19 @@ extension DIContainer {
             networkProvider: networkProvider,
             tokenManager: tokenManager
         )
+        let userRepository = UserRepositoryImpl(
+            networkProvider: networkProvider
+        )
+        let filterRepository = FilterRepositoryImpl(
+            networkProvider: networkProvider
+        )
+        let bannerRepository = BannerRepositoryImpl(
+            networkProvider: networkProvider
+        )
         
         register(authRepository, type: AuthRepository.self)
+        register(userRepository, type: UserRepository.self)
+        register(filterRepository, type: FilterRepository.self)
+        register(bannerRepository, type: BannerRepository.self)
     }
 }

@@ -20,12 +20,8 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
-    private var disposeBag = DisposeBag()
-    
     override func prepareForReuse() {
         super.prepareForReuse()
-        
-        disposeBag = DisposeBag()
     }
     
     override init(frame: CGRect) {
@@ -44,11 +40,36 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
         
         hashTagButton.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.height.equalTo(30)
         }
     }
     
-    func configure(text: String) {
+    func configureCell(text: String, xmarkIsHidden: Bool = false) {
         hashTagButton.textLabel.text = text
+        hashTagButton.xmarkImageView.isHidden = xmarkIsHidden
+    }
+}
+
+extension HashTagCollectionViewCell {
+    static func layoutSection() -> NSCollectionLayoutSection {
+        let item = NSCollectionLayoutItem(layoutSize: .init(
+            widthDimension: .estimated(64),
+            heightDimension: .absolute(24)
+        ))
+        
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: .init(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .estimated(60)
+            ),
+            subitems: [item]
+        )
+        group.interItemSpacing = .fixed(8)
+        
+        let section = NSCollectionLayoutSection(group: group)
+        section.contentInsets = .init(top: 20, leading: 20, bottom: 0, trailing: 20)
+        
+        section.interGroupSpacing = 8
+        section.orthogonalScrollingBehavior = .none
+        return section
     }
 }

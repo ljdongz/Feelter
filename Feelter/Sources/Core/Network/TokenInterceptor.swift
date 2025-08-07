@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class TokenInterceptor: RequestInterceptor {
+struct TokenInterceptor: RequestInterceptor {
     
     private let tokenRefreshTasker = TokenRefreshTasker()
     private let tokenManager: TokenManager
@@ -19,8 +19,8 @@ final class TokenInterceptor: RequestInterceptor {
     // 요청 전에 액세스 토큰 추가
     func adapt(_ request: URLRequest) async -> URLRequest {
         // 액세스 토큰이 존재하는지 확인 (없으면 엑세스 토큰을 설정할 필요 없는 API)
-        guard let accessToken = await tokenManager.accessToken,
-              let refreshToken = await tokenManager.refreshToken else {
+        guard let accessToken = tokenManager.accessToken,
+              let refreshToken = tokenManager.refreshToken else {
             return request
         }
         
@@ -50,21 +50,20 @@ final class TokenInterceptor: RequestInterceptor {
         }
         
         // 현재 진행중인 액세스 토큰 요청 작업을 가져옴 (만약 진행중인 작업이 없는 경우, 새로 생성)
-        let refreshTask = await tokenRefreshTasker.task(performing: { [weak self] in
-            guard let self else { return }
+        let refreshTask = await tokenRefreshTasker.task(performing: {
             
             do {
-                let token = try await self.performAccessTokenRefresh(api: AuthAPI.refresh)
+                let token = try await performAccessTokenRefresh(api: AuthAPI.refresh)
                 
                 // 새롭게 갱신된 액세스, 리프레시 토큰 저장
-                await self.tokenManager.updateToken(
+                tokenManager.updateToken(
                     access: token.accessToken,
                     refresh: token.refreshToken
                 )
             } catch {
                 // 액세스 토큰 갱신 실패 = 리프레스 토큰 만료
                 // 키체인에 저장된 모든 토큰 제거
-                await self.tokenManager.clearToken()
+                tokenManager.clearToken()
                 
                 throw error
             }

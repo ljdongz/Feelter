@@ -95,15 +95,22 @@ private extension BaseViewController {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground()
         appearance.backgroundColor = .clear
-        
         appearance.titleTextAttributes = [
             .foregroundColor: UIColor.gray15,
             .font: UIFont.hakgyoansimMulgyeol(size: 20, weight: .bold)
         ]
         
-        navigationController?.navigationBar.standardAppearance = appearance
+        let standardAppearance = UINavigationBarAppearance()
+        standardAppearance.configureWithDefaultBackground()
+        standardAppearance.backgroundColor = UIColor.gray100.withAlphaComponent(0.9)
+        standardAppearance.titleTextAttributes = [
+            .foregroundColor: UIColor.gray15,
+            .font: UIFont.hakgyoansimMulgyeol(size: 20, weight: .bold)
+        ]
+        
+        navigationController?.navigationBar.standardAppearance = standardAppearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        navigationController?.navigationBar.compactAppearance = appearance
+//        navigationController?.navigationBar.compactAppearance = appearance
     }
     
     func setupNavigationBarBackButton() {

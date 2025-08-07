@@ -57,7 +57,7 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            await tokenManager.updateToken(
+            tokenManager.updateToken(
                 access: response.accessToken,
                 refresh: response.refreshToken
             )
@@ -79,7 +79,7 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            await tokenManager.updateToken(
+            tokenManager.updateToken(
                 access: response.accessToken,
                 refresh: response.refreshToken
             )
@@ -105,7 +105,7 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            await tokenManager.updateToken(
+            tokenManager.updateToken(
                 access: response.accessToken,
                 refresh: response.refreshToken
             )
@@ -129,7 +129,7 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            await tokenManager.updateToken(
+            tokenManager.updateToken(
                 access: response.accessToken,
                 refresh: response.refreshToken
             )
