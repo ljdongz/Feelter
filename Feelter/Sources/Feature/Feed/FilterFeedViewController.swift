@@ -1,0 +1,32 @@
+//
+//  FilterFeedViewController.swift
+//  Feelter
+//
+//  Created by 이정동 on 8/7/25.
+//
+
+import UIKit
+
+import RxCocoa
+import RxSwift
+import SnapKit
+
+final class FilterFeedViewController: RxBaseViewController {
+    
+    private let mainView = FilterFeedView()
+    
+    private let viewModel = FilterFeedViewModel()
+
+    override func loadView() {
+        self.view = mainView
+    }
+    
+    override func setupView() {
+        title = "Feed"
+        view.backgroundColor = .gray100
+    }
+
+    override func bind() {
+        
+    }
+}
