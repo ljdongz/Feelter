@@ -324,7 +324,7 @@ private extension HomeView {
             }
         )
         
-        dataSource?.supplementaryViewProvider = { collectionView, kind, indexPath in
+        dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
             guard kind == UICollectionView.elementKindSectionHeader,
                   let headerView = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
@@ -335,9 +335,9 @@ private extension HomeView {
             let section = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section]
             switch section {
             case .hotTrend:
-                headerView.configure(title: "핫 트렌드")
+                headerView.configure(leading: "핫 트렌드")
             case .authorHeader:
-                headerView.configure(title: "오늘의 작가 소개")
+                headerView.configure(leading: "오늘의 작가 소개")
             default:
                 break
             }
