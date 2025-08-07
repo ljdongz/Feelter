@@ -48,8 +48,6 @@ final class BannerPageIndicatorDecorationView: UICollectionReusableView {
     private func setupSubviews() {
         addSubview(backgroundView)
         backgroundView.addSubview(pageLabel)
-        
-        setupConstraints()
     }
     
     private func setupConstraints() {

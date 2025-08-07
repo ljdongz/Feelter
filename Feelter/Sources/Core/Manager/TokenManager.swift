@@ -7,6 +7,7 @@
 
 import Foundation
 
+// MARK: - Actor 다시 고민해보기
 final class TokenManager {
     private(set) var accessToken: String?
     private(set) var refreshToken: String?

@@ -59,7 +59,9 @@ final class HomeViewController: RxBaseViewController {
                 
                 switch section {
                 case .banner:
-                    let banner = owner.mainView.getBanner(item: indexPath.item)
+                    guard let banner = owner.mainView.banner(at: indexPath.item) else {
+                        return
+                    }
                     let url = AppConfiguration.baseURL + banner.payload.value
                     owner.presentWebViewController(with: url)
                 default:

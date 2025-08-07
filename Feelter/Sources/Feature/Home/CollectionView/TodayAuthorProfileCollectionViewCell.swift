@@ -31,7 +31,6 @@ final class TodayAuthorProfileCollectionViewCell: BaseCollectionViewCell {
     
     private let authorName: UILabel = {
         let view = UILabel()
-        view.text = "작가 이름"
         view.textColor = .gray30
         view.font = .hakgyoansimMulgyeol(size: 20, weight: .bold)
         return view
@@ -39,7 +38,6 @@ final class TodayAuthorProfileCollectionViewCell: BaseCollectionViewCell {
 
     private let authorNickname: UILabel = {
         let view = UILabel()
-        view.text = "작가 닉네임"
         view.textColor = .gray75
         view.font = .pretendard(size: 16, weight: .medium)
         return view

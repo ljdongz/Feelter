@@ -106,9 +106,10 @@ extension HomeView {
         dataSource.apply(introductionSnapShot, to: .authorIntroduction)
     }
     
-    func getBanner(item: Int) -> Banner {
+    func banner(at index: Int) -> Banner? {
         let snapShot = dataSource.snapshot(for: .banner)
-        let banner = snapShot.items[item] as! Banner
+        guard 0...bannerCount ~= index,
+              let banner = snapShot.items[index] as? Banner else { return nil }
         return banner
     }
 }
