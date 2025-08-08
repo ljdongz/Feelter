@@ -19,7 +19,7 @@ final class FilterFeedView: BaseView {
         case feed
     }
     
-    let collectionView: UICollectionView = {
+    lazy var collectionView: UICollectionView = {
         let view = UICollectionView(
             frame: .zero,
             collectionViewLayout: UICollectionViewLayout()
@@ -27,6 +27,7 @@ final class FilterFeedView: BaseView {
         view.contentInsetAdjustmentBehavior = .never
         view.showsVerticalScrollIndicator = false
         view.backgroundColor = .clear
+        view.delegate = self
         return view
     }()
     
@@ -240,6 +241,25 @@ private extension FilterFeedView {
                 return nil
             }
         }
+    }
+}
+
+extension FilterFeedView: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) else {
+            return
+        }
+        
+        cell.animateTouchDown()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
+        
+        guard let cell = collectionView.cellForItem(at: indexPath) else {
+            return
+        }
+        
+        cell.animateTouchUp()
     }
 }
 
