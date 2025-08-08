@@ -25,8 +25,9 @@ final class FilterCategoryCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
-    func configureCell(category: FilterCategory) {
-        categoryButton.category = category
+    func configureCell(item: CategorySectionItem) {
+        categoryButton.category = item.category
+        categoryButton.isSelected = item.isSelected
     }
 }
 

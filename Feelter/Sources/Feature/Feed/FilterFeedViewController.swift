@@ -27,8 +27,12 @@ final class FilterFeedViewController: RxBaseViewController {
     }
 
     override func bind() {
-        
-        
+        mainView.collectionView.rx.itemSelected
+            .filter { $0.section == FilterFeedView.Section.category.rawValue }
+            .subscribe(onNext: { [weak self] indexPath in
+                self?.mainView.updateCategorySelection(selectedIndexPath: indexPath)
+            })
+            .disposed(by: disposeBag)
     }
 }
 

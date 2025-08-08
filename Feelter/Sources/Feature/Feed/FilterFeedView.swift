@@ -32,8 +32,9 @@ final class FilterFeedView: BaseView {
     
     private var dataSource: DataSourceType!
     
+    private var categoryItems: [CategorySectionItem] = CategorySectionItem.default
+    
     override func setupView() {
-        
         setupCollectionView()
     }
 
@@ -47,23 +48,49 @@ final class FilterFeedView: BaseView {
             make.top.equalTo(safeAreaLayoutGuide.snp.top)
             make.horizontalEdges.bottom.equalToSuperview()
         }
-        
-        // TODO: 삭제하기
-        applyFeedSnapShot()
     }
+}
+
+// MARK: - Public Method
+extension FilterFeedView {
     
     func applyFeedSnapShot() {
-        var snapShot1 = dataSource.snapshot(for: .category)
-        snapShot1.append(["122223", "42223", "22213", "5222353", "2222214"])
-        dataSource.apply(snapShot1, to: .category)
-        
         var snapShot = dataSource.snapshot(for: .topRanking)
         snapShot.append(["123", "43", "13", "5353"])
         dataSource.apply(snapShot, to: .topRanking)
-        
+
         var feedSnapShot = dataSource.snapshot(for: .feed)
         feedSnapShot.append(["aasdf", "fdasfsad", "asdfas", "fds", "vddas", "fadsfsf"])
         dataSource.apply(feedSnapShot, to: .feed)
+    }
+    
+    func updateCategorySelection(selectedIndexPath: IndexPath) {
+        guard selectedIndexPath.section == Section.category.rawValue else { return }
+        
+        // 데이터 모델 업데이트
+        categoryItems = categoryItems.enumerated().map { index, item in
+            CategorySectionItem(
+                category: item.category,
+                isSelected: index == selectedIndexPath.item
+            )
+        }
+        
+        // 스냅샷 업데이트
+        var snapshot = dataSource.snapshot(for: .category)
+        snapshot.deleteAll()
+        snapshot.append(categoryItems)
+        dataSource.apply(snapshot, to: .category, animatingDifferences: false)
+    }
+}
+
+// MARK: - Private Method
+
+private extension FilterFeedView {
+    func applyInitialDataSource() {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
+        snapshot.appendSections([.category])
+        snapshot.appendItems(categoryItems, toSection: .category)
+        dataSource.apply(snapshot)
     }
 }
 
@@ -79,6 +106,12 @@ private extension FilterFeedView {
         
         // 3) DiffableDataSource 설정
         configureDiffableDataSource()
+        
+        // 4) 초기 데이터 설정
+        applyInitialDataSource()
+
+        // TODO: 삭제하기
+        applyFeedSnapShot()
     }
     
     func configureCompositionalLayout() {
@@ -138,17 +171,17 @@ private extension FilterFeedView {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
             cellProvider: { collectionView, indexPath, itemIdentifier in
-                
                 switch Section(rawValue: indexPath.section) {
                 case .category:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? CategorySectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: FilterCategoryCollectionViewCell.identifier,
                             for: indexPath
                           ) as? FilterCategoryCollectionViewCell else { return .init() }
                     
-                    cell.configureCell(category: .character)
+                    cell.configureCell(item: item)
                     return cell
+                    
                 case .topRanking:
                     guard let item = itemIdentifier as? String,
                           let cell = collectionView.dequeueReusableCell(
@@ -158,6 +191,7 @@ private extension FilterFeedView {
                     
                     cell.configureCell()
                     return cell
+                    
                 case .feed:
                     guard let item = itemIdentifier as? String,
                           let cell = collectionView.dequeueReusableCell(
@@ -167,6 +201,7 @@ private extension FilterFeedView {
                     
                     cell.configureCell()
                     return cell
+                    
                 default:
                     return .init()
                 }
