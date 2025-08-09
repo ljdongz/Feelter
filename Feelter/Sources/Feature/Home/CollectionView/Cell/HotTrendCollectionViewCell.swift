@@ -19,8 +19,6 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
         view.layer.cornerRadius = 8
         return view
     }()
-
-    @Dependency private var tokenManager: TokenManager
     
     override func prepareForReuse() {
         super.prepareForReuse()
