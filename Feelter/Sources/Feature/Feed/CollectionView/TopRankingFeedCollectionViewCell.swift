@@ -62,6 +62,7 @@ final class TopRankingFeedCollectionViewCell: BaseCollectionViewCell {
         super.prepareForReuse()
         
         ImageLoader.cancelDownloadTask(for: filterImageView)
+        filterImageView.image = nil
     }
     
     override func layoutSubviews() {

@@ -8,7 +8,8 @@
 import Foundation
 
 struct Filter: Hashable {
-    var uuid = UUID()
+    let uuid = UUID()
+    
     let filterID: String?
     let category: String?
     let title: String?

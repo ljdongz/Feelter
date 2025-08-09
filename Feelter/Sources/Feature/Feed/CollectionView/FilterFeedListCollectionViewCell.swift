@@ -51,6 +51,7 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
         super.prepareForReuse()
         
         ImageLoader.cancelDownloadTask(for: filterImageView.imageView)
+        filterImageView.imageView.image = nil
     }
 
     override func setupSubviews() {

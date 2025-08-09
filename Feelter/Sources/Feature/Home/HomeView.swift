@@ -332,7 +332,7 @@ private extension HomeView {
                 for: indexPath
             ) as? BaseSectionHeaderView else { return nil }
             
-            let section = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section]
+            let section = Section(rawValue: indexPath.section)
             switch section {
             case .hotTrend:
                 headerView.configure(leading: "핫 트렌드")

@@ -251,7 +251,7 @@ private extension FilterFeedView {
                     for: indexPath
                 ) as? BaseSectionHeaderView else { return nil }
                 
-                let section = self.dataSource?.snapshot().sectionIdentifiers[indexPath.section]
+                let section = Section(rawValue: indexPath.section)
                 switch section {
                 case .topRanking:
                     headerView.configure(leading: "Top Ranking")
