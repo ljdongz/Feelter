@@ -86,6 +86,7 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
         filterTitleLabel.text = filter.title
         nicknameLabel.text = filter.creator?.nickname
         descriptionLabel.text = filter.creator?.introduction
+        filterImageView.likeImageView.image = (filter.isLiked ?? false) ? .likeFill : .likeEmpty
         
         ImageLoader.applyAuthenticatedImage(
             for: filterImageView.imageView,

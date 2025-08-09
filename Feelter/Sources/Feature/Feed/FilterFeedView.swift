@@ -58,39 +58,28 @@ final class FilterFeedView: BaseView {
 extension FilterFeedView {
     
     func applyFeedSnapShot(_ filters: [Filter]) {
-        var snapshot = dataSource.snapshot()
-        
-        // topRanking 섹션이 없으면 추가, 있으면 기존 데이터 삭제
-        if !snapshot.sectionIdentifiers.contains(.topRanking) {
-            snapshot.appendSections([.topRanking])
-        } else {
-            snapshot.deleteItems(snapshot.itemIdentifiers(inSection: .topRanking))
-        }
-        
-        // feed 섹션이 없으면 추가, 있으면 기존 데이터 삭제
-        if !snapshot.sectionIdentifiers.contains(.feed) {
-            snapshot.appendSections([.feed])
-        } else {
-            snapshot.deleteItems(snapshot.itemIdentifiers(inSection: .feed))
-        }
-        
-        // topRanking: 첫 3개 아이템
         let topRankingItems = Array(filters.prefix(3))
-        snapshot.appendItems(topRankingItems, toSection: .topRanking)
-        
-        // feed: 4번째부터 나머지 아이템
         let feedItems = Array(filters.dropFirst(3))
-        snapshot.appendItems(feedItems, toSection: .feed)
         
-        dataSource.apply(snapshot, animatingDifferences: true)
+        var topRankSnapShot = dataSource.snapshot(for: .topRanking)
+        topRankSnapShot.deleteAll()
+        topRankSnapShot.append(topRankingItems)
+        
+        var feedSnapShot = dataSource.snapshot(for: .feed)
+        feedSnapShot.deleteAll()
+        feedSnapShot.append(feedItems)
+        
+        dataSource.apply(topRankSnapShot, to: .topRanking, animatingDifferences: true)
+        dataSource.apply(feedSnapShot, to: .feed, animatingDifferences: true)
     }
     
     func updateCategorySelection(selectedIndex: Int) {
         // 데이터 모델 업데이트
         categoryItems = categoryItems.enumerated().map { index, item in
+            
             CategorySectionItem(
                 category: item.category,
-                isSelected: index == selectedIndex
+                isSelected: (index == selectedIndex) && !item.isSelected
             )
         }
         
@@ -267,7 +256,7 @@ private extension FilterFeedView {
                 case .topRanking:
                     headerView.configure(leading: "Top Ranking")
                 case .feed:
-                    headerView.configure(leading: "Filter Feed", trailing: "List Mode")
+                    headerView.configure(leading: "Filter Feed")
                 default:
                     break
                 }
