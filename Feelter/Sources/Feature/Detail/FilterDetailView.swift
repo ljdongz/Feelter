@@ -31,6 +31,7 @@ final class FilterDetailView: BaseView {
     }()
     
     private var dataSource: DataSourceType!
+    private weak var imageSliderCell: ImageSliderCollectionViewCell?
     
     override func setupView() {
         setupCollectionView()
@@ -105,7 +106,7 @@ private extension FilterDetailView {
     func configureDiffableDataSource() {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
-            cellProvider: { collectionView, indexPath, itemIdentifier in
+            cellProvider: { [weak self] collectionView, indexPath, itemIdentifier in
                 switch Section(rawValue: indexPath.section) {
                 case .imageSlider:
                     guard let item = itemIdentifier as? String,
@@ -115,7 +116,7 @@ private extension FilterDetailView {
                           ) as? ImageSliderCollectionViewCell else {
                         return .init()
                     }
-                    
+                    self?.imageSliderCell = cell
                     return cell
                 default:
                     return .init()
@@ -131,6 +132,10 @@ private extension FilterDetailView {
                     withReuseIdentifier: ImageSliderFooterView.identifier,
                     for: indexPath
                 ) as? ImageSliderFooterView else { return nil }
+                
+                footerView.onSliderChanged = { [weak self] value in
+                    self?.imageSliderCell?.updateSliderPosition(value: value)
+                }
                 
                 return footerView
             } else {
