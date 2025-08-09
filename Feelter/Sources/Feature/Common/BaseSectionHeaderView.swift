@@ -49,7 +49,8 @@ final class BaseSectionHeaderView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(title: String) {
-        self.sectionTitle.text = title
+    func configure(leading: String, trailing: String? = nil) {
+        self.sectionTitle.text = leading
+        self.sectionButton.setTitle(trailing, for: .normal)
     }
 }

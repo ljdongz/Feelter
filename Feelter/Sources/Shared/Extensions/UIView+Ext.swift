@@ -11,4 +11,16 @@ extension UIView {
     func addSubviews(_ views: [UIView]) {
         views.forEach { addSubview($0) }
     }
+    
+    func animateTouchDown() {
+        UIView.animate(withDuration: 0.1) {
+            self.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+        }
+    }
+
+    func animateTouchUp() {
+        UIView.animate(withDuration: 0.1) {
+            self.transform = .identity
+        }
+    }
 }
