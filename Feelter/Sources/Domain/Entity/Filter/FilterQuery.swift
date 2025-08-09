@@ -8,10 +8,10 @@
 import Foundation
 
 struct FilterQuery {
-    let nextID: String?
-    let limit: Int?
-    let category: FilterCategory?
-    let order: FilterOrder?
+    var nextID: String?
+    var limit: Int?
+    var category: FilterCategory?
+    var order: FilterOrder?
 }
 
 enum FilterCategory: String {

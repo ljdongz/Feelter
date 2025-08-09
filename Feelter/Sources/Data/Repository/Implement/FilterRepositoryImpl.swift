@@ -32,19 +32,19 @@ struct FilterRepositoryImpl: FilterRepository {
         return response.toDomain()
     }
     
-    func fetchFilters(query: FilterQuery?) async throws -> FilterFeed {
+    func fetchFilters(query: FilterQuery) async throws -> FilterFeed {
         
         var limit: String?
-        if let queryLimit = query?.limit {
+        if let queryLimit = query.limit {
             limit = String(queryLimit)
         }
         
         let response = try await networkProvider.request(
             endpoint: FilterAPI.queryFilters(
-                next: query?.nextID,
+                next: query.nextID,
                 limit: limit,
-                category: query?.category?.rawValue,
-                order: query?.order?.rawValue
+                category: query.category?.rawValue,
+                order: query.order?.rawValue
             ),
             type: FilterFeedResponseDTO.self
         )
