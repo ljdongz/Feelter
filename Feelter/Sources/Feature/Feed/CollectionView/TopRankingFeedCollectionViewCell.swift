@@ -24,7 +24,6 @@ final class TopRankingFeedCollectionViewCell: BaseCollectionViewCell {
     
     private let filterImageView: UIImageView = {
         let view = UIImageView()
-        view.image = .sample
         view.clipsToBounds = true
         view.contentMode = .scaleAspectFill
         return view
@@ -41,6 +40,8 @@ final class TopRankingFeedCollectionViewCell: BaseCollectionViewCell {
         let view = UILabel()
         view.textColor = .gray30
         view.font = .hakgyoansimMulgyeol(size: 32, weight: .bold)
+        view.textAlignment = .center
+        view.numberOfLines = 2
         return view
     }()
     
@@ -56,6 +57,12 @@ final class TopRankingFeedCollectionViewCell: BaseCollectionViewCell {
         view.textAlignment = .center
         return view
     }()
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        ImageLoader.cancelDownloadTask(for: filterImageView)
+    }
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -94,6 +101,7 @@ final class TopRankingFeedCollectionViewCell: BaseCollectionViewCell {
         filterTitleLabel.snp.makeConstraints { make in
             make.top.equalTo(nicknameLabel.snp.bottom).offset(8)
             make.centerX.equalToSuperview()
+            make.horizontalEdges.lessThanOrEqualToSuperview().inset(15)
         }
         
         rankLabel.snp.makeConstraints { make in
@@ -103,10 +111,12 @@ final class TopRankingFeedCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
-    func configureCell() {
-        nicknameLabel.text = "YOON SESAC"
-        filterTitleLabel.text = "청록 새록"
-        rankLabel.text = "1"
+    func configureCell(filter: Filter, index: Int) {
+        nicknameLabel.text = filter.creator?.nickname
+        filterTitleLabel.text = filter.title
+        rankLabel.text = "\(index + 1)"
+        
+        ImageLoader.applyAuthenticatedImage(for: filterImageView, path: filter.files?.first ?? "")
         
         Task { @MainActor in
             self.containerView.layer.cornerRadius = self.containerView.bounds.width / 2

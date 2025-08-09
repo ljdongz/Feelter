@@ -145,9 +145,6 @@ private extension FilterFeedView {
         
         // 4) 초기 데이터 설정
         applyInitialDataSource()
-
-//        // TODO: 삭제하기
-//        applyFeedSnapShot()
     }
     
     func configureCompositionalLayout() {
@@ -237,7 +234,7 @@ private extension FilterFeedView {
                             for: indexPath
                           ) as? TopRankingFeedCollectionViewCell else { return .init() }
                     
-                    cell.configureCell()
+                    cell.configureCell(filter: item, index: indexPath.item)
                     return cell
                     
                 case .feed:
@@ -247,7 +244,7 @@ private extension FilterFeedView {
                             for: indexPath
                           ) as? FilterFeedListCollectionViewCell else { return .init() }
                     
-                    cell.configureCell()
+                    cell.configureCell(filter: item)
                     return cell
                     
                 default:

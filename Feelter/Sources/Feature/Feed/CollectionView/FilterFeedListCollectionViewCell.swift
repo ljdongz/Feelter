@@ -46,6 +46,12 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
         view.numberOfLines = 3
         return view
     }()
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        ImageLoader.cancelDownloadTask(for: filterImageView.imageView)
+    }
 
     override func setupSubviews() {
         contentView.addSubviews([
@@ -75,15 +81,16 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
-    func configureCell() {
+    func configureCell(filter: Filter) {
         filterImageView.imageView.image = .sample
-        filterTitleLabel.text = "청연"
-        nicknameLabel.text = "YOON SESAC"
-        descriptionLabel.text = """
-            푸르른 여운처럼 마음에 스며드는, 고요하고 
-            깊은 감성의 청록빛 필터.
-            지금 사용해보세요.
-            """
+        filterTitleLabel.text = filter.title
+        nicknameLabel.text = filter.creator?.nickname
+        descriptionLabel.text = filter.creator?.introduction
+        
+        ImageLoader.applyAuthenticatedImage(
+            for: filterImageView.imageView,
+            path: filter.files?.first ?? ""
+        )
     }
 }
 
