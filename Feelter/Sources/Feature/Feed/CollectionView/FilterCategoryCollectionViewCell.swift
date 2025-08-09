@@ -52,18 +52,8 @@ extension FilterCategoryCollectionViewCell {
         group.interItemSpacing = .fixed(spacing)
         
         let section = NSCollectionLayoutSection(group: group)
-        
-        let footer = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: .init(
-                widthDimension: .fractionalWidth(1),
-                heightDimension: .absolute(40)),
-            
-            elementKind: UICollectionView.elementKindSectionFooter,
-            alignment: .bottom
-        )
-        
-        section.boundarySupplementaryItems = [footer]
-        section.contentInsets = .init(top: 20, leading: 20, bottom: 10, trailing: 20)
+
+        section.contentInsets = .init(top: 20, leading: 20, bottom: 0, trailing: 20)
         return section
     }
 }

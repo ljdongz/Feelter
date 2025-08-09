@@ -18,6 +18,7 @@ final class CapsuleButton: BaseView {
     
     private let titleLabel: UILabel = {
         let view = UILabel()
+        view.textAlignment = .center
         return view
     }()
 

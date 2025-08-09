@@ -15,6 +15,7 @@ final class FilterFeedView: BaseView {
 
     enum Section: Int {
         case category
+        case order
         case topRanking
         case feed
     }
@@ -34,6 +35,7 @@ final class FilterFeedView: BaseView {
     private var dataSource: DataSourceType!
     
     private var categoryItems: [CategorySectionItem] = CategorySectionItem.default
+    private var orderItems: [OrderSectionItem] = OrderSectionItem.default
     
     override func setupView() {
         setupCollectionView()
@@ -65,14 +67,12 @@ extension FilterFeedView {
         dataSource.apply(feedSnapShot, to: .feed)
     }
     
-    func updateCategorySelection(selectedIndexPath: IndexPath) {
-        guard selectedIndexPath.section == Section.category.rawValue else { return }
-        
+    func updateCategorySelection(selectedIndex: Int) {
         // 데이터 모델 업데이트
         categoryItems = categoryItems.enumerated().map { index, item in
             CategorySectionItem(
                 category: item.category,
-                isSelected: index == selectedIndexPath.item
+                isSelected: index == selectedIndex
             )
         }
         
@@ -82,6 +82,22 @@ extension FilterFeedView {
         snapshot.append(categoryItems)
         dataSource.apply(snapshot, to: .category, animatingDifferences: false)
     }
+    
+    func updateOrderSelection(selectedIndex: Int) {
+        // 데이터 모델 업데이트
+        orderItems = orderItems.enumerated().map { index, item in
+            OrderSectionItem(
+                order: item.order,
+                isSelected: index == selectedIndex
+            )
+        }
+        
+        // 스냅샷 업데이트
+        var snapshot = dataSource.snapshot(for: .order)
+        snapshot.deleteAll()
+        snapshot.append(orderItems)
+        dataSource.apply(snapshot, to: .order, animatingDifferences: false)
+    }
 }
 
 // MARK: - Private Method
@@ -89,8 +105,9 @@ extension FilterFeedView {
 private extension FilterFeedView {
     func applyInitialDataSource() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
-        snapshot.appendSections([.category])
+        snapshot.appendSections([.category, .order])
         snapshot.appendItems(categoryItems, toSection: .category)
+        snapshot.appendItems(orderItems, toSection: .order)
         dataSource.apply(snapshot)
     }
 }
@@ -121,6 +138,8 @@ private extension FilterFeedView {
             switch Section(rawValue: sectionIndex) {
             case .category:
                 return FilterCategoryCollectionViewCell.layoutSection()
+            case .order:
+                return FilterOrderCollectionViewCell.layoutSection()
             case .topRanking:
                 return TopRankingFeedCollectionViewCell.layoutSection()
             case .feed:
@@ -142,16 +161,16 @@ private extension FilterFeedView {
             withReuseIdentifier: BaseSectionHeaderView.identifier
         )
         
-        // 푸터 뷰
-        collectionView.register(
-            FilterCategoryFooterView.self,
-            forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter,
-            withReuseIdentifier: FilterCategoryFooterView.identifier
-        )
-        
+        // 카테고리 선택 버튼
         collectionView.register(
             FilterCategoryCollectionViewCell.self,
             forCellWithReuseIdentifier: FilterCategoryCollectionViewCell.identifier
+        )
+        
+        // 정렬 상태 선택 버튼
+        collectionView.register(
+            FilterOrderCollectionViewCell.self,
+            forCellWithReuseIdentifier: FilterOrderCollectionViewCell.identifier
         )
         
         // Top Ranking
@@ -179,6 +198,16 @@ private extension FilterFeedView {
                             withReuseIdentifier: FilterCategoryCollectionViewCell.identifier,
                             for: indexPath
                           ) as? FilterCategoryCollectionViewCell else { return .init() }
+                    
+                    cell.configureCell(item: item)
+                    return cell
+                    
+                case .order:
+                    guard let item = itemIdentifier as? OrderSectionItem,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: FilterOrderCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? FilterOrderCollectionViewCell else { return .init() }
                     
                     cell.configureCell(item: item)
                     return cell
@@ -229,14 +258,6 @@ private extension FilterFeedView {
                 }
                 
                 return headerView
-            } else if kind == UICollectionView.elementKindSectionFooter {
-                guard let footerView = collectionView.dequeueReusableSupplementaryView(
-                    ofKind: kind,
-                    withReuseIdentifier: FilterCategoryFooterView.identifier,
-                    for: indexPath
-                ) as? FilterCategoryFooterView else { return nil }
-                
-                return footerView
             } else {
                 return nil
             }
