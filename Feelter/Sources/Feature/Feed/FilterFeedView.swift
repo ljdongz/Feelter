@@ -57,14 +57,32 @@ final class FilterFeedView: BaseView {
 // MARK: - Public Method
 extension FilterFeedView {
     
-    func applyFeedSnapShot() {
-        var snapShot = dataSource.snapshot(for: .topRanking)
-        snapShot.append(["123", "43", "13", "5353"])
-        dataSource.apply(snapShot, to: .topRanking)
-
-        var feedSnapShot = dataSource.snapshot(for: .feed)
-        feedSnapShot.append(["aasdf", "fdasfsad", "asdfas", "fds", "vddas", "fadsfsf"])
-        dataSource.apply(feedSnapShot, to: .feed)
+    func applyFeedSnapShot(_ filters: [Filter]) {
+        var snapshot = dataSource.snapshot()
+        
+        // topRanking 섹션이 없으면 추가, 있으면 기존 데이터 삭제
+        if !snapshot.sectionIdentifiers.contains(.topRanking) {
+            snapshot.appendSections([.topRanking])
+        } else {
+            snapshot.deleteItems(snapshot.itemIdentifiers(inSection: .topRanking))
+        }
+        
+        // feed 섹션이 없으면 추가, 있으면 기존 데이터 삭제
+        if !snapshot.sectionIdentifiers.contains(.feed) {
+            snapshot.appendSections([.feed])
+        } else {
+            snapshot.deleteItems(snapshot.itemIdentifiers(inSection: .feed))
+        }
+        
+        // topRanking: 첫 3개 아이템
+        let topRankingItems = Array(filters.prefix(3))
+        snapshot.appendItems(topRankingItems, toSection: .topRanking)
+        
+        // feed: 4번째부터 나머지 아이템
+        let feedItems = Array(filters.dropFirst(3))
+        snapshot.appendItems(feedItems, toSection: .feed)
+        
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
     
     func updateCategorySelection(selectedIndex: Int) {
@@ -128,8 +146,8 @@ private extension FilterFeedView {
         // 4) 초기 데이터 설정
         applyInitialDataSource()
 
-        // TODO: 삭제하기
-        applyFeedSnapShot()
+//        // TODO: 삭제하기
+//        applyFeedSnapShot()
     }
     
     func configureCompositionalLayout() {
@@ -213,7 +231,7 @@ private extension FilterFeedView {
                     return cell
                     
                 case .topRanking:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? Filter,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: TopRankingFeedCollectionViewCell.identifier,
                             for: indexPath
@@ -223,7 +241,7 @@ private extension FilterFeedView {
                     return cell
                     
                 case .feed:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? Filter,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: FilterFeedListCollectionViewCell.identifier,
                             for: indexPath

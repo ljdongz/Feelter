@@ -27,6 +27,31 @@ final class FilterFeedViewController: RxBaseViewController {
     }
 
     override func bind() {
+        
+        let input = FilterFeedViewModel.Input(
+            viewDidLoad: .just(()),
+            categoryButtonTapped: mainView.collectionView.rx
+                .itemSelected
+                .filter { FilterFeedView.Section(rawValue: $0.section) == .category }
+                .compactMap { CategorySectionItem.default[$0.item].category }
+                .asObservable()
+            ,
+            orderButtonTapped: mainView.collectionView.rx
+                .itemSelected
+                .filter { FilterFeedView.Section(rawValue: $0.section) == .order }
+                .compactMap { OrderSectionItem.default[$0.item].order }
+                .asObservable()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.filters
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, filters in
+                owner.mainView.applyFeedSnapShot(filters)
+            }
+            .disposed(by: disposeBag)
+        
         mainView.collectionView.rx.itemSelected
             .subscribe(with: self, onNext: { owner, indexPath in
                 switch FilterFeedView.Section(rawValue: indexPath.section) {

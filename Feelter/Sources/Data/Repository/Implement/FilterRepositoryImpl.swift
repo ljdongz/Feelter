@@ -42,7 +42,7 @@ struct FilterRepositoryImpl: FilterRepository {
         let response = try await networkProvider.request(
             endpoint: FilterAPI.queryFilters(
                 next: query?.nextID,
-                limit: limit ,
+                limit: limit,
                 category: query?.category?.rawValue,
                 order: query?.order?.rawValue
             ),
