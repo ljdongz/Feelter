@@ -16,6 +16,7 @@ enum FilterAPI {
         category: String?,
         order: String?
     )
+    case detail(filterID: String)
 }
 
 extension FilterAPI: APIEndpoint {
@@ -31,6 +32,8 @@ extension FilterAPI: APIEndpoint {
             "/v1/filters/today-filter"
         case .queryFilters:
             "/v1/filters"
+        case .detail(let id):
+            "/v1/filters/\(id)"
         }
     }
     
@@ -39,6 +42,7 @@ extension FilterAPI: APIEndpoint {
         case .hotTrend: .get
         case .todayFilter: .get
         case .queryFilters: .get
+        case .detail: .get
         }
     }
     
@@ -55,6 +59,8 @@ extension FilterAPI: APIEndpoint {
             if let category { queryParameters["category"] = category }
             if let order { queryParameters["order"] = order }
             return .requestQueryParameters(parameters: queryParameters)
+        case .detail:
+            return .requestPlain
         }
     }
     
