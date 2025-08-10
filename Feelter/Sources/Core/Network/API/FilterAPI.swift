@@ -17,6 +17,7 @@ enum FilterAPI {
         order: String?
     )
     case detail(filterID: String)
+    case like(filterID: String, body: Encodable)
 }
 
 extension FilterAPI: APIEndpoint {
@@ -34,6 +35,8 @@ extension FilterAPI: APIEndpoint {
             "/v1/filters"
         case .detail(let id):
             "/v1/filters/\(id)"
+        case let .like(id, _):
+            "/v1/filters/\(id)/like"
         }
     }
     
@@ -43,6 +46,7 @@ extension FilterAPI: APIEndpoint {
         case .todayFilter: .get
         case .queryFilters: .get
         case .detail: .get
+        case .like: .post
         }
     }
     
@@ -61,6 +65,8 @@ extension FilterAPI: APIEndpoint {
             return .requestQueryParameters(parameters: queryParameters)
         case .detail:
             return .requestPlain
+        case let .like(_, body):
+            return .requestJSONEncodable(body)
         }
     }
     
