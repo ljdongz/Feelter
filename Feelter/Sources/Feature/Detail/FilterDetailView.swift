@@ -20,6 +20,7 @@ final class FilterDetailView: BaseView {
         case counterState
         case presets
         case photoMetadata
+        case authorProfile
     }
     
     lazy var collectionView: UICollectionView = {
@@ -70,6 +71,10 @@ final class FilterDetailView: BaseView {
         var photoMetadataSnapShot = dataSource.snapshot(for: .photoMetadata)
         photoMetadataSnapShot.append(["pf"])
         dataSource.apply(photoMetadataSnapShot, to: .photoMetadata)
+        
+        var profileSnapShot = dataSource.snapshot(for: .authorProfile)
+        profileSnapShot.append(["asdf"])
+        dataSource.apply(profileSnapShot, to: .authorProfile)
     }
 }
 
@@ -99,6 +104,8 @@ private extension FilterDetailView {
                 return FilterPresetsCollectionViewCell.layoutSection()
             case .photoMetadata:
                 return PhotoMetadataCollectionViewCell.layoutSection()
+            case .authorProfile:
+                return AuthorProfileCollectionViewCell.layoutSection()
             default:
                 return ImageSliderCollectionViewCell.layoutSection()
             }
@@ -138,6 +145,12 @@ private extension FilterDetailView {
         collectionView.register(
             PhotoMetadataCollectionViewCell.self,
             forCellWithReuseIdentifier: PhotoMetadataCollectionViewCell.identifier
+        )
+        
+        // 작가 프로필
+        collectionView.register(
+            AuthorProfileCollectionViewCell.self,
+            forCellWithReuseIdentifier: AuthorProfileCollectionViewCell.identifier
         )
     }
     
@@ -190,6 +203,18 @@ private extension FilterDetailView {
                     }
                     
                     cell.configureCell(photoMetadata: nil)
+                    return cell
+                    
+                case .authorProfile:
+                    guard let item = itemIdentifier as? String,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: AuthorProfileCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? AuthorProfileCollectionViewCell else {
+                        return .init()
+                    }
+                    
+                    cell.configureCell(profile: nil)
                     return cell
                 default:
                     return .init()
