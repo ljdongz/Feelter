@@ -16,6 +16,8 @@ final class FilterFeedViewController: RxBaseViewController {
     private let mainView = FilterFeedView()
     
     private let viewModel = FilterFeedViewModel()
+    
+    private let likeStatusUpdateRelay = PublishRelay<Filter>()
 
     override func loadView() {
         self.view = mainView
@@ -40,7 +42,8 @@ final class FilterFeedViewController: RxBaseViewController {
                 .itemSelected
                 .filter { FilterFeedView.Section(rawValue: $0.section) == .order }
                 .compactMap { OrderSectionItem.default[$0.item].order }
-                .asObservable()
+                .asObservable(),
+            updatedLikeStatus: likeStatusUpdateRelay.asObservable()
         )
         
         let output = viewModel.transform(input: input)
@@ -62,31 +65,38 @@ final class FilterFeedViewController: RxBaseViewController {
                     owner.mainView.updateOrderSelection(selectedIndex: indexPath.item)
                     
                 case .topRanking:
-                    let selectedFilter = owner.viewModel.filters[indexPath.item]
-                    owner.navigateToDetail(with: selectedFilter)
+                    let filter = owner.viewModel.filters[indexPath.item]
+                    let filterDetailViewModel = FilterDetailViewModel(
+                        filterID: filter.filterID ?? "",
+                        isLiked: filter.isLiked ?? false
+                    )
+                    
+                    let vc = FilterDetailViewController(viewModel: filterDetailViewModel)
+                    vc.title = filter.title
+                    
+                    owner.navigationController?.pushViewController(vc, animated: true)
                     
                 case .feed:
-                    let selectedFilter = owner.viewModel.filters[indexPath.item + 3]
-                    owner.navigateToDetail(with: selectedFilter)
+                    let filter = owner.viewModel.filters[indexPath.item + 3]
+                    let filterDetailViewModel = FilterDetailViewModel(
+                        filterID: filter.filterID ?? "",
+                        isLiked: filter.isLiked ?? false
+                    )
+                    
+                    let vc = FilterDetailViewController(viewModel: filterDetailViewModel)
+                    vc.title = filter.title
+                    vc.onChangeLikeStatus = { isLiked in
+                        owner.likeStatusUpdateRelay.accept(filter)
+                        owner.mainView.updateLikeStatus(filter: filter)
+                    }
+                    
+                    owner.navigationController?.pushViewController(vc, animated: true)
                     
                 default:
                     break
                 }
             })
             .disposed(by: disposeBag)
-    }
-}
-
-private extension FilterFeedViewController {
-    func navigateToDetail(with item: Filter) {
-        let filterDetailViewModel = FilterDetailViewModel(
-            filterID: item.filterID ?? "",
-            isLiked: item.isLiked ?? false
-        )
-        
-        let vc = FilterDetailViewController(viewModel: filterDetailViewModel)
-        vc.title = item.title
-        navigationController?.pushViewController(vc, animated: true)
     }
 }
 

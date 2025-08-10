@@ -15,6 +15,7 @@ final class FilterFeedViewModel: ViewModel {
         let viewDidLoad: Observable<Void>
         let categoryButtonTapped: Observable<FilterCategory>
         let orderButtonTapped: Observable<FilterOrder>
+        let updatedLikeStatus: Observable<Filter>
     }
     
     struct Output {
@@ -97,6 +98,15 @@ final class FilterFeedViewModel: ViewModel {
                 case .failure(let error):
                     print(error)
                 }
+            }
+            .disposed(by: disposeBag)
+        
+        input.updatedLikeStatus
+            .subscribe(with: self) { owner, filter in
+                guard let index = owner.filters.firstIndex(of: filter) else {
+                    return
+                }
+                owner.filters[index].isLiked?.toggle()
             }
             .disposed(by: disposeBag)
         

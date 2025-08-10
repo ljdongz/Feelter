@@ -105,6 +105,25 @@ extension FilterFeedView {
         snapshot.append(orderItems)
         dataSource.apply(snapshot, to: .order, animatingDifferences: false)
     }
+    
+    func updateLikeStatus(filter: Filter) {
+        var snapshot = dataSource.snapshot(for: .feed)
+        
+        guard let data = snapshot.items as? [Filter],
+              let index = data.firstIndex(where: {
+                  $0.filterID == filter.filterID
+              }) else {
+            return
+        }
+        
+        let before = data[index]
+        var after = data[index]
+        after.isLiked?.toggle()
+        
+        snapshot.insert([after], before: before)
+        snapshot.delete([before])
+        dataSource.apply(snapshot, to: .feed)
+    }
 }
 
 // MARK: - Private Method
