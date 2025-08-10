@@ -14,7 +14,6 @@ final class FilterDetailViewController: RxBaseViewController {
     
     private lazy var navigationRightBarButton: UIButton = {
         let view = UIButton()
-        view.setImage(.likeEmpty, for: .normal)
         view.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
         view.tintColor = .gray15
         return view
@@ -24,7 +23,7 @@ final class FilterDetailViewController: RxBaseViewController {
     
     private let viewModel: FilterDetailViewModel
     
-    var onChangeBookmark: ((Bool) -> Void)?
+    var onChangeLikeStatus: ((Bool) -> Void)?
     
     init(viewModel: FilterDetailViewModel) {
         self.viewModel = viewModel
@@ -41,25 +40,40 @@ final class FilterDetailViewController: RxBaseViewController {
     
     override func setupView() {
         view.backgroundColor = .gray100
-        
+                
+        navigationRightBarButton.setImage(
+            viewModel.isLiked ? .likeFill : .likeEmpty,
+            for: .normal
+        )
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: navigationRightBarButton)
     }
     
     override func bind() {
         let input = FilterDetailViewModel.Input(
             viewDidLoad: .just(()),
-            bookmarkButtonTapped: navigationRightBarButton.rx
+            likekButtonTapped: navigationRightBarButton.rx
                 .tap
                 .asObservable()
         )
 
-        
         let output = viewModel.transform(input: input)
         
         output.filterDetail
             .observe(on: MainScheduler.instance)
             .subscribe(with: self) { owner, filterDetail in
                 owner.mainView.applySnapShot(filter: filterDetail)
+            }
+            .disposed(by: disposeBag)
+        
+        output.updatedLikeStatus
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, isLiked in
+                owner.onChangeLikeStatus?(isLiked)
+                
+                owner.navigationRightBarButton.setImage(
+                    isLiked ? .likeFill : .likeEmpty,
+                    for: .normal
+                )
             }
             .disposed(by: disposeBag)
     }

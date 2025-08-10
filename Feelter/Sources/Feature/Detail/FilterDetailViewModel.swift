@@ -13,17 +13,18 @@ import RxSwift
 final class FilterDetailViewModel: ViewModel {
     struct Input {
         let viewDidLoad: Observable<Void>
-        let bookmarkButtonTapped: Observable<Void>
+        let likekButtonTapped: Observable<Void>
     }
     
     struct Output {
         let filterDetail = PublishRelay<FilterDetail>()
+        let updatedLikeStatus = PublishRelay<Bool>()
     }
     
     @Dependency private var filterRepository: FilterRepository
     
     private let filterID: String
-    private var isLiked: Bool
+    private(set) var isLiked: Bool
     
     var disposeBag: DisposeBag = .init()
     
@@ -43,6 +44,25 @@ final class FilterDetailViewModel: ViewModel {
                 switch result {
                 case .success(let filterDetail):
                     output.filterDetail.accept(filterDetail)
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        input.likekButtonTapped
+            .withAsyncResult(with: self) { owner, _ in
+                try await owner.filterRepository.updateLikeStatus(
+                    filterID: owner.filterID,
+                    isLiked: !owner.isLiked
+                )
+            }
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success:
+                    owner.isLiked.toggle()
+                    
+                    output.updatedLikeStatus.accept(owner.isLiked)
                 case .failure(let error):
                     print(error)
                 }
