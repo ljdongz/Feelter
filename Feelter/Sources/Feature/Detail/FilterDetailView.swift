@@ -19,6 +19,7 @@ final class FilterDetailView: BaseView {
         case imageSlider
         case counterState
         case presets
+        case photoMetadata
     }
     
     lazy var collectionView: UICollectionView = {
@@ -65,6 +66,10 @@ final class FilterDetailView: BaseView {
         var presetsSnapShot = dataSource.snapshot(for: .presets)
         presetsSnapShot.append(["as"])
         dataSource.apply(presetsSnapShot, to: .presets)
+        
+        var photoMetadataSnapShot = dataSource.snapshot(for: .photoMetadata)
+        photoMetadataSnapShot.append(["pf"])
+        dataSource.apply(photoMetadataSnapShot, to: .photoMetadata)
     }
 }
 
@@ -92,6 +97,8 @@ private extension FilterDetailView {
                 return CounterStateCollectionViewCell.layoutSection()
             case .presets:
                 return FilterPresetsCollectionViewCell.layoutSection()
+            case .photoMetadata:
+                return PhotoMetadataCollectionViewCell.layoutSection()
             default:
                 return ImageSliderCollectionViewCell.layoutSection()
             }
@@ -125,6 +132,12 @@ private extension FilterDetailView {
         collectionView.register(
             FilterPresetsCollectionViewCell.self,
             forCellWithReuseIdentifier: FilterPresetsCollectionViewCell.identifier
+        )
+        
+        // 메타데이터
+        collectionView.register(
+            PhotoMetadataCollectionViewCell.self,
+            forCellWithReuseIdentifier: PhotoMetadataCollectionViewCell.identifier
         )
     }
     
@@ -165,6 +178,18 @@ private extension FilterDetailView {
                         return .init()
                     }
                     
+                    return cell
+                    
+                case .photoMetadata:
+                    guard let item = itemIdentifier as? String,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: PhotoMetadataCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? PhotoMetadataCollectionViewCell else {
+                        return .init()
+                    }
+                    
+                    cell.configureCell(photoMetadata: nil)
                     return cell
                 default:
                     return .init()
