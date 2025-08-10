@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FilterAttribute {
+struct FilterAttribute: Hashable {
     /// 밝기 (-1.0 ~ 1.0)
     var brightness: Float
     /// 노출 (-1.0 ~ 1.0)

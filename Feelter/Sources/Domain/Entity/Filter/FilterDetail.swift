@@ -21,6 +21,6 @@ struct FilterDetail {
     let isDownloaded: Bool
     let likeCount: Int
     let buyerCount: Int
-    let createdAt: Date
-    let updatedAt: Date
+    let createdAt: String
+    let updatedAt: String
 }

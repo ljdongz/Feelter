@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct PhotoMetadata {
+struct PhotoMetadata: Hashable {
     /// 카메라 정보
     let camera: String?
     /// 렌즈 정보
