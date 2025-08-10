@@ -30,6 +30,8 @@ final class FilterFeedViewModel: ViewModel {
         order: .latest
     )
     
+    private(set) var filters: [Filter] = []
+    
     var disposeBag: DisposeBag = .init()
     
     func transform(input: Input) -> Output {
@@ -43,6 +45,7 @@ final class FilterFeedViewModel: ViewModel {
                 switch result {
                 case .success(let filterFeed):
                     owner.currentQuery.nextID = filterFeed.nextCursor
+                    owner.filters = filterFeed.filters
                     
                     output.filters.accept(filterFeed.filters)
                 case .failure(let error):
@@ -65,6 +68,7 @@ final class FilterFeedViewModel: ViewModel {
                 switch result {
                 case .success(let filterFeed):
                     owner.currentQuery.nextID = filterFeed.nextCursor
+                    owner.filters = filterFeed.filters
                     
                     output.filters.accept(filterFeed.filters)
                 case .failure(let error):
@@ -87,6 +91,7 @@ final class FilterFeedViewModel: ViewModel {
                 switch result {
                 case .success(let filterFeed):
                     owner.currentQuery.nextID = filterFeed.nextCursor
+                    owner.filters = filterFeed.filters
                     
                     output.filters.accept(filterFeed.filters)
                 case .failure(let error):

@@ -57,13 +57,36 @@ final class FilterFeedViewController: RxBaseViewController {
                 switch FilterFeedView.Section(rawValue: indexPath.section) {
                 case .category:
                     owner.mainView.updateCategorySelection(selectedIndex: indexPath.item)
+                    
                 case .order:
                     owner.mainView.updateOrderSelection(selectedIndex: indexPath.item)
+                    
+                case .topRanking:
+                    let selectedFilter = owner.viewModel.filters[indexPath.item]
+                    owner.navigateToDetail(with: selectedFilter)
+                    
+                case .feed:
+                    let selectedFilter = owner.viewModel.filters[indexPath.item + 3]
+                    owner.navigateToDetail(with: selectedFilter)
+                    
                 default:
                     break
                 }
             })
             .disposed(by: disposeBag)
+    }
+}
+
+private extension FilterFeedViewController {
+    func navigateToDetail(with item: Filter) {
+        let filterDetailViewModel = FilterDetailViewModel(
+            filterID: item.filterID ?? "",
+            isLiked: item.isLiked ?? false
+        )
+        
+        let vc = FilterDetailViewController(viewModel: filterDetailViewModel)
+        vc.title = item.title
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
