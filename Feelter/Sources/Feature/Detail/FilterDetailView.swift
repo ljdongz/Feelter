@@ -21,6 +21,8 @@ final class FilterDetailView: BaseView {
         case presets
         case photoMetadata
         case authorProfile
+        case authorHashTags
+        case authorIntroduction
     }
     
     lazy var collectionView: UICollectionView = {
@@ -75,6 +77,14 @@ final class FilterDetailView: BaseView {
         var profileSnapShot = dataSource.snapshot(for: .authorProfile)
         profileSnapShot.append(["asdf"])
         dataSource.apply(profileSnapShot, to: .authorProfile)
+        
+        var hashTagsSnapShot = dataSource.snapshot(for: .authorHashTags)
+        hashTagsSnapShot.append(["32543123", "32542451", "43531", "5325325135", "32442", "23dk214k"])
+        dataSource.apply(hashTagsSnapShot, to: .authorHashTags)
+        
+        var authorIntroductionSnapShot = dataSource.snapshot(for: .authorIntroduction)
+        authorIntroductionSnapShot.append(["안녕하세요, 잘 부탁드립니다."])
+        dataSource.apply(authorIntroductionSnapShot, to: .authorIntroduction)
     }
 }
 
@@ -106,6 +116,10 @@ private extension FilterDetailView {
                 return PhotoMetadataCollectionViewCell.layoutSection()
             case .authorProfile:
                 return AuthorProfileCollectionViewCell.layoutSection()
+            case .authorHashTags:
+                return HashTagCollectionViewCell.layoutSection()
+            case .authorIntroduction:
+                return BaseAuthorIntroductionCollectionViewCell.layoutSection()
             default:
                 return ImageSliderCollectionViewCell.layoutSection()
             }
@@ -151,6 +165,18 @@ private extension FilterDetailView {
         collectionView.register(
             AuthorProfileCollectionViewCell.self,
             forCellWithReuseIdentifier: AuthorProfileCollectionViewCell.identifier
+        )
+        
+        // 작가 해시태그
+        collectionView.register(
+            HashTagCollectionViewCell.self,
+            forCellWithReuseIdentifier: HashTagCollectionViewCell.identifier
+        )
+        
+        // 작가 소개
+        collectionView.register(
+            BaseAuthorIntroductionCollectionViewCell.self,
+            forCellWithReuseIdentifier: BaseAuthorIntroductionCollectionViewCell.identifier
         )
     }
     
@@ -216,6 +242,31 @@ private extension FilterDetailView {
                     
                     cell.configureCell(profile: nil)
                     return cell
+                    
+                case .authorHashTags:
+                    guard let item = itemIdentifier as? String,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: HashTagCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? HashTagCollectionViewCell else {
+                        return .init()
+                    }
+                    
+                    cell.configureCell(text: item, xmarkIsHidden: true)
+                    return cell
+                    
+                case .authorIntroduction:
+                    guard let item = itemIdentifier as? String,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: BaseAuthorIntroductionCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? BaseAuthorIntroductionCollectionViewCell else {
+                        return .init()
+                    }
+                    
+                    cell.configureCell(body: item)
+                    return cell
+                    
                 default:
                     return .init()
                 }

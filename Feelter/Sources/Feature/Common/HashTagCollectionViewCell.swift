@@ -16,7 +16,6 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
     
     let hashTagButton: HashTagButton = {
         let button = HashTagButton()
-        button.isUserInteractionEnabled = false
         return button
     }()
     
