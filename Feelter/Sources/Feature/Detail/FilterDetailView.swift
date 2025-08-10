@@ -17,6 +17,7 @@ final class FilterDetailView: BaseView {
 
     enum Section: Int {
         case imageSlider
+        case counterState
     }
     
     lazy var collectionView: UICollectionView = {
@@ -55,6 +56,10 @@ final class FilterDetailView: BaseView {
         var snapShot = dataSource.snapshot(for: .imageSlider)
         snapShot.append(["1"])
         dataSource.apply(snapShot, to: .imageSlider)
+        
+        var counterStateSnapShot = dataSource.snapshot(for: .counterState)
+        counterStateSnapShot.append(["a"])
+        dataSource.apply(counterStateSnapShot, to: .counterState)
     }
 }
 
@@ -78,6 +83,8 @@ private extension FilterDetailView {
             switch Section(rawValue: sectionIndex) {
             case .imageSlider:
                 return ImageSliderCollectionViewCell.layoutSection()
+            case .counterState:
+                return CounterStateCollectionViewCell.layoutSection()
             default:
                 return ImageSliderCollectionViewCell.layoutSection()
             }
@@ -101,6 +108,11 @@ private extension FilterDetailView {
             withReuseIdentifier: ImageSliderFooterView.identifier
         )
         
+        // 다운로드, 좋아요
+        collectionView.register(
+            CounterStateCollectionViewCell.self,
+            forCellWithReuseIdentifier: CounterStateCollectionViewCell.identifier
+        )
     }
     
     func configureDiffableDataSource() {
@@ -118,6 +130,19 @@ private extension FilterDetailView {
                     }
                     self?.imageSliderCell = cell
                     return cell
+                    
+                case .counterState:
+                    guard let item = itemIdentifier as? String,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: CounterStateCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? CounterStateCollectionViewCell else {
+                        return .init()
+                    }
+                    
+                    cell.configureCell()
+                    return cell
+                    
                 default:
                     return .init()
                 }

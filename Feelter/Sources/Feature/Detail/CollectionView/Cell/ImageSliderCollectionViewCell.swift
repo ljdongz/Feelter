@@ -107,7 +107,7 @@ extension ImageSliderCollectionViewCell {
             alignment: .bottom
         )
         
-        section.contentInsets = .init(top: 0, leading: 20, bottom: 12, trailing: 20)
+        section.contentInsets = .init(top: 10, leading: 20, bottom: 12, trailing: 20)
         section.boundarySupplementaryItems = [footer]
         return section
     }
