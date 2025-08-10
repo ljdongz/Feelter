@@ -18,6 +18,7 @@ final class FilterDetailView: BaseView {
     enum Section: Int {
         case imageSlider
         case counterState
+        case presets
     }
     
     lazy var collectionView: UICollectionView = {
@@ -60,6 +61,10 @@ final class FilterDetailView: BaseView {
         var counterStateSnapShot = dataSource.snapshot(for: .counterState)
         counterStateSnapShot.append(["a"])
         dataSource.apply(counterStateSnapShot, to: .counterState)
+        
+        var presetsSnapShot = dataSource.snapshot(for: .presets)
+        presetsSnapShot.append(["as"])
+        dataSource.apply(presetsSnapShot, to: .presets)
     }
 }
 
@@ -85,6 +90,8 @@ private extension FilterDetailView {
                 return ImageSliderCollectionViewCell.layoutSection()
             case .counterState:
                 return CounterStateCollectionViewCell.layoutSection()
+            case .presets:
+                return FilterPresetsCollectionViewCell.layoutSection()
             default:
                 return ImageSliderCollectionViewCell.layoutSection()
             }
@@ -112,6 +119,12 @@ private extension FilterDetailView {
         collectionView.register(
             CounterStateCollectionViewCell.self,
             forCellWithReuseIdentifier: CounterStateCollectionViewCell.identifier
+        )
+        
+        // 프리셋
+        collectionView.register(
+            FilterPresetsCollectionViewCell.self,
+            forCellWithReuseIdentifier: FilterPresetsCollectionViewCell.identifier
         )
     }
     
@@ -143,6 +156,16 @@ private extension FilterDetailView {
                     cell.configureCell()
                     return cell
                     
+                case .presets:
+                    guard let item = itemIdentifier as? String,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: FilterPresetsCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? FilterPresetsCollectionViewCell else {
+                        return .init()
+                    }
+                    
+                    return cell
                 default:
                     return .init()
                 }
