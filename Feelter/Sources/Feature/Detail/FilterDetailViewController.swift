@@ -11,23 +11,28 @@ import RxCocoa
 import RxSwift
 
 final class FilterDetailViewController: RxBaseViewController {
-
-    private let mainView = FilterDetailView()
     
     private lazy var navigationRightBarButton: UIButton = {
         let view = UIButton()
         view.setImage(.likeEmpty, for: .normal)
         view.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
         view.tintColor = .gray15
-        view.addTarget(self, action: #selector(rightBarButtonTapped), for: .touchUpInside)
         return view
     }()
     
-    private let viewModel = FilterDetailViewModel()
+    private let mainView = FilterDetailView()
     
-    private var isBookmarked = false
-    private var rightBarButtonImage: UIImage {
-        isBookmarked ? .likeFill : .likeEmpty
+    private let viewModel: FilterDetailViewModel
+    
+    var onChangeBookmark: ((Bool) -> Void)?
+    
+    init(viewModel: FilterDetailViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     override func loadView() {
@@ -41,16 +46,22 @@ final class FilterDetailViewController: RxBaseViewController {
     }
     
     override func bind() {
-        let input = FilterDetailViewModel.Input()
+        let input = FilterDetailViewModel.Input(
+            viewDidLoad: .just(()),
+            bookmarkButtonTapped: navigationRightBarButton.rx
+                .tap
+                .asObservable()
+        )
+
         
         let output = viewModel.transform(input: input)
-    }
-}
-
-private extension FilterDetailViewController {
-    @objc private func rightBarButtonTapped() {
-        isBookmarked.toggle()
-        navigationRightBarButton.setImage(rightBarButtonImage, for: .normal)
+        
+        output.filterDetail
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, filterDetail in
+                owner.mainView.applySnapShot(filter: filterDetail)
+            }
+            .disposed(by: disposeBag)
     }
 }
 
@@ -59,6 +70,10 @@ private extension FilterDetailViewController {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    UINavigationController(rootViewController: FilterDetailViewController())
+    UINavigationController(
+        rootViewController: FilterDetailViewController(
+            viewModel: FilterDetailViewModel(filterID: "", isLiked: false)
+        )
+    )
 }
 #endif

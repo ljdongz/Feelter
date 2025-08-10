@@ -142,6 +142,21 @@ final class FilterAttributeGridView: BaseView {
             make.edges.equalToSuperview().inset(15)
         }
     }
+    
+    func applyValue(attribute: FilterAttribute) {
+        attributeViews[0].value = attribute.brightness
+        attributeViews[1].value = attribute.exposure
+        attributeViews[2].value = attribute.contrast
+        attributeViews[3].value = attribute.saturation
+        attributeViews[4].value = attribute.sharpness
+        attributeViews[5].value = attribute.blur
+        attributeViews[6].value = attribute.vignette
+        attributeViews[7].value = attribute.noiseReduction
+        attributeViews[8].value = attribute.highlights
+        attributeViews[9].value = attribute.shadows
+        attributeViews[10].value = attribute.temperature
+        attributeViews[11].value = attribute.blackPoint
+    }
 }
 
 #if DEBUG

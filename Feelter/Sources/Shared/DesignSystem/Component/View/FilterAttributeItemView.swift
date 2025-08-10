@@ -63,6 +63,12 @@ final class FilterAttributeItemView: BaseView {
             }
         }
     }
+    
+    var value: Float? {
+        didSet {
+            valueLabel.text = "\(value ?? 0.0)"
+        }
+    }
 
     override func setupSubviews() {
         addSubviews([

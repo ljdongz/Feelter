@@ -35,6 +35,13 @@ final class ImageSliderCollectionViewCell: BaseCollectionViewCell {
         return view
     }()
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        ImageLoader.cancelDownloadTask(for: beforeImageView)
+        ImageLoader.cancelDownloadTask(for: afterImageView)
+    }
+    
     override func setupView() {
         contentView.layer.cornerRadius = 24
         contentView.clipsToBounds = true
@@ -62,6 +69,17 @@ final class ImageSliderCollectionViewCell: BaseCollectionViewCell {
         beforeImageView.snp.makeConstraints { make in
             make.edges.equalTo(contentView.snp.edges)
         }
+    }
+    
+    func configureCell(item: FilterDetailView.ImageSliderSectionItem) {
+        ImageLoader.applyAuthenticatedImage(
+            for: beforeImageView,
+            path: item.originalImageUrl
+        )
+        ImageLoader.applyAuthenticatedImage(
+            for: afterImageView,
+            path: item.filteredImageUrl
+        )
     }
     
     func updateSliderPosition(value: CGFloat) {

@@ -52,39 +52,39 @@ final class FilterDetailView: BaseView {
             make.top.equalTo(safeAreaLayoutGuide.snp.top)
             make.horizontalEdges.bottom.equalToSuperview()
         }
-        
-        // TODO: 삭제
-        dummyDataSource()
     }
     
-    func dummyDataSource() {
-        var snapShot = dataSource.snapshot(for: .imageSlider)
-        snapShot.append(["1"])
-        dataSource.apply(snapShot, to: .imageSlider)
+    func applySnapShot(filter: FilterDetail) {
+        var snapShot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
+        snapShot.appendSections([.imageSlider, .counterState, .presets, .photoMetadata, .authorProfile, .authorHashTags, .authorIntroduction])
         
-        var counterStateSnapShot = dataSource.snapshot(for: .counterState)
-        counterStateSnapShot.append(["a"])
-        dataSource.apply(counterStateSnapShot, to: .counterState)
+        let imageSlider = ImageSliderSectionItem(
+            originalImageUrl: filter.imageURLs[0],
+            filteredImageUrl: filter.imageURLs[1]
+        )
+        let counterState = CounterStateSectionItem(
+            downloadCount: filter.buyerCount,
+            likeCount: filter.likeCount
+        )
+        let attribute = FilterAttributeSectionItem(attribute: filter.attribute)
+        let metadata = PhotoMetadataSectionItem(metadata: filter.photoMetadata)
+        let profile = AuthorProfileSectionItem(
+            profileImageURL: filter.author.profileImageURL,
+            name: filter.author.name,
+            nickname: filter.author.nickname
+        )
+        let hashTags = filter.author.hashTags.map { HashTagsSectionItem(text: $0) }
+        let introduction = IntroductionSectionItem(text: filter.author.introduction)
         
-        var presetsSnapShot = dataSource.snapshot(for: .presets)
-        presetsSnapShot.append(["as"])
-        dataSource.apply(presetsSnapShot, to: .presets)
+        snapShot.appendItems([imageSlider], toSection: .imageSlider)
+        snapShot.appendItems([counterState], toSection: .counterState)
+        snapShot.appendItems([attribute], toSection: .presets)
+        snapShot.appendItems([metadata], toSection: .photoMetadata)
+        snapShot.appendItems([profile], toSection: .authorProfile)
+        snapShot.appendItems(hashTags, toSection: .authorHashTags)
+        snapShot.appendItems([introduction], toSection: .authorIntroduction)
         
-        var photoMetadataSnapShot = dataSource.snapshot(for: .photoMetadata)
-        photoMetadataSnapShot.append(["pf"])
-        dataSource.apply(photoMetadataSnapShot, to: .photoMetadata)
-        
-        var profileSnapShot = dataSource.snapshot(for: .authorProfile)
-        profileSnapShot.append(["asdf"])
-        dataSource.apply(profileSnapShot, to: .authorProfile)
-        
-        var hashTagsSnapShot = dataSource.snapshot(for: .authorHashTags)
-        hashTagsSnapShot.append(["32543123", "32542451", "43531", "5325325135", "32442", "23dk214k"])
-        dataSource.apply(hashTagsSnapShot, to: .authorHashTags)
-        
-        var authorIntroductionSnapShot = dataSource.snapshot(for: .authorIntroduction)
-        authorIntroductionSnapShot.append(["안녕하세요, 잘 부탁드립니다."])
-        dataSource.apply(authorIntroductionSnapShot, to: .authorIntroduction)
+        dataSource.apply(snapShot, animatingDifferences: false)
     }
 }
 
@@ -186,7 +186,7 @@ private extension FilterDetailView {
             cellProvider: { [weak self] collectionView, indexPath, itemIdentifier in
                 switch Section(rawValue: indexPath.section) {
                 case .imageSlider:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? ImageSliderSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: ImageSliderCollectionViewCell.identifier,
                             for: indexPath
@@ -194,10 +194,12 @@ private extension FilterDetailView {
                         return .init()
                     }
                     self?.imageSliderCell = cell
+                    
+                    cell.configureCell(item: item)
                     return cell
                     
                 case .counterState:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? CounterStateSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: CounterStateCollectionViewCell.identifier,
                             for: indexPath
@@ -205,11 +207,11 @@ private extension FilterDetailView {
                         return .init()
                     }
                     
-                    cell.configureCell()
+                    cell.configureCell(item: item)
                     return cell
                     
                 case .presets:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? FilterAttributeSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: FilterPresetsCollectionViewCell.identifier,
                             for: indexPath
@@ -217,10 +219,11 @@ private extension FilterDetailView {
                         return .init()
                     }
                     
+                    cell.configureCell(item: item)
                     return cell
                     
                 case .photoMetadata:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? PhotoMetadataSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: PhotoMetadataCollectionViewCell.identifier,
                             for: indexPath
@@ -228,11 +231,11 @@ private extension FilterDetailView {
                         return .init()
                     }
                     
-                    cell.configureCell(photoMetadata: nil)
+                    cell.configureCell(photoMetadata: item.metadata)
                     return cell
                     
                 case .authorProfile:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? AuthorProfileSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: AuthorProfileCollectionViewCell.identifier,
                             for: indexPath
@@ -240,11 +243,21 @@ private extension FilterDetailView {
                         return .init()
                     }
                     
-                    cell.configureCell(profile: nil)
+                    cell.configureCell(profile: .init(
+                        userID: "",
+                        email: "",
+                        nickname: item.nickname,
+                        name: item.name,
+                        introduction: "",
+                        description: "",
+                        profileImageURL: item.profileImageURL,
+                        phoneNumber: "",
+                        hashTags: []
+                    ))
                     return cell
                     
                 case .authorHashTags:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? HashTagsSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: HashTagCollectionViewCell.identifier,
                             for: indexPath
@@ -252,11 +265,11 @@ private extension FilterDetailView {
                         return .init()
                     }
                     
-                    cell.configureCell(text: item, xmarkIsHidden: true)
+                    cell.configureCell(text: item.text, xmarkIsHidden: true)
                     return cell
                     
                 case .authorIntroduction:
-                    guard let item = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? IntroductionSectionItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: BaseAuthorIntroductionCollectionViewCell.identifier,
                             for: indexPath
@@ -264,7 +277,7 @@ private extension FilterDetailView {
                         return .init()
                     }
                     
-                    cell.configureCell(body: item)
+                    cell.configureCell(body: item.text ?? "")
                     return cell
                     
                 default:
@@ -294,10 +307,54 @@ private extension FilterDetailView {
     }
 }
 
+extension FilterDetailView {
+    struct ImageSliderSectionItem: Hashable {
+        let originalImageUrl: String
+        let filteredImageUrl: String
+    }
+    
+    struct CounterStateSectionItem: Hashable {
+        let downloadCount: Int
+        let likeCount: Int
+    }
+    
+    struct FilterAttributeSectionItem: Hashable {
+        let attribute: FilterAttribute
+    }
+    
+    struct PhotoMetadataSectionItem: Hashable {
+        let uuid = UUID()
+        let metadata: PhotoMetadata?
+    }
+    
+    struct AuthorProfileSectionItem: Hashable {
+        let profileImageURL: String?
+        let name: String?
+        let nickname: String
+    }
+    
+    struct HashTagsSectionItem: Hashable {
+        let uuid = UUID()
+        let text: String
+    }
+    
+    struct IntroductionSectionItem: Hashable {
+        let uuid = UUID()
+        let text: String?
+    }
+}
+
 #if DEBUG
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    UINavigationController(rootViewController: FilterDetailViewController())
+    UINavigationController(
+        rootViewController: FilterDetailViewController(
+            viewModel: FilterDetailViewModel(
+                filterID: "",
+                isLiked: false
+            )
+        )
+    )
 }
 #endif

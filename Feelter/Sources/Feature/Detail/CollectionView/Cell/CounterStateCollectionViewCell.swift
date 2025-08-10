@@ -121,9 +121,9 @@ final class CounterStateCollectionViewCell: BaseCollectionViewCell {
         }
     }
 
-    func configureCell() {
-        downloadCounterLabel.text = "2400+"
-        likeCounterLabel.text = "800"
+    func configureCell(item: FilterDetailView.CounterStateSectionItem) {
+        downloadCounterLabel.text = "\(item.downloadCount)"
+        likeCounterLabel.text = "\(item.likeCount)"
     }
 }
 
