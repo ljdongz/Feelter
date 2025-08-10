@@ -29,7 +29,7 @@ struct PhotoMetadata: Hashable {
     /// 파일 포멧
     let format: String?
     /// 원본 촬영 날짜/시간
-    let originDate: Date?
+    let originDate: String?
     /// 위도
     let latitude: Float?
     /// 경도
