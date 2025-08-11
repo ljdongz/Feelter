@@ -48,6 +48,32 @@ final class PhotoMetadataView: BaseView {
         return view
     }()
     
+    private let emptyLocationContainerView: UIView = {
+        let view = UIView()
+        view.clipsToBounds = true
+        view.layer.cornerRadius = 8
+        view.layer.borderColor = UIColor.deepTurquoise.cgColor
+        view.layer.borderWidth = 2
+        view.backgroundColor = .blackTurquoise
+        return view
+    }()
+    
+    private let emptyLocationImageView: UIImageView = {
+        let view = UIImageView()
+        view.image = .noLocation
+        view.tintColor = .deepTurquoise
+        view.contentMode = .scaleAspectFill
+        return view
+    }()
+    
+    private let emptyLocationLabel: UILabel = {
+        let view = UILabel()
+        view.text = "No Location"
+        view.textColor = .deepTurquoise
+        view.font = .pretendard(size: 12, weight: .semiBold)
+        return view
+    }()
+    
     private let mapView: MKMapView = {
         let view = MKMapView()
         view.preferredConfiguration = MKStandardMapConfiguration()
@@ -59,6 +85,8 @@ final class PhotoMetadataView: BaseView {
         view.showsScale = false
         view.showsUserLocation = false
         view.layer.cornerRadius = 8
+        view.layer.borderColor = UIColor.deepTurquoise.cgColor
+        view.layer.borderWidth = 2
         return view
     }()
     
@@ -97,11 +125,6 @@ final class PhotoMetadataView: BaseView {
         }
     }
     
-    // TODO: 삭제
-    override func setupView() {
-        updateUI(metadata: nil)
-    }
-    
     override func setupSubviews() {
         addSubview(containerView)
         
@@ -118,6 +141,13 @@ final class PhotoMetadataView: BaseView {
         metadataContainerView.addSubviews([
             mapView,
             metadataStackView
+        ])
+        
+        mapView.addSubview(emptyLocationContainerView)
+        
+        emptyLocationContainerView.addSubviews([
+            emptyLocationImageView,
+            emptyLocationLabel
         ])
         
         metadataStackView.addArrangedSubviews([
@@ -156,6 +186,21 @@ final class PhotoMetadataView: BaseView {
             make.size.equalTo(100)
         }
         
+        emptyLocationContainerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        emptyLocationImageView.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.top.equalToSuperview().inset(25)
+            make.size.equalTo(35)
+        }
+        
+        emptyLocationLabel.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.bottom.equalToSuperview().inset(25)
+        }
+        
         metadataStackView.snp.makeConstraints { make in
             make.leading.equalTo(mapView.snp.trailing).offset(15)
             make.trailing.lessThanOrEqualToSuperview().inset(8)
@@ -166,15 +211,78 @@ final class PhotoMetadataView: BaseView {
     }
     
     private func updateUI(metadata: PhotoMetadata?) {
+
+        applyCameraInfo(
+            lens: metadata?.lens,
+            focalLength: metadata?.focalLength,
+            aperture: metadata?.aperture,
+            iso: metadata?.iso
+        )
         
-        firstLabel.text = "와이드 카메라 - 26 mm 1.5 ISO 400"
-        secondLabel.text = "12MP • 3024 x 4032 • 2.2MB"
-        thirdLabel.text = "서울 영등포구 선유로 9길 30"
+        applyPhotoInfo(
+            shutterSpeed: metadata?.shutterSpeed,
+            width: metadata?.pixelWidth,
+            height: metadata?.pixleHeight,
+            fileSize: metadata?.fileSize
+        )
+        
+        applyLocation(
+            latitude: metadata?.latitude,
+            longitude: metadata?.longitude
+        )
+    }
+}
+
+private extension PhotoMetadataView {
+    
+    func applyCameraInfo(
+        lens: String?,
+        focalLength: Float?,
+        aperture: Float?,
+        iso: Int?
+    ) {
+        var text = ""
+        if let lens { text += "\(lens) - " }
+        if let focalLength { text += "\(Int(focalLength.rounded()))mm " }
+        if let aperture { text += "𝒇 \(aperture.rounded(toPlaces: 1)) " }
+        if let iso { text += "ISO \(iso)" }
+        
+        firstLabel.text = text
+    }
+    
+    func applyPhotoInfo(
+        shutterSpeed: String?,
+        width: Int?,
+        height: Int?,
+        fileSize: Int?
+    ) {
+        var text = ""
+        if let shutterSpeed { text += "\(shutterSpeed) • "}
+        if let width, let height { text += "\(width) × \(height) • " }
+        if let fileSize {
+            let fileSizeFormat = FileSizeFormatter.format(bytes: fileSize, style: .binary)
+            text += "\(fileSizeFormat)"
+        }
+        
+        secondLabel.text = text
+    }
+    
+    func applyLocation(latitude: Float?, longitude: Float?) {
+  
+        guard let latitude, let longitude else {
+            emptyLocationContainerView.isHidden = false
+            return
+        }
+        
+        emptyLocationContainerView.isHidden = true
+        
+        let lat = Double(latitude)
+        let long = Double(longitude)
         
         // 중심값(필수): 위, 경도
         let center = CLLocationCoordinate2D(
-            latitude: 37.51775,
-            longitude: 126.886557
+            latitude: lat,
+            longitude: long
         )
 
         // center를 중심으로 지정한 미터(m)만큼의 영역을 보여줌
@@ -183,11 +291,11 @@ final class PhotoMetadataView: BaseView {
             latitudinalMeters: 500,
             longitudinalMeters: 500
         )
-
+        
         let annotation = MKPointAnnotation()
         annotation.coordinate = CLLocationCoordinate2D(
-            latitude: 37.51775,
-            longitude: 126.886557
+            latitude: lat,
+            longitude: long
         )
         mapView.setRegion(region, animated: true)
         mapView.addAnnotation(annotation)
