@@ -237,8 +237,8 @@ private extension PhotoMetadataView {
     
     func applyCameraInfo(
         lens: String?,
-        focalLength: Float?,
-        aperture: Float?,
+        focalLength: Double?,
+        aperture: Double?,
         iso: Int?
     ) {
         var text = ""
@@ -267,7 +267,7 @@ private extension PhotoMetadataView {
         secondLabel.text = text
     }
     
-    func applyLocation(latitude: Float?, longitude: Float?) {
+    func applyLocation(latitude: Double?, longitude: Double?) {
   
         guard let latitude, let longitude else {
             emptyLocationContainerView.isHidden = false
@@ -276,13 +276,10 @@ private extension PhotoMetadataView {
         
         emptyLocationContainerView.isHidden = true
         
-        let lat = Double(latitude)
-        let long = Double(longitude)
-        
         // 중심값(필수): 위, 경도
         let center = CLLocationCoordinate2D(
-            latitude: lat,
-            longitude: long
+            latitude: latitude,
+            longitude: longitude
         )
 
         // center를 중심으로 지정한 미터(m)만큼의 영역을 보여줌
@@ -294,8 +291,8 @@ private extension PhotoMetadataView {
         
         let annotation = MKPointAnnotation()
         annotation.coordinate = CLLocationCoordinate2D(
-            latitude: lat,
-            longitude: long
+            latitude: latitude,
+            longitude: longitude
         )
         mapView.setRegion(region, animated: true)
         mapView.addAnnotation(annotation)

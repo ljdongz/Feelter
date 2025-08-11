@@ -64,7 +64,7 @@ final class FilterAttributeItemView: BaseView {
         }
     }
     
-    var value: Float? {
+    var value: Double? {
         didSet {
             valueLabel.text = "\(value ?? 0.0)"
         }

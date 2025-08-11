@@ -13,9 +13,9 @@ struct PhotoMetadata: Hashable {
     /// 렌즈 정보
     let lens: String?
     /// 초점 거리
-    let focalLength: Float?
+    let focalLength: Double?
     /// 조리개 값
-    let aperture: Float?
+    let aperture: Double?
     /// ISO
     let iso: Int?
     /// 셔터 속도
@@ -31,7 +31,7 @@ struct PhotoMetadata: Hashable {
     /// 원본 촬영 날짜/시간
     let originDate: String?
     /// 위도
-    let latitude: Float?
+    let latitude: Double?
     /// 경도
-    let longitude: Float?
+    let longitude: Double?
 }
