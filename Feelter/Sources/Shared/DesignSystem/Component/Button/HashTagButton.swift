@@ -9,7 +9,7 @@ import UIKit
 
 import SnapKit
 
-final class HashTagButton: UIButton {
+final class HashTagButton: UIView {
     
     private let stackView: UIStackView = {
         let view = UIStackView()
@@ -35,12 +35,6 @@ final class HashTagButton: UIButton {
         view.tintColor = .gray60
         return view
     }()
-    
-    override var isHighlighted: Bool {
-        didSet {
-            self.alpha = self.isHighlighted ? 0.6 : 1.0
-        }
-    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)

@@ -7,16 +7,9 @@
 
 import UIKit
 
-enum RightBarButtonType {
-    case none
-    case text(String, Selector)
-    case image(UIImage, Selector)
-    case custom(UIBarButtonItem)
-}
-
 class BaseViewController: UIViewController {
     
-    private var keyboardHelper: KeyboardObserver?
+    private var keyboardObserver: KeyboardObserver?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,7 +33,7 @@ class BaseViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        keyboardHelper = nil
+        keyboardObserver = nil
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -49,48 +42,21 @@ class BaseViewController: UIViewController {
     }
     
     deinit {
-        keyboardHelper = nil
+        keyboardObserver = nil
     }
     
     func setupView() {}
     func setupSubviews() {}
     func setupConstraints() {}
     func setupActions() {}
-    
-    
     func setupKeyboardObserver() -> KeyboardObserver.Configuration? {
         return nil
     }
-    
-    func setupNavigationBarRightButton(type: RightBarButtonType) {
-        guard navigationController != nil else { return }
-        
-        switch type {
-        case .none:
-            navigationItem.rightBarButtonItem = nil
-        case .text(let title, let action):
-            let button = UIButton(type: .custom)
-            button.setTitle(title, for: .normal)
-            button.setTitleColor(.gray15, for: .normal)
-            button.titleLabel?.font = .pretendard(size: 16, weight: .medium)
-            button.addTarget(self, action: action, for: .touchUpInside)
-            button.sizeToFit()
-            navigationItem.rightBarButtonItem = UIBarButtonItem(customView: button)
-        case .image(let image, let action):
-            let button = UIButton(type: .custom)
-            button.setImage(image, for: .normal)
-            button.tintColor = .gray15
-            button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
-            button.addTarget(self, action: action, for: .touchUpInside)
-            navigationItem.rightBarButtonItem = UIBarButtonItem(customView: button)
-        case .custom(let barButtonItem):
-            navigationItem.rightBarButtonItem = barButtonItem
-        }
-    }
 }
 
-// MARK: - Private
+// MARK: - Configure NaivgationBar
 private extension BaseViewController {
+    
     func setupNavigationBarStyle() {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithTransparentBackground()
@@ -131,7 +97,7 @@ private extension BaseViewController {
     func setupKeyboardAdjustmentIfNeeded() {
         guard let configuration = setupKeyboardObserver() else { return }
         
-        keyboardHelper = KeyboardObserver(
+        keyboardObserver = KeyboardObserver(
             viewController: self,
             configuration: configuration
         )

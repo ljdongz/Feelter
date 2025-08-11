@@ -52,6 +52,7 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
         
         ImageLoader.cancelDownloadTask(for: filterImageView.imageView)
         filterImageView.imageView.image = nil
+        filterImageView.likeImageView.image = nil
     }
 
     override func setupSubviews() {
@@ -87,7 +88,7 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
         filterTitleLabel.text = filter.title
         nicknameLabel.text = filter.creator?.nickname
         descriptionLabel.text = filter.creator?.introduction
-        filterImageView.likeImageView.image = (filter.isLiked ?? false) ? .likeFill : .likeEmpty
+        filterImageView.isLiked = filter.isLiked ?? false
         
         ImageLoader.applyAuthenticatedImage(
             for: filterImageView.imageView,

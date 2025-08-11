@@ -25,6 +25,12 @@ final class FilterFeedSmallImageView: BaseView {
         view.tintColor = .gray60
         return view
     }()
+    
+    var isLiked: Bool = false {
+        didSet {
+            likeImageView.image = isLiked ? .likeFill : .likeEmpty
+        }
+    }
 
     override func setupSubviews() {
         addSubview(imageView)

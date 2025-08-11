@@ -8,6 +8,7 @@
 import Foundation
 
 struct FilterRepositoryImpl: FilterRepository {
+    
     private let networkProvider: NetworkProvider
     
     init(networkProvider: NetworkProvider) {
@@ -50,5 +51,24 @@ struct FilterRepositoryImpl: FilterRepository {
         )
 
         return response.toDomain()
+    }
+    
+    func fetchDetailFilter(filterID: String) async throws -> FilterDetail {
+        
+        let response = try await networkProvider.request(
+            endpoint: FilterAPI.detail(filterID: filterID),
+            type: FilterDetailResponseDTO.self
+        )
+        
+        return response.toDomain()
+    }
+    
+    func updateLikeStatus(filterID: String, isLiked: Bool) async throws {
+        let requestDTO = LikeStatusDTO(likeStatus: isLiked)
+        
+        _ = try await networkProvider.request(
+            endpoint: FilterAPI.like(filterID: filterID, body: requestDTO),
+            type: LikeStatusDTO.self
+        )
     }
 }

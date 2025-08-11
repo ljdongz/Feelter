@@ -9,9 +9,9 @@ import UIKit
 
 import SnapKit
 
-final class TodayAuthorIntroductionCollectionViewCell: BaseCollectionViewCell {
+final class BaseAuthorIntroductionCollectionViewCell: BaseCollectionViewCell {
     
-    static let identifier = "TodayAuthorIntroductionCollectionViewCell"
+    static let identifier = "BaseAuthorIntroductionCollectionViewCell"
     
     private let stackView: UIStackView = {
         let view = UIStackView()
@@ -34,6 +34,7 @@ final class TodayAuthorIntroductionCollectionViewCell: BaseCollectionViewCell {
         view.textColor = .gray60
         view.font = .pretendard(size: 12, weight: .regular)
         view.numberOfLines = 0
+        
         return view
     }()
 
@@ -47,17 +48,23 @@ final class TodayAuthorIntroductionCollectionViewCell: BaseCollectionViewCell {
     
     override func setupConstraints() {
         stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.top.horizontalEdges.equalToSuperview()
+            make.bottom.lessThanOrEqualToSuperview()
         }
     }
     
     func configureCell(header: String? = nil, body: String) {
-        if let header { headerTitle.text = "\"\(header)\"" }
+        if let header {
+            headerTitle.text = "\"\(header)\""
+            headerTitle.isHidden = false
+        } else {
+            headerTitle.isHidden = true
+        }
         bodyTitle.text = body
     }
 }
 
-extension TodayAuthorIntroductionCollectionViewCell {
+extension BaseAuthorIntroductionCollectionViewCell {
     static func layoutSection() -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(layoutSize: .init(
             widthDimension: .fractionalWidth(1),

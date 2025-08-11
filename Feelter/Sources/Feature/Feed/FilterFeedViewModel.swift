@@ -15,6 +15,7 @@ final class FilterFeedViewModel: ViewModel {
         let viewDidLoad: Observable<Void>
         let categoryButtonTapped: Observable<FilterCategory>
         let orderButtonTapped: Observable<FilterOrder>
+        let updatedLikeStatus: Observable<Filter>
     }
     
     struct Output {
@@ -30,6 +31,8 @@ final class FilterFeedViewModel: ViewModel {
         order: .latest
     )
     
+    private(set) var filters: [Filter] = []
+    
     var disposeBag: DisposeBag = .init()
     
     func transform(input: Input) -> Output {
@@ -43,6 +46,7 @@ final class FilterFeedViewModel: ViewModel {
                 switch result {
                 case .success(let filterFeed):
                     owner.currentQuery.nextID = filterFeed.nextCursor
+                    owner.filters = filterFeed.filters
                     
                     output.filters.accept(filterFeed.filters)
                 case .failure(let error):
@@ -65,6 +69,7 @@ final class FilterFeedViewModel: ViewModel {
                 switch result {
                 case .success(let filterFeed):
                     owner.currentQuery.nextID = filterFeed.nextCursor
+                    owner.filters = filterFeed.filters
                     
                     output.filters.accept(filterFeed.filters)
                 case .failure(let error):
@@ -87,11 +92,21 @@ final class FilterFeedViewModel: ViewModel {
                 switch result {
                 case .success(let filterFeed):
                     owner.currentQuery.nextID = filterFeed.nextCursor
+                    owner.filters = filterFeed.filters
                     
                     output.filters.accept(filterFeed.filters)
                 case .failure(let error):
                     print(error)
                 }
+            }
+            .disposed(by: disposeBag)
+        
+        input.updatedLikeStatus
+            .subscribe(with: self) { owner, filter in
+                guard let index = owner.filters.firstIndex(of: filter) else {
+                    return
+                }
+                owner.filters[index].isLiked?.toggle()
             }
             .disposed(by: disposeBag)
         
