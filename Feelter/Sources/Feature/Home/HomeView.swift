@@ -158,7 +158,7 @@ private extension HomeView {
             case .authorPhotos:
                 return TodayAuthorPhotosCollectionViewCell.layoutSection()
             case .authorHashTags:
-                return HashTagCollectionViewCell.layoutSection()
+                return BaseHashTagCollectionViewCell.layoutSection()
             case .authorIntroduction:
                 return BaseAuthorIntroductionCollectionViewCell.layoutSection()
             case .none:
@@ -215,8 +215,8 @@ private extension HomeView {
         
         // 오늘의 작가 해시태그 목록
         collectionView.register(
-            HashTagCollectionViewCell.self,
-            forCellWithReuseIdentifier: HashTagCollectionViewCell.identifier
+            BaseHashTagCollectionViewCell.self,
+            forCellWithReuseIdentifier: BaseHashTagCollectionViewCell.identifier
         )
         
         // 오늘의 작가 소개글
@@ -293,9 +293,9 @@ private extension HomeView {
                 case .authorHashTags:
                     guard let item = itemIdentifier as? ProfileSectionItem,
                           let cell = collectionView.dequeueReusableCell(
-                            withReuseIdentifier: HashTagCollectionViewCell.identifier,
+                            withReuseIdentifier: BaseHashTagCollectionViewCell.identifier,
                             for: indexPath
-                          ) as? HashTagCollectionViewCell else {
+                          ) as? BaseHashTagCollectionViewCell else {
                         return .init()
                     }
                     

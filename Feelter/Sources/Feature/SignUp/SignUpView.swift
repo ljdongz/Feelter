@@ -110,8 +110,8 @@ final class SignUpView: BaseView {
         view.showsHorizontalScrollIndicator = false
         view.contentInset = .init(top: 0, left: 30, bottom: 0, right: 30)
         view.register(
-            HashTagCollectionViewCell.self,
-            forCellWithReuseIdentifier: HashTagCollectionViewCell.identifier
+            BaseHashTagCollectionViewCell.self,
+            forCellWithReuseIdentifier: BaseHashTagCollectionViewCell.identifier
         )
         return view
     }()
@@ -178,9 +178,9 @@ final class SignUpView: BaseView {
             collectionView: hashTagCollectionView,
             cellProvider: { collectionView, indexPath, itemIdentifier in
                 guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: HashTagCollectionViewCell.identifier,
+                    withReuseIdentifier: BaseHashTagCollectionViewCell.identifier,
                     for: indexPath
-                ) as? HashTagCollectionViewCell else { return UICollectionViewCell() }
+                ) as? BaseHashTagCollectionViewCell else { return UICollectionViewCell() }
                 cell.configureCell(text: itemIdentifier)
                 return cell
         })
