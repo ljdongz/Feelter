@@ -257,10 +257,14 @@ private extension PhotoMetadataView {
         fileSize: Int?
     ) {
         var text = ""
+        
         if let shutterSpeed { text += "\(shutterSpeed) • "}
         if let width, let height { text += "\(width) × \(height) • " }
         if let fileSize {
-            let fileSizeFormat = FileSizeFormatter.format(bytes: fileSize, style: .binary)
+            let fileSizeFormat = FileSizeFormatter.format(
+                bytes: fileSize,
+                style: .decimal
+            )
             text += "\(fileSizeFormat)"
         }
         
@@ -296,6 +300,15 @@ private extension PhotoMetadataView {
         )
         mapView.setRegion(region, animated: true)
         mapView.addAnnotation(annotation)
+        
+        Task { @MainActor in
+            let address = await LocationMapper.shared.address(
+                latitude: latitude,
+                longitude: longitude
+            )
+            
+            thirdLabel.text = address
+        }
     }
 }
 
