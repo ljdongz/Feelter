@@ -117,7 +117,7 @@ private extension FilterDetailView {
             case .authorProfile:
                 return AuthorProfileCollectionViewCell.layoutSection()
             case .authorHashTags:
-                return HashTagCollectionViewCell.layoutSection()
+                return BaseHashTagCollectionViewCell.layoutSection()
             case .authorIntroduction:
                 return BaseAuthorIntroductionCollectionViewCell.layoutSection()
             default:
@@ -169,8 +169,8 @@ private extension FilterDetailView {
         
         // 작가 해시태그
         collectionView.register(
-            HashTagCollectionViewCell.self,
-            forCellWithReuseIdentifier: HashTagCollectionViewCell.identifier
+            BaseHashTagCollectionViewCell.self,
+            forCellWithReuseIdentifier: BaseHashTagCollectionViewCell.identifier
         )
         
         // 작가 소개
@@ -259,9 +259,9 @@ private extension FilterDetailView {
                 case .authorHashTags:
                     guard let item = itemIdentifier as? HashTagsSectionItem,
                           let cell = collectionView.dequeueReusableCell(
-                            withReuseIdentifier: HashTagCollectionViewCell.identifier,
+                            withReuseIdentifier: BaseHashTagCollectionViewCell.identifier,
                             for: indexPath
-                          ) as? HashTagCollectionViewCell else {
+                          ) as? BaseHashTagCollectionViewCell else {
                         return .init()
                     }
                     

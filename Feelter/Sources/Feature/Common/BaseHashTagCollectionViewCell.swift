@@ -10,9 +10,9 @@ import UIKit
 import RxSwift
 import SnapKit
 
-final class HashTagCollectionViewCell: UICollectionViewCell {
+final class BaseHashTagCollectionViewCell: UICollectionViewCell {
     
-    static let identifier = "HashTagCollectionViewCell"
+    static let identifier = "BaseHashTagCollectionViewCell"
     
     let hashTagButton: HashTagButton = {
         let button = HashTagButton()
@@ -48,7 +48,7 @@ final class HashTagCollectionViewCell: UICollectionViewCell {
     }
 }
 
-extension HashTagCollectionViewCell {
+extension BaseHashTagCollectionViewCell {
     static func layoutSection() -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(layoutSize: .init(
             widthDimension: .estimated(64),
