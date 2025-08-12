@@ -13,7 +13,9 @@ import SnapKit
 
 final class FilterMakeViewController: RxBaseViewController {
 
-    let mainView = FilterMakeView()
+    private let mainView = FilterMakeView()
+    
+    private let viewModel = FilterMakeViewModel()
     
     override func loadView() {
         view = mainView

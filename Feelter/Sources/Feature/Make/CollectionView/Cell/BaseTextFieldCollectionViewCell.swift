@@ -7,11 +7,15 @@
 
 import UIKit
 
+import RxCocoa
+import RxSwift
 import SnapKit
 
 final class BaseTextFieldCollectionViewCell: BaseCollectionViewCell {
     
     static let identifier = "BaseTextFieldCollectionViewCell"
+    
+    var disposeBag = DisposeBag()
     
     let textField: UITextField = {
         let view = UITextField()
@@ -27,6 +31,12 @@ final class BaseTextFieldCollectionViewCell: BaseCollectionViewCell {
         
         return view
     }()
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        self.disposeBag = DisposeBag()
+    }
     
     override func setupSubviews() {
         contentView.addSubview(textField)
