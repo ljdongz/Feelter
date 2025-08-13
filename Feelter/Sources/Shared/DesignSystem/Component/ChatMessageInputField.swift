@@ -37,15 +37,15 @@ final class ChatMessageInputField: BaseView {
         return view
     }()
     
-    let textView: UITextView = {
+    let messageInputTextView: UITextView = {
         let view = UITextView()
         view.textColor = .gray45
         view.font = .pretendard(size: 15, weight: .medium)
         view.textContainerInset = .init(top: 9, left: 11, bottom: 9, right: 11)
         view.textAlignment = .left
-        view.tintColor = .gray45
         view.backgroundColor = .deepTurquoise
         view.layer.cornerRadius = 18
+        view.isScrollEnabled = false
         return view
     }()
 
@@ -64,6 +64,10 @@ final class ChatMessageInputField: BaseView {
         return view
     }()
     
+    private var textViewHeightConstraint: Constraint?
+    private let minHeight: CGFloat = 36
+    private let maxHeight: CGFloat = 120
+    
     override func setupSubviews() {
         addSubviews([
             divider,
@@ -72,12 +76,14 @@ final class ChatMessageInputField: BaseView {
         
         inputFieldContainerView.addSubviews([
             plusButton,
-            textView,
+            messageInputTextView,
             sendButton
         ])
         
         plusButton.addSubview(plusImageView)
         sendButton.addSubview(sendImageView)
+        
+        messageInputTextView.delegate = self
     }
     
     override func setupConstraints() {
@@ -97,7 +103,7 @@ final class ChatMessageInputField: BaseView {
         plusButton.snp.makeConstraints { make in
             make.size.equalTo(30)
             make.leading.equalToSuperview().inset(10)
-            make.top.equalTo(textView.snp.top).offset(3)
+            make.bottom.equalTo(messageInputTextView.snp.bottom).offset(-3)
         }
         
         // 추가 이미지
@@ -107,19 +113,19 @@ final class ChatMessageInputField: BaseView {
         }
         
         // 입력 필드
-        textView.snp.makeConstraints { make in
+        messageInputTextView.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(5)
             make.leading.equalTo(plusButton.snp.trailing).offset(10)
             make.trailing.equalTo(sendButton.snp.leading).offset(-10)
             make.bottom.equalToSuperview().inset(34)
-            make.height.equalTo(36)
+            textViewHeightConstraint = make.height.equalTo(minHeight).constraint
         }
         
         // 입력 필드 우측 전송 버튼
         sendButton.snp.makeConstraints { make in
             make.size.equalTo(30)
             make.trailing.equalToSuperview().inset(10)
-            make.top.equalTo(textView.snp.top).offset(3)
+            make.bottom.equalTo(messageInputTextView.snp.bottom).offset(-3)
         }
         
         // 전송 이미지
@@ -128,6 +134,27 @@ final class ChatMessageInputField: BaseView {
             make.centerY.equalToSuperview().offset(1)
             make.size.equalTo(16)
         }
+    }
+}
+
+// MARK: - UITextViewDelegate
+extension ChatMessageInputField: UITextViewDelegate {
+    
+    func textViewDidChange(_ textView: UITextView) {
+        guard self.messageInputTextView.bounds.width > 0 else { return }
+        
+        // 현재 텍스트에 맞는 높이 계산
+        let fixedWidth = textView.bounds.width
+        let estimatedSize = textView.sizeThatFits(.init(width: fixedWidth, height: .greatestFiniteMagnitude))
+        let newHeight = max(minHeight, min(estimatedSize.height, maxHeight))
+        print(newHeight)
+        // 제약조건 업데이트
+        textViewHeightConstraint?.layoutConstraints.first?.constant = newHeight
+        
+        textView.isScrollEnabled = estimatedSize.height > maxHeight
+        
+        // 부모 뷰의 레이아웃 업데이트
+        self.superview?.layoutIfNeeded()
     }
 }
 
