@@ -37,7 +37,7 @@ final class ChatMessageInputField: BaseView {
         return view
     }()
     
-    let messageInputTextView: UITextView = {
+    lazy var messageInputTextView: UITextView = {
         let view = UITextView()
         view.textColor = .gray45
         view.font = .pretendard(size: 15, weight: .medium)
@@ -46,6 +46,7 @@ final class ChatMessageInputField: BaseView {
         view.backgroundColor = .deepTurquoise
         view.layer.cornerRadius = 18
         view.isScrollEnabled = false
+        view.delegate = self
         return view
     }()
 
@@ -82,8 +83,6 @@ final class ChatMessageInputField: BaseView {
         
         plusButton.addSubview(plusImageView)
         sendButton.addSubview(sendImageView)
-        
-        messageInputTextView.delegate = self
     }
     
     override func setupConstraints() {
@@ -147,7 +146,7 @@ extension ChatMessageInputField: UITextViewDelegate {
         let fixedWidth = textView.bounds.width
         let estimatedSize = textView.sizeThatFits(.init(width: fixedWidth, height: .greatestFiniteMagnitude))
         let newHeight = max(minHeight, min(estimatedSize.height, maxHeight))
-        print(newHeight)
+        
         // 제약조건 업데이트
         textViewHeightConstraint?.layoutConstraints.first?.constant = newHeight
         
