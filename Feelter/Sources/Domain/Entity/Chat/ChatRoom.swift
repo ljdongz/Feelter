@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ChatRoom {
+struct ChatRoom: Hashable {
     let roomID: String
     let participants: [Profile]
     let lastChat: ChatMessage?
