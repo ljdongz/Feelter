@@ -12,25 +12,26 @@ import RxSwift
 import SnapKit
 
 final class ChatRoomListViewController: RxBaseViewController {
+    
+    typealias DataSourceType = UITableViewDiffableDataSource<Int, ChatRoom>
 
     private lazy var tableView: UITableView = {
         let view = UITableView()
         view.rowHeight = 80
-        view.separatorStyle = .none
-        view.register(
-            ChatRoomListTableViewCell.self,
-            forCellReuseIdentifier: ChatRoomListTableViewCell.identifier
-        )
         view.delegate = self
         view.contentInset.top = 20
         return view
     }()
+    
+    private var dataSource: DataSourceType!
 
     private let viewModel = ChatRoomListViewModel()
     
     override func setupView() {
         title = "Chat"
         view.backgroundColor = .gray100
+        
+        setupTableView()
     }
   
     override func setupSubviews() {
@@ -52,14 +53,72 @@ final class ChatRoomListViewController: RxBaseViewController {
         let output = viewModel.transform(input: input)
         
         output.chatRooms
-            .bind(to: tableView.rx.items(
-                cellIdentifier: ChatRoomListTableViewCell.identifier,
-                cellType: ChatRoomListTableViewCell.self
-            )) { row, element, cell in
-                cell.selectionStyle = .none
-                cell.configureCell(element)
-            }
+            .subscribe(with: self, onNext: { owner, rooms in
+                owner.updateDataSource(with: rooms)
+            })
             .disposed(by: disposeBag)
+    }
+}
+
+extension ChatRoomListViewController {
+    
+    private func updateDataSource(with newRooms: [ChatRoom]) {
+        // 첫 번째 로드인 경우
+        if dataSource.snapshot().sectionIdentifiers.isEmpty {
+            var snapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
+            snapShot.appendSections([0])
+            snapShot.appendItems(newRooms.sorted { $0.updatedAt > $1.updatedAt })
+            dataSource.apply(snapShot, animatingDifferences: false)
+            return
+        }
+        
+        // 새로운 스냅샷을 직접 생성 (DiffableDataSource가 차이점을 자동 계산)
+        var newSnapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
+        newSnapShot.appendSections([0])
+        newSnapShot.appendItems(newRooms.sorted { $0.updatedAt > $1.updatedAt })
+        
+        // DiffableDataSource가 기존 데이터와 새 데이터를 비교해서 
+        // 실제로 변경된 부분만 애니메이션과 함께 업데이트
+        dataSource.apply(newSnapShot, animatingDifferences: true)
+    }
+    
+    func setupTableView() {
+        
+        // 1) 셀 등록
+        registerTableViewCells()
+        
+        // 2) DiffableDataSource 설정
+        configureDiffableDataSource()
+    }
+    
+    func registerTableViewCells() {
+        tableView.register(
+            ChatRoomListTableViewCell.self,
+            forCellReuseIdentifier: ChatRoomListTableViewCell.identifier
+        )
+    }
+    
+    func configureDiffableDataSource() {
+        dataSource = UITableViewDiffableDataSource(
+            tableView: tableView,
+            cellProvider: { tableView, indexPath, room in
+                guard let cell = tableView.dequeueReusableCell(
+                    withIdentifier: ChatRoomListTableViewCell.identifier,
+                    for: indexPath
+                ) as? ChatRoomListTableViewCell else { return .init() }
+                
+                guard let profile = room.participants.last else { return .init() }
+                
+                cell.configureCell(.init(
+                    profileImageURL: profile.profileImageURL,
+                    name: profile.nickname,
+                    message: room.lastChat?.content ?? "",
+                    date: room.updatedAt,
+                    unreadCount: 0
+                ))
+                return cell
+            }
+        )
     }
 }
 
