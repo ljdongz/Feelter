@@ -129,7 +129,7 @@ extension ChatRoomViewController {
         dataSource = UITableViewDiffableDataSource(
             tableView: tableView,
             cellProvider: { tableView, indexPath, itemIdentifier in
-                guard let item = itemIdentifier as? CellType else { return .init() }
+                guard let item = itemIdentifier as? MessageCellType else { return .init() }
                 
                 switch item {
                 
@@ -232,12 +232,12 @@ extension ChatRoomViewController: UITableViewDelegate {
 
 extension ChatRoomViewController {
     
-    enum CellType: Hashable {
-        case message(MessageData)
+    enum MessageCellType: Hashable {
+        case message(MessageItem)
         case dateSeparator(String)
     }
     
-    struct MessageData: Hashable {
+    struct MessageItem: Hashable {
         let id = UUID()
         let sender: MessageSender
         let content: String
@@ -258,24 +258,24 @@ extension ChatRoomViewController {
         }
     }
     
-    static let dummyData: [CellType] = [
+    static let dummyData: [MessageCellType] = [
         .dateSeparator("2025년 8월 14일"),
-        .message(MessageData(
+        .message(MessageItem(
             sender: .other(name: "윤새싹", profileImage: nil),
             content: "안녕하세요!",
             timestamp: "오후 1:15"
         )),
-        .message(MessageData(
+        .message(MessageItem(
             sender: .me,
             content: "네, 안녕하세요",
             timestamp: "오후 1:16"
         )),
-        .message(MessageData(
+        .message(MessageItem(
             sender: .other(name: "윤새싹", profileImage: nil),
             content: "오늘 날씨 정말 좋네요",
             timestamp: "오후 1:17"
         )),
-        .message(MessageData(
+        .message(MessageItem(
             sender: .me,
             content: "네, 정말 좋은 날씨입니다",
             timestamp: "오후 1:18"
