@@ -16,7 +16,7 @@ final class ChatRoomListTableViewCell: BaseTableViewCell {
     static let identifier = "ChatRoomListTableViewCell"
     
     struct Item: Hashable {
-        let profileImageURL: String
+        let profileImageURL: String?
         let name: String
         let message: String
         let date: String
@@ -82,6 +82,10 @@ final class ChatRoomListTableViewCell: BaseTableViewCell {
         super.prepareForReuse()
         
         profileImageView.image = nil
+    }
+    
+    override func setupView() {
+        selectionStyle = .none
     }
     
     override func setupSubviews() {
