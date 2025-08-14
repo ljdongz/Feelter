@@ -23,6 +23,7 @@ final class ChatRoomViewController: RxBaseViewController {
         let id = UUID()
         let content: String
         let date: String
+        let isMe: Bool = Bool.random()
     }
     
     private lazy var tableView: UITableView = {
@@ -111,9 +112,15 @@ extension ChatRoomViewController {
     }
     
     func registerTableViewCells() {
+        
         tableView.register(
             MyMessageTableViewCell.self,
             forCellReuseIdentifier: MyMessageTableViewCell.identifier
+        )
+        
+        tableView.register(
+            OtherMessageTableViewCell.self,
+            forCellReuseIdentifier: OtherMessageTableViewCell.identifier
         )
     }
     
@@ -121,15 +128,27 @@ extension ChatRoomViewController {
         dataSource = UITableViewDiffableDataSource(
             tableView: tableView,
             cellProvider: { tableView, indexPath, itemIdentifier in
-                guard let item = itemIdentifier as? MessageItem,
-                      let cell = tableView.dequeueReusableCell(
+                guard let item = itemIdentifier as? MessageItem else { return .init() }
+                
+                if item.isMe {
+                    guard let cell = tableView.dequeueReusableCell(
                         withIdentifier: MyMessageTableViewCell.identifier,
                         for: indexPath
-                      ) as? MyMessageTableViewCell else {
-                    return UITableViewCell()
+                    ) as? MyMessageTableViewCell else {
+                        return UITableViewCell()
+                    }
+                    cell.configureCell(content: item.content, date: item.date)
+                    return cell
+                } else {
+                    guard let cell = tableView.dequeueReusableCell(
+                        withIdentifier: OtherMessageTableViewCell.identifier,
+                        for: indexPath
+                    ) as? OtherMessageTableViewCell else {
+                        return UITableViewCell()
+                    }
+                    cell.configureCell(content: item.content, date: item.date)
+                    return cell
                 }
-                cell.configureCell(content: item.content, date: item.date)
-                return cell
             }
         )
     }
