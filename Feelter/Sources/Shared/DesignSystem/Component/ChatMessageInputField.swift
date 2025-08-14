@@ -88,7 +88,7 @@ final class ChatMessageInputField: BaseView {
     override func setupConstraints() {
         // 구분선
         divider.snp.makeConstraints { make in
-            make.horizontalEdges.equalToSuperview()
+            make.horizontalEdges.top.equalToSuperview()
             make.bottom.equalTo(inputFieldContainerView.snp.top)
             make.height.equalTo(1)
         }
@@ -96,6 +96,7 @@ final class ChatMessageInputField: BaseView {
         // 메시지 입력 필드 컨테이너
         inputFieldContainerView.snp.makeConstraints { make in
             make.horizontalEdges.bottom.equalToSuperview()
+            make.top.equalTo(divider.snp.bottom)
         }
         
         // 입력 필드 좌측 추가 버튼
