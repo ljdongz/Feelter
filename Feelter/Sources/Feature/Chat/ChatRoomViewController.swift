@@ -15,15 +15,8 @@ final class ChatRoomViewController: RxBaseViewController {
     
     typealias DataSourceType = UITableViewDiffableDataSource<Section, AnyHashable>
     
-    enum Section {
+    enum Section: Int {
         case chat
-    }
-    
-    struct MessageItem: Hashable {
-        let id = UUID()
-        let content: String
-        let date: String
-        let isMe: Bool = Bool.random()
     }
     
     private lazy var tableView: UITableView = {
@@ -54,11 +47,14 @@ final class ChatRoomViewController: RxBaseViewController {
         
         var snapShot = dataSource.snapshot()
         snapShot.appendSections([.chat])
-        snapShot.appendItems(MessageItem.dummy)
+        snapShot.appendItems(Self.dummyData)
         dataSource.apply(snapShot, animatingDifferences: false)
         
         DispatchQueue.main.async {
-            let lastIndexPath = IndexPath(row: MessageItem.dummy.count - 1, section: 0)
+            let lastIndexPath = IndexPath(
+                row: Self.dummyData.count - 1,
+                section: Section.chat.rawValue
+            )
             self.tableView.scrollToRow(at: lastIndexPath, at: .bottom, animated: false)
         }
     }
@@ -122,32 +118,52 @@ extension ChatRoomViewController {
             OtherMessageTableViewCell.self,
             forCellReuseIdentifier: OtherMessageTableViewCell.identifier
         )
+        
+        tableView.register(
+            DateSeparatorTableViewCell.self,
+            forCellReuseIdentifier: DateSeparatorTableViewCell.identifier
+        )
     }
     
     func configureDiffableDataSource() {
         dataSource = UITableViewDiffableDataSource(
             tableView: tableView,
             cellProvider: { tableView, indexPath, itemIdentifier in
-                guard let item = itemIdentifier as? MessageItem else { return .init() }
+                guard let item = itemIdentifier as? CellType else { return .init() }
                 
-                if item.isMe {
+                switch item {
+                
+                // 날짜 구분선
+                case .dateSeparator(let date):
                     guard let cell = tableView.dequeueReusableCell(
-                        withIdentifier: MyMessageTableViewCell.identifier,
+                        withIdentifier: DateSeparatorTableViewCell.identifier,
                         for: indexPath
-                    ) as? MyMessageTableViewCell else {
-                        return UITableViewCell()
-                    }
-                    cell.configureCell(content: item.content, date: item.date)
+                    ) as? DateSeparatorTableViewCell else { return .init() }
+                    
+                    cell.configureCell(date)
                     return cell
-                } else {
-                    guard let cell = tableView.dequeueReusableCell(
-                        withIdentifier: OtherMessageTableViewCell.identifier,
-                        for: indexPath
-                    ) as? OtherMessageTableViewCell else {
-                        return UITableViewCell()
+                    
+                // 메시지
+                case .message(let messageData):
+                    if messageData.isMe {
+                        guard let cell = tableView.dequeueReusableCell(
+                            withIdentifier: MyMessageTableViewCell.identifier,
+                            for: indexPath
+                        ) as? MyMessageTableViewCell else {
+                            return UITableViewCell()
+                        }
+                        cell.configureCell(content: messageData.content, date: messageData.timestamp)
+                        return cell
+                    } else {
+                        guard let cell = tableView.dequeueReusableCell(
+                            withIdentifier: OtherMessageTableViewCell.identifier,
+                            for: indexPath
+                        ) as? OtherMessageTableViewCell else {
+                            return UITableViewCell()
+                        }
+                        cell.configureCell(content: messageData.content, date: messageData.timestamp)
+                        return cell
                     }
-                    cell.configureCell(content: item.content, date: item.date)
-                    return cell
                 }
             }
         )
@@ -214,19 +230,56 @@ extension ChatRoomViewController: UITableViewDelegate {
     
 }
 
-extension ChatRoomViewController.MessageItem {
-    static let dummy = [
-        ChatRoomViewController.MessageItem(content: "asdfas1f", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "asdf321asfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasf", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "a131313131313131313131313131313sdf3asf", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "asasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfdf43asf", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "asd43asdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasf5fasf", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "a1543sdfasf", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "asdfaasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfsf", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "afㅁㄴㅇㄹ\nasdfasfasdfasf", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "af", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "asdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasf", date: "오후 1:15"),
-        ChatRoomViewController.MessageItem(content: "asdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasfasdfasf", date: "오후 1:15"),
+extension ChatRoomViewController {
+    
+    enum CellType: Hashable {
+        case message(MessageData)
+        case dateSeparator(String)
+    }
+    
+    struct MessageData: Hashable {
+        let id = UUID()
+        let sender: MessageSender
+        let content: String
+        let timestamp: String
+        
+        enum MessageSender: Hashable {
+            case me
+            case other(name: String, profileImage: String?)
+        }
+        
+        var isMe: Bool {
+            switch sender {
+            case .me:
+                return true
+            case .other:
+                return false
+            }
+        }
+    }
+    
+    static let dummyData: [CellType] = [
+        .dateSeparator("2025년 8월 14일"),
+        .message(MessageData(
+            sender: .other(name: "윤새싹", profileImage: nil),
+            content: "안녕하세요!",
+            timestamp: "오후 1:15"
+        )),
+        .message(MessageData(
+            sender: .me,
+            content: "네, 안녕하세요",
+            timestamp: "오후 1:16"
+        )),
+        .message(MessageData(
+            sender: .other(name: "윤새싹", profileImage: nil),
+            content: "오늘 날씨 정말 좋네요",
+            timestamp: "오후 1:17"
+        )),
+        .message(MessageData(
+            sender: .me,
+            content: "네, 정말 좋은 날씨입니다",
+            timestamp: "오후 1:18"
+        ))
     ]
 }
 
