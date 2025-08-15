@@ -113,7 +113,7 @@ extension ChatRoomListViewController {
                     profileImageURL: profile.profileImageURL,
                     name: profile.nickname,
                     message: room.lastChat?.content ?? "",
-                    date: room.updatedAt,
+                    date: room.updatedAt.formatted(.basic),
                     unreadCount: 0
                 ))
                 return cell

@@ -29,8 +29,8 @@ struct ChatRoomResponseDTO: Decodable {
             roomID: roomID,
             participants: participants.map { $0.toDomain() },
             lastChat: lastChat?.toDomain(),
-            createdAt: createdAt,
-            updatedAt: updatedAt
+            createdAt: UTCDateFormatter.shared.date(from: createdAt) ?? Date(),
+            updatedAt: UTCDateFormatter.shared.date(from: updatedAt) ?? Date()
         )
     }
 }

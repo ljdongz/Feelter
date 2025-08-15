@@ -13,6 +13,6 @@ struct ChatMessage: Hashable {
     let content: String
     let fileURLs: [String]
     let sender: Profile
-    let createdAt: String
-    let updatedAt: String
+    let createdAt: Date
+    let updatedAt: Date
 }

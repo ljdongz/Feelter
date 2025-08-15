@@ -34,8 +34,8 @@ struct ChatMessageResponseDTO: Decodable {
             content: content,
             fileURLs: fileURLs,
             sender: sender.toDomain(),
-            createdAt: createdAt,
-            updatedAt: updatedAt
+            createdAt: UTCDateFormatter.shared.date(from: createdAt) ?? Date(),
+            updatedAt: UTCDateFormatter.shared.date(from: updatedAt) ?? Date()
         )
     }
 }

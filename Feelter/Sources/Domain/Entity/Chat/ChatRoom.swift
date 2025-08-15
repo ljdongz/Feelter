@@ -11,7 +11,7 @@ struct ChatRoom: Hashable {
     let roomID: String
     let participants: [Profile]
     let lastChat: ChatMessage?
-    let createdAt: String
-    let updatedAt: String
+    let createdAt: Date
+    let updatedAt: Date
 }
 
