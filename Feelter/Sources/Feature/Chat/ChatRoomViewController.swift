@@ -33,14 +33,23 @@ final class ChatRoomViewController: RxBaseViewController {
         return view
     }()
     
-    private var messageInputFieldBottomConstraint: Constraint?
+    private let viewModel: ChatRoomViewModel
     
+    private var messageInputFieldBottomConstraint: Constraint?
     private var dataSource: DataSourceType!
+    
+    init(viewModel: ChatRoomViewModel) {
+        self.viewModel = viewModel
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func setupView() {
         setupTableView()
-        
-        loadInitialData()
     }
 
     private func loadInitialData() {
@@ -80,6 +89,27 @@ final class ChatRoomViewController: RxBaseViewController {
     }
     
     override func bind() {
+        let input = ChatRoomViewModel.Input(
+            viewDidLoad: .just(())
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.messages
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, updateType in
+                switch updateType {
+                case .fullReload(let messages):
+                    owner.initializeDataSource(messages)
+                case .prepend(let messages):
+                    owner.prependDataSource(messages)
+                case .append(let message):
+                    owner.appendDataSource(message)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        
         NotificationCenter.default.rx
             .notification(UIResponder.keyboardWillShowNotification)
             .subscribe(with: self, onNext: { owner, notification in
@@ -96,9 +126,11 @@ final class ChatRoomViewController: RxBaseViewController {
     }
 }
 
+// MARK: - TableView Configuration
+
 extension ChatRoomViewController {
     
-    func setupTableView() {
+    private func setupTableView() {
         
         // 1) 셀 등록
         registerTableViewCells()
@@ -107,7 +139,7 @@ extension ChatRoomViewController {
         configureDiffableDataSource()
     }
     
-    func registerTableViewCells() {
+    private func registerTableViewCells() {
         
         tableView.register(
             MyMessageTableViewCell.self,
@@ -125,7 +157,7 @@ extension ChatRoomViewController {
         )
     }
     
-    func configureDiffableDataSource() {
+    private func configureDiffableDataSource() {
         dataSource = UITableViewDiffableDataSource(
             tableView: tableView,
             cellProvider: { tableView, indexPath, itemIdentifier in
@@ -169,6 +201,34 @@ extension ChatRoomViewController {
         )
     }
 }
+
+// MARK: - Update DataSource
+extension ChatRoomViewController {
+    private func initializeDataSource(_ messages: [ChatMessage]) {
+        var snapShot = dataSource.snapshot()
+        snapShot.appendSections([.chat])
+        
+        let data = messages.map {
+            MessageCellType.message(.init(
+                sender: .other(name: $0.sender.nickname, profileImage: $0.sender.profileImageURL),
+                content: $0.content,
+                timestamp: $0.createdAt.formatted(.timeOnly)
+            ))
+        }
+        
+        snapShot.appendItems(data)
+        dataSource.apply(snapShot, animatingDifferences: false)
+    }
+    
+    private func prependDataSource(_ messages: [ChatMessage]) {
+        
+    }
+    
+    private func appendDataSource(_ message: ChatMessage) {
+        
+    }
+}
+
 
 // MARK: - Keyboard Handling
 
@@ -287,6 +347,10 @@ extension ChatRoomViewController {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    UINavigationController(rootViewController: ChatRoomViewController())
+    UINavigationController(
+        rootViewController: ChatRoomViewController(
+            viewModel: ChatRoomViewModel(roomID: "")
+        )
+    )
 }
 #endif

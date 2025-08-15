@@ -53,36 +53,29 @@ final class ChatRoomListViewController: RxBaseViewController {
         let output = viewModel.transform(input: input)
         
         output.chatRooms
+            .observe(on: MainScheduler.instance)
             .subscribe(with: self, onNext: { owner, rooms in
                 owner.updateDataSource(with: rooms)
             })
             .disposed(by: disposeBag)
+        
+        tableView.rx.itemSelected
+            .map { output.chatRooms.value[$0.row] }
+            .subscribe(with: self) { owner, room in
+                let viewModel = ChatRoomViewModel(roomID: room.roomID)
+                let vc = ChatRoomViewController(viewModel: viewModel)
+                vc.title = room.participants.last?.nickname
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
 }
 
+// MARK: - TableView Configuration
+
 extension ChatRoomListViewController {
     
-    private func updateDataSource(with newRooms: [ChatRoom]) {
-        // 첫 번째 로드인 경우
-        if dataSource.snapshot().sectionIdentifiers.isEmpty {
-            var snapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
-            snapShot.appendSections([0])
-            snapShot.appendItems(newRooms.sorted { $0.updatedAt > $1.updatedAt })
-            dataSource.apply(snapShot, animatingDifferences: false)
-            return
-        }
-        
-        // 새로운 스냅샷을 직접 생성 (DiffableDataSource가 차이점을 자동 계산)
-        var newSnapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
-        newSnapShot.appendSections([0])
-        newSnapShot.appendItems(newRooms.sorted { $0.updatedAt > $1.updatedAt })
-        
-        // DiffableDataSource가 기존 데이터와 새 데이터를 비교해서 
-        // 실제로 변경된 부분만 애니메이션과 함께 업데이트
-        dataSource.apply(newSnapShot, animatingDifferences: true)
-    }
-    
-    func setupTableView() {
+    private func setupTableView() {
         
         // 1) 셀 등록
         registerTableViewCells()
@@ -91,14 +84,14 @@ extension ChatRoomListViewController {
         configureDiffableDataSource()
     }
     
-    func registerTableViewCells() {
+    private func registerTableViewCells() {
         tableView.register(
             ChatRoomListTableViewCell.self,
             forCellReuseIdentifier: ChatRoomListTableViewCell.identifier
         )
     }
     
-    func configureDiffableDataSource() {
+    private func configureDiffableDataSource() {
         dataSource = UITableViewDiffableDataSource(
             tableView: tableView,
             cellProvider: { tableView, indexPath, room in
@@ -121,6 +114,23 @@ extension ChatRoomListViewController {
         )
     }
 }
+
+// MARK: - Update DataSource
+
+extension ChatRoomListViewController {
+    private func updateDataSource(with newRooms: [ChatRoom]) {
+        // 새로운 스냅샷을 직접 생성 (DiffableDataSource가 차이점을 자동 계산)
+        var newSnapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
+        newSnapShot.appendSections([0])
+        newSnapShot.appendItems(newRooms.sorted { $0.updatedAt > $1.updatedAt })
+        
+        // DiffableDataSource가 기존 데이터와 새 데이터를 비교해서
+        // 실제로 변경된 부분만 애니메이션과 함께 업데이트
+        dataSource.apply(newSnapShot, animatingDifferences: true)
+    }
+}
+
+// MARK: - TableViewDelegate
 
 extension ChatRoomListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didHighlightRowAt indexPath: IndexPath) {
