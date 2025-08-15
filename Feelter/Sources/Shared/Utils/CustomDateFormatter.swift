@@ -7,8 +7,8 @@
 
 import Foundation
 
-final class ChattingDateFormatter {
-    static let shared = ChattingDateFormatter()
+final class CustomDateFormatter {
+    static let shared = CustomDateFormatter()
     
     private let calendar: Calendar
     

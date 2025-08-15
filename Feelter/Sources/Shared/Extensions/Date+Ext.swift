@@ -18,11 +18,11 @@ extension Date {
     func formatted(_ format: FormatType) -> String {
         switch format {
         case .basic:
-            ChattingDateFormatter.shared.formatDate(self)
+            CustomDateFormatter.shared.formatDate(self)
         case .fullDateWithWeekday:
-            ChattingDateFormatter.shared.formatFullDateWithWeekday(self)
+            CustomDateFormatter.shared.formatFullDateWithWeekday(self)
         case .timeOnly:
-            ChattingDateFormatter.shared.formatTimeOnly(self)
+            CustomDateFormatter.shared.formatTimeOnly(self)
         }
     }
 }
