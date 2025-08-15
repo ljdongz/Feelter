@@ -11,13 +11,9 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
-final class ChatRoomViewController: RxBaseViewController {
+final class ChatViewController: RxBaseViewController {
     
-    typealias DataSourceType = UITableViewDiffableDataSource<Section, AnyHashable>
-    
-    enum Section: Int {
-        case chat
-    }
+    typealias DataSourceType = UITableViewDiffableDataSource<Int, AnyHashable>
     
     private lazy var tableView: UITableView = {
         let view = UITableView()
@@ -33,12 +29,12 @@ final class ChatRoomViewController: RxBaseViewController {
         return view
     }()
     
-    private let viewModel: ChatRoomViewModel
+    private let viewModel: ChatViewModel
     
     private var messageInputFieldBottomConstraint: Constraint?
     private var dataSource: DataSourceType!
     
-    init(viewModel: ChatRoomViewModel) {
+    init(viewModel: ChatViewModel) {
         self.viewModel = viewModel
         
         super.init(nibName: nil, bundle: nil)
@@ -50,22 +46,6 @@ final class ChatRoomViewController: RxBaseViewController {
     
     override func setupView() {
         setupTableView()
-    }
-
-    private func loadInitialData() {
-        
-        var snapShot = dataSource.snapshot()
-        snapShot.appendSections([.chat])
-        snapShot.appendItems(Self.dummyData)
-        dataSource.apply(snapShot, animatingDifferences: false)
-        
-        DispatchQueue.main.async {
-            let lastIndexPath = IndexPath(
-                row: Self.dummyData.count - 1,
-                section: Section.chat.rawValue
-            )
-            self.tableView.scrollToRow(at: lastIndexPath, at: .bottom, animated: false)
-        }
     }
     
     override func setupSubviews() {
@@ -89,7 +69,7 @@ final class ChatRoomViewController: RxBaseViewController {
     }
     
     override func bind() {
-        let input = ChatRoomViewModel.Input(
+        let input = ChatViewModel.Input(
             viewDidLoad: .just(())
         )
         
@@ -128,7 +108,7 @@ final class ChatRoomViewController: RxBaseViewController {
 
 // MARK: - TableView Configuration
 
-extension ChatRoomViewController {
+extension ChatViewController {
     
     private func setupTableView() {
         
@@ -203,10 +183,10 @@ extension ChatRoomViewController {
 }
 
 // MARK: - Update DataSource
-extension ChatRoomViewController {
+extension ChatViewController {
     private func initializeDataSource(_ messages: [ChatMessage]) {
         var snapShot = dataSource.snapshot()
-        snapShot.appendSections([.chat])
+        snapShot.appendSections([0])
         
         let data = messages.map {
             MessageCellType.message(.init(
@@ -232,7 +212,7 @@ extension ChatRoomViewController {
 
 // MARK: - Keyboard Handling
 
-extension ChatRoomViewController {
+extension ChatViewController {
     
     private func handleKeyboardWillShow(notification: Notification) {
         guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
@@ -286,11 +266,11 @@ extension ChatRoomViewController {
     }
 }
 
-extension ChatRoomViewController: UITableViewDelegate {
+extension ChatViewController: UITableViewDelegate {
     
 }
 
-extension ChatRoomViewController {
+extension ChatViewController {
     
     enum MessageCellType: Hashable {
         case message(MessageItem)
@@ -348,8 +328,8 @@ import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
     UINavigationController(
-        rootViewController: ChatRoomViewController(
-            viewModel: ChatRoomViewModel(roomID: "")
+        rootViewController: ChatViewController(
+            viewModel: ChatViewModel(roomID: "")
         )
     )
 }

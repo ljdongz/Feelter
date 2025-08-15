@@ -10,7 +10,7 @@ import Foundation
 import RxCocoa
 import RxSwift
 
-final class ChatRoomViewModel: ViewModel {
+final class ChatViewModel: ViewModel {
     struct Input {
         let viewDidLoad: Observable<Void>
     }
@@ -50,7 +50,7 @@ final class ChatRoomViewModel: ViewModel {
     }
 }
 
-extension ChatRoomViewModel {
+extension ChatViewModel {
     enum UpdateType {
         /// 초기 로드, 재연결
         case fullReload([ChatMessage])

@@ -9,11 +9,11 @@ import UIKit
 
 import SnapKit
 
-typealias ChatRoomListCellItem = ChatRoomListTableViewCell.Item
+typealias ChatRoomCellItem = ChatRoomTableViewCell.Item
 
-final class ChatRoomListTableViewCell: BaseTableViewCell {
+final class ChatRoomTableViewCell: BaseTableViewCell {
     
-    static let identifier = "ChatRoomListTableViewCell"
+    static let identifier = "ChatRoomTableViewCell"
     
     struct Item: Hashable {
         let profileImageURL: String?
@@ -135,7 +135,7 @@ final class ChatRoomListTableViewCell: BaseTableViewCell {
         }
     }
     
-    func configureCell(_ item: ChatRoomListCellItem) {
+    func configureCell(_ item: ChatRoomCellItem) {
         profileImageView.image = .sample
         
         nameLabel.text = item.name

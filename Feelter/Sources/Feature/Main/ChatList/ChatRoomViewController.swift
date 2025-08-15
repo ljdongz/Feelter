@@ -11,7 +11,7 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
-final class ChatRoomListViewController: RxBaseViewController {
+final class ChatRoomViewController: RxBaseViewController {
     
     typealias DataSourceType = UITableViewDiffableDataSource<Int, ChatRoom>
 
@@ -25,7 +25,7 @@ final class ChatRoomListViewController: RxBaseViewController {
     
     private var dataSource: DataSourceType!
 
-    private let viewModel = ChatRoomListViewModel()
+    private let viewModel = ChatRoomViewModel()
     
     override func setupView() {
         title = "Chat"
@@ -46,7 +46,7 @@ final class ChatRoomListViewController: RxBaseViewController {
     }
     
     override func bind() {
-        let input = ChatRoomListViewModel.Input(
+        let input = ChatRoomViewModel.Input(
             viewDidLoad: .just(())
         )
         
@@ -62,8 +62,8 @@ final class ChatRoomListViewController: RxBaseViewController {
         tableView.rx.itemSelected
             .map { output.chatRooms.value[$0.row] }
             .subscribe(with: self) { owner, room in
-                let viewModel = ChatRoomViewModel(roomID: room.roomID)
-                let vc = ChatRoomViewController(viewModel: viewModel)
+                let viewModel = ChatViewModel(roomID: room.roomID)
+                let vc = ChatViewController(viewModel: viewModel)
                 vc.title = room.participants.last?.nickname
                 owner.navigationController?.pushViewController(vc, animated: true)
             }
@@ -73,7 +73,7 @@ final class ChatRoomListViewController: RxBaseViewController {
 
 // MARK: - TableView Configuration
 
-extension ChatRoomListViewController {
+extension ChatRoomViewController {
     
     private func setupTableView() {
         
@@ -86,8 +86,8 @@ extension ChatRoomListViewController {
     
     private func registerTableViewCells() {
         tableView.register(
-            ChatRoomListTableViewCell.self,
-            forCellReuseIdentifier: ChatRoomListTableViewCell.identifier
+            ChatRoomTableViewCell.self,
+            forCellReuseIdentifier: ChatRoomTableViewCell.identifier
         )
     }
     
@@ -96,9 +96,9 @@ extension ChatRoomListViewController {
             tableView: tableView,
             cellProvider: { tableView, indexPath, room in
                 guard let cell = tableView.dequeueReusableCell(
-                    withIdentifier: ChatRoomListTableViewCell.identifier,
+                    withIdentifier: ChatRoomTableViewCell.identifier,
                     for: indexPath
-                ) as? ChatRoomListTableViewCell else { return .init() }
+                ) as? ChatRoomTableViewCell else { return .init() }
                 
                 guard let profile = room.participants.last else { return .init() }
                 
@@ -117,7 +117,7 @@ extension ChatRoomListViewController {
 
 // MARK: - Update DataSource
 
-extension ChatRoomListViewController {
+extension ChatRoomViewController {
     private func updateDataSource(with newRooms: [ChatRoom]) {
         // 새로운 스냅샷을 직접 생성 (DiffableDataSource가 차이점을 자동 계산)
         var newSnapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
@@ -132,15 +132,15 @@ extension ChatRoomListViewController {
 
 // MARK: - TableViewDelegate
 
-extension ChatRoomListViewController: UITableViewDelegate {
+extension ChatRoomViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didHighlightRowAt indexPath: IndexPath) {
-        guard let cell = tableView.cellForRow(at: indexPath) as? ChatRoomListTableViewCell else { return }
+        guard let cell = tableView.cellForRow(at: indexPath) as? ChatRoomTableViewCell else { return }
         
         cell.animateTouchDown()
     }
     
     func tableView(_ tableView: UITableView, didUnhighlightRowAt indexPath: IndexPath) {
-        guard let cell = tableView.cellForRow(at: indexPath) as? ChatRoomListTableViewCell else { return }
+        guard let cell = tableView.cellForRow(at: indexPath) as? ChatRoomTableViewCell else { return }
         
         cell.animateTouchUp()
     }
@@ -150,6 +150,6 @@ extension ChatRoomListViewController: UITableViewDelegate {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    UINavigationController(rootViewController: ChatRoomListViewController())
+    UINavigationController(rootViewController: ChatRoomViewController())
 }
 #endif

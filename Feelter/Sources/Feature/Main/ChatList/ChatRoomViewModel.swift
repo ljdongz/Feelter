@@ -10,7 +10,7 @@ import Foundation
 import RxCocoa
 import RxSwift
 
-final class ChatRoomListViewModel: ViewModel {
+final class ChatRoomViewModel: ViewModel {
     
     struct Input {
         let viewDidLoad: Observable<Void>
