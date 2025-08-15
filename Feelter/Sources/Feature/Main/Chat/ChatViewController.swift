@@ -215,8 +215,8 @@ extension ChatViewController {
 extension ChatViewController {
     
     private func handleKeyboardWillShow(notification: Notification) {
-        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
-              let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else {
+        guard let keyboardFrame = notification.keyboardFrameEndUserInfoKey,
+              let animationDuration = notification.keyboardAnimationDurationUserInfoKey else {
             return
         }
         
@@ -244,8 +244,8 @@ extension ChatViewController {
     }
     
     private func handleKeyboardWillHide(notification: Notification) {
-        guard let animationDuration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double,
-              let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
+        guard let animationDuration = notification.keyboardAnimationDurationUserInfoKey,
+              let keyboardFrame = notification.keyboardFrameEndUserInfoKey else {
             return
         }
         
