@@ -90,7 +90,7 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         
         contentStackView.snp.makeConstraints { make in
             make.top.equalTo(profileImageView.snp.top).offset(2)
-            make.leading.equalTo(profileImageView.snp.trailing).offset(10)
+            make.leading.equalToSuperview().inset(65)
             make.trailing.lessThanOrEqualToSuperview().inset(85)
             make.bottom.equalToSuperview().inset(2)
         }
@@ -110,10 +110,27 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         messageLabel.text = message.content
         dateLabel.text = message.timestamp.formatted(.timeOnly)
         
+        // 프로필 표시 여부에 따른 UI 처리
+        if message.showProfile {
+            showProfileElements(message: message)
+        } else {
+            hideProfileElements()
+        }
+    }
+    
+    private func showProfileElements(message: MessageItem) {
+        profileImageView.isHidden = false
+        nameLabel.isHidden = false
+        
         nameLabel.text = message.sender.name
         ImageLoader.applyAuthenticatedImage(
             for: profileImageView,
             path: message.sender.profileImageURL ?? ""
         )
+    }
+    
+    private func hideProfileElements() {
+        profileImageView.isHidden = true
+        nameLabel.isHidden = true
     }
 }

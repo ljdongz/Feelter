@@ -35,7 +35,7 @@ final class ChatRoomViewModel: ViewModel {
                 case .success(let rooms):
                     output.chatRooms.accept(rooms)
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    print(error)
                 }
             })
             .disposed(by: disposeBag)

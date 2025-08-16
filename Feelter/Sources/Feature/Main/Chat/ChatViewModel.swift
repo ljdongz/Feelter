@@ -44,7 +44,7 @@ final class ChatViewModel: ViewModel {
                     let cellTypes = owner.convertToCellTypes(messages: messages)
                     output.messages.accept(.fullReload(cellTypes))
                 case .failure(let error):
-                    print(error.localizedDescription)
+                    print(error)
                 }
             }
             .disposed(by: disposeBag)
@@ -61,6 +61,7 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let message):
+                    // TODO: 연속 프로필 처리 필요
                     let cellType = owner.convertToSingleCellType(message: message)
                     output.messages.accept(.append(cellType))
                 case .failure(let error):
@@ -81,17 +82,32 @@ extension ChatViewModel {
         var cellTypes: [MessageCellType] = []
         var lastDate: Date?
         
-        for message in messages {
+        for (index, message) in messages.enumerated() {
             let messageDate = message.createdAt
             
+            let isDateSeparator = shouldAddDateSeparator(
+                lastDate: lastDate,
+                currentDate: messageDate
+            )
+            
             // 새로운 날짜인 경우 구분선 추가
-            if shouldAddDateSeparator(lastDate: lastDate, currentDate: messageDate) {
+            if isDateSeparator {
                 cellTypes.append(.dateSeparator(messageDate))
                 lastDate = messageDate
             }
             
+            // 프로필 표시 여부 결정
+            let showProfile = shouldShowProfile(
+                currentMessage: message,
+                previousMessage: index > 0 ? messages[index - 1] : nil,
+                didAddDateSeparator: isDateSeparator
+            )
+            
             // 메시지 추가
-            cellTypes.append(convertToSingleCellType(message: message))
+            cellTypes.append(convertToSingleCellType(
+                message: message,
+                showProfile: showProfile
+            ))
         }
         
         return cellTypes
@@ -102,7 +118,31 @@ extension ChatViewModel {
         return !Calendar.current.isDate(lastDate, inSameDayAs: currentDate)
     }
     
-    private func convertToSingleCellType(message: ChatMessage) -> MessageCellType {
+    private func shouldShowProfile(
+        currentMessage: ChatMessage,
+        previousMessage: ChatMessage?,
+        didAddDateSeparator: Bool
+    ) -> Bool {
+        // 내 메시지는 항상 프로필 숨김
+        guard currentMessage.sender.userID != tokenManager.userID else { return false }
+        
+        // 날짜 구분선이 추가되었으면 프로필 표시
+        if didAddDateSeparator { return true }
+        
+        // 이전 메시지가 없으면 프로필 표시
+        guard let previousMessage else { return true }
+        
+        // 이전 메시지와 발신자가 다르면 프로필 표시
+        if previousMessage.sender.userID != currentMessage.sender.userID { return true }
+        
+        // 같은 발신자의 연속 메시지면 프로필 숨김
+        return false
+    }
+    
+    private func convertToSingleCellType(
+        message: ChatMessage,
+        showProfile: Bool = true
+    ) -> MessageCellType {
         let isMe = message.sender.userID == tokenManager.userID
         
         let sender = MessageItem.MessageSender(
@@ -114,7 +154,8 @@ extension ChatViewModel {
         return .message(MessageItem(
             sender: sender,
             content: message.content,
-            timestamp: message.createdAt
+            timestamp: message.createdAt,
+            showProfile: showProfile
         ))
     }
 }
@@ -138,6 +179,7 @@ struct MessageItem: Hashable {
     let sender: MessageSender
     let content: String
     let timestamp: Date
+    let showProfile: Bool
     
     struct MessageSender: Hashable {
         let name: String
