@@ -70,7 +70,16 @@ final class ChatViewController: RxBaseViewController {
     
     override func bind() {
         let input = ChatViewModel.Input(
-            viewDidLoad: .just(())
+            viewDidLoad: .just(()),
+            sendMessageButtonTapped: messageInputField.sendButton.rx
+                .tap
+                .compactMap { [weak self] _ in
+                    self?.messageInputField.message
+                }
+                .do(onNext: { [weak self] _ in
+                    self?.messageInputField.message = ""
+                })
+                .asObservable()
         )
         
         let output = viewModel.transform(input: input)

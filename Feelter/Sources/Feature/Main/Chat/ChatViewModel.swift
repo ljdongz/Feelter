@@ -13,6 +13,7 @@ import RxSwift
 final class ChatViewModel: ViewModel {
     struct Input {
         let viewDidLoad: Observable<Void>
+        let sendMessageButtonTapped: Observable<String>
     }
     
     struct Output {
@@ -42,6 +43,25 @@ final class ChatViewModel: ViewModel {
                     output.messages.accept(.fullReload(messages))
                 case .failure(let error):
                     print(error.localizedDescription)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        input.sendMessageButtonTapped
+            .withAsyncResult(with: self) { owner, message in
+                try await owner.chatRepository.sendMessage(
+                    to: owner.roomID,
+                    message: .init(
+                        content: message,
+                        fileURLs: []
+                    ))
+            }
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success(let message):
+                    print(message)
+                case .failure(let error):
+                    print(error)
                 }
             }
             .disposed(by: disposeBag)

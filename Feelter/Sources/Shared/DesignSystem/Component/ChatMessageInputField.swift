@@ -71,6 +71,16 @@ final class ChatMessageInputField: BaseView {
     private let minHeight: CGFloat = 36
     private let maxHeight: CGFloat = 120
     
+    var message: String {
+        get {
+            messageInputTextView.text
+        }
+        set {
+            messageInputTextView.text = newValue
+            updateSendButtonEnabled()
+        }
+    }
+    
     override func setupSubviews() {
         addSubviews([
             divider,
