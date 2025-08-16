@@ -72,5 +72,6 @@ final class MyMessageTableViewCell: BaseTableViewCell {
     func configureCell(message: MessageItem) {
         messageLabel.text = message.content
         dateLabel.text = message.timestamp.formatted(.timeOnly)
+        dateLabel.isHidden = !message.showTime
     }
 }

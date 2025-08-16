@@ -116,6 +116,8 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         } else {
             hideProfileElements()
         }
+        
+        dateLabel.isHidden = !message.showTime
     }
     
     private func showProfileElements(message: MessageItem) {

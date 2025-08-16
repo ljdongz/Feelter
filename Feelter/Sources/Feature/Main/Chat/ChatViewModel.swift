@@ -24,6 +24,7 @@ final class ChatViewModel: ViewModel {
     @Dependency private var tokenManager: TokenManager
     
     private let roomID: String
+    private let calendar = Calendar.current
     
     var disposeBag: DisposeBag = .init()
     
@@ -74,7 +75,7 @@ final class ChatViewModel: ViewModel {
     }
 }
 
-// MARK: - Convert to MessageCellType Method
+// MARK: - MessageCellType Method
 
 extension ChatViewModel {
     
@@ -103,10 +104,17 @@ extension ChatViewModel {
                 didAddDateSeparator: isDateSeparator
             )
             
+            // 시간 표시 여부 결정
+            let showTime = shouldShowTime(
+                currentMessage: message,
+                nextMessage: index < messages.count - 1 ? messages[index + 1] : nil
+            )
+            
             // 메시지 추가
             cellTypes.append(convertToSingleCellType(
                 message: message,
-                showProfile: showProfile
+                showProfile: showProfile,
+                showTime: showTime
             ))
         }
         
@@ -115,7 +123,7 @@ extension ChatViewModel {
     
     private func shouldAddDateSeparator(lastDate: Date?, currentDate: Date) -> Bool {
         guard let lastDate = lastDate else { return true }
-        return !Calendar.current.isDate(lastDate, inSameDayAs: currentDate)
+        return !calendar.isDate(lastDate, inSameDayAs: currentDate)
     }
     
     private func shouldShowProfile(
@@ -139,9 +147,34 @@ extension ChatViewModel {
         return false
     }
     
+    private func shouldShowTime(
+        currentMessage: ChatMessage,
+        nextMessage: ChatMessage?
+    ) -> Bool {
+        // 다음 메시지가 없으면 시간 표시 (마지막 메시지)
+        guard let nextMessage = nextMessage else { return true }
+        
+        // 다음 메시지와 발신자가 다르면 시간 표시
+        if nextMessage.sender.userID != currentMessage.sender.userID { return true }
+        
+        // 다음 메시지와 시간이 다르면 시간 표시
+        if !isSameMinute(currentMessage.createdAt, nextMessage.createdAt) { return true }
+        
+        // 같은 발신자이고 같은 시간이면 시간 숨김
+        return false
+    }
+    
+    private func isSameMinute(_ date1: Date, _ date2: Date) -> Bool {
+        let components1 = calendar.dateComponents([.hour, .minute], from: date1)
+        let components2 = calendar.dateComponents([.hour, .minute], from: date2)
+        
+        return components1.hour == components2.hour && components1.minute == components2.minute
+    }
+    
     private func convertToSingleCellType(
         message: ChatMessage,
-        showProfile: Bool = true
+        showProfile: Bool = true,
+        showTime: Bool = true
     ) -> MessageCellType {
         let isMe = message.sender.userID == tokenManager.userID
         
@@ -155,10 +188,13 @@ extension ChatViewModel {
             sender: sender,
             content: message.content,
             timestamp: message.createdAt,
-            showProfile: showProfile
+            showProfile: showProfile,
+            showTime: showTime
         ))
     }
 }
+
+// MARK: - Model
 
 enum UpdateType {
     /// 초기 로드, 재연결
@@ -180,6 +216,7 @@ struct MessageItem: Hashable {
     let content: String
     let timestamp: Date
     let showProfile: Bool
+    let showTime: Bool // 시간 표시 여부
     
     struct MessageSender: Hashable {
         let name: String
