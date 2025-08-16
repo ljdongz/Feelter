@@ -68,8 +68,8 @@ private extension KeyboardObserver {
     
     @objc func keyboardWillShow(_ notification: Notification) {
         guard let viewController = viewController,
-              let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-              let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval else {
+              let keyboardFrame = notification.keyboardFrameEndUserInfoKey,
+              let duration = notification.keyboardAnimationDurationUserInfoKey else {
             return
         }
         
@@ -78,7 +78,7 @@ private extension KeyboardObserver {
             return
         }
         
-        let keyboardHeight = keyboardFrame.height
+        let keyboardHeight = keyboardFrame.cgRectValue.height
         
         // 활성 입력 뷰의 화면상 위치 계산
         let inputViewFrame = activeInputView.convert(activeInputView.bounds, to: nil)
@@ -101,7 +101,7 @@ private extension KeyboardObserver {
     }
     
     @objc func keyboardWillHide(_ notification: Notification) {
-        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval else {
+        guard let duration = notification.keyboardAnimationDurationUserInfoKey else {
             return
         }
         

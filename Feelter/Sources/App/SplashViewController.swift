@@ -47,7 +47,7 @@ private extension SplashViewController {
                     async let sleep: Void = Task.sleep(nanoseconds: 1_000_000_000)
                     async let response = networkProvider.request(
                         endpoint: AuthAPI.refresh,
-                        type: AuthTokenResponseDTO.self
+                        type: TokenRefreshResponseDTO.self
                     )
                     
                     let (token, _) = try await (response, sleep)
@@ -62,6 +62,7 @@ private extension SplashViewController {
                     }
                     
                 } catch {
+                    print(error)
                     // TODO: 각 에러상황 별 화면 분기 처리 고민
                     tokenManager.clearToken()
                     
@@ -69,8 +70,7 @@ private extension SplashViewController {
                         RootViewSwitcher.shared.changeRootView(to: .signIn)
                     }
                 }
-            }
-            else {
+            } else {
                 await MainActor.run {
                     RootViewSwitcher.shared.changeRootView(to: .signIn)
                 }

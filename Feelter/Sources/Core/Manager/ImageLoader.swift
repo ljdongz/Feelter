@@ -18,6 +18,11 @@ struct ImageLoader {
         for imageView: UIImageView,
         path: String
     ) {
+        if path.isEmpty {
+            imageView.image = .sample
+            return
+        }
+        
         let token = tokenManager.accessToken
         let modifier = AnyModifier { request in
             var request = request
@@ -40,7 +45,9 @@ struct ImageLoader {
             with: URL(string: url),
             options: [
                 .requestModifier(modifier),
-                .backgroundDecode
+                .backgroundDecode,
+                .cacheMemoryOnly,
+                .onFailureImage(.sample),
             ]
         )
     }

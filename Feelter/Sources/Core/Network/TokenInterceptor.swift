@@ -67,7 +67,6 @@ struct TokenInterceptor: RequestInterceptor {
                 
                 throw error
             }
-            
         })
         
         // 여러 요청이 동시에 같은 Task를 대기
@@ -78,7 +77,7 @@ struct TokenInterceptor: RequestInterceptor {
     }
        
     // TODO: 리팩토링 필요
-    private func performAccessTokenRefresh(api: APIEndpoint) async throws -> AuthTokenResponseDTO {
+    private func performAccessTokenRefresh(api: APIEndpoint) async throws -> TokenRefreshResponseDTO {
         
         guard var request = api.asURLRequest() else {
             throw NetworkError.notCreatedURLRequest
@@ -104,7 +103,7 @@ struct TokenInterceptor: RequestInterceptor {
         
         // JSON 디코딩
         do {
-            return try JSONDecoder().decode(AuthTokenResponseDTO.self, from: data)
+            return try JSONDecoder().decode(TokenRefreshResponseDTO.self, from: data)
         } catch {
             throw NetworkError.decodingError(error)
         }

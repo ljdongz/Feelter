@@ -8,7 +8,7 @@
 import Foundation
 
 final class DIContainer {
-    public static let shared = DIContainer()
+    static let shared = DIContainer()
     private var dependencies: [String: Any] = [:]
     
     private init() {}
@@ -66,10 +66,14 @@ extension DIContainer {
         let bannerRepository = BannerRepositoryImpl(
             networkProvider: networkProvider
         )
+        let chatRepository = ChatRepositoryImpl(
+            networkProvider: networkProvider
+        )
         
         register(authRepository, type: AuthRepository.self)
         register(userRepository, type: UserRepository.self)
         register(filterRepository, type: FilterRepository.self)
         register(bannerRepository, type: BannerRepository.self)
+        register(chatRepository, type: ChatRepository.self)
     }
 }
