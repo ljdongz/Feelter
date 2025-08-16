@@ -165,15 +165,16 @@ extension ChatViewController {
                     return cell
                     
                 // 메시지
-                case .message(let messageData):
-                    if messageData.isMe {
+                case .message(let messageItem):
+                    if messageItem.sender.isMe {
                         guard let cell = tableView.dequeueReusableCell(
                             withIdentifier: MyMessageTableViewCell.identifier,
                             for: indexPath
                         ) as? MyMessageTableViewCell else {
                             return UITableViewCell()
                         }
-                        cell.configureCell(content: messageData.content, date: messageData.timestamp)
+                        
+                        cell.configureCell(message: messageItem)
                         return cell
                     } else {
                         guard let cell = tableView.dequeueReusableCell(
@@ -182,7 +183,8 @@ extension ChatViewController {
                         ) as? OtherMessageTableViewCell else {
                             return UITableViewCell()
                         }
-                        cell.configureCell(content: messageData.content, date: messageData.timestamp)
+                        
+                        cell.configureCell(message: messageItem)
                         return cell
                     }
                 }
@@ -193,27 +195,20 @@ extension ChatViewController {
 
 // MARK: - Update DataSource
 extension ChatViewController {
-    private func initializeDataSource(_ messages: [ChatMessage]) {
+    private func initializeDataSource(_ messages: [MessageCellType]) {
         var snapShot = dataSource.snapshot()
         snapShot.appendSections([0])
         
-        let data = messages.map {
-            MessageCellType.message(.init(
-                sender: .other(name: $0.sender.nickname, profileImage: $0.sender.profileImageURL),
-                content: $0.content,
-                timestamp: $0.createdAt.formatted(.timeOnly)
-            ))
-        }
         
-        snapShot.appendItems(data)
+        snapShot.appendItems(messages)
         dataSource.apply(snapShot, animatingDifferences: false)
     }
     
-    private func prependDataSource(_ messages: [ChatMessage]) {
+    private func prependDataSource(_ messages: [MessageCellType]) {
         
     }
     
-    private func appendDataSource(_ message: ChatMessage) {
+    private func appendDataSource(_ message: MessageCellType) {
         
     }
 }
@@ -281,55 +276,7 @@ extension ChatViewController: UITableViewDelegate {
 
 extension ChatViewController {
     
-    enum MessageCellType: Hashable {
-        case message(MessageItem)
-        case dateSeparator(String)
-    }
     
-    struct MessageItem: Hashable {
-        let id = UUID()
-        let sender: MessageSender
-        let content: String
-        let timestamp: String
-        
-        enum MessageSender: Hashable {
-            case me
-            case other(name: String, profileImage: String?)
-        }
-        
-        var isMe: Bool {
-            switch sender {
-            case .me:
-                return true
-            case .other:
-                return false
-            }
-        }
-    }
-    
-    static let dummyData: [MessageCellType] = [
-        .dateSeparator("2025년 8월 14일"),
-        .message(MessageItem(
-            sender: .other(name: "윤새싹", profileImage: nil),
-            content: "안녕하세요!",
-            timestamp: "오후 1:15"
-        )),
-        .message(MessageItem(
-            sender: .me,
-            content: "네, 안녕하세요",
-            timestamp: "오후 1:16"
-        )),
-        .message(MessageItem(
-            sender: .other(name: "윤새싹", profileImage: nil),
-            content: "오늘 날씨 정말 좋네요",
-            timestamp: "오후 1:17"
-        )),
-        .message(MessageItem(
-            sender: .me,
-            content: "네, 정말 좋은 날씨입니다",
-            timestamp: "오후 1:18"
-        ))
-    ]
 }
 
 #if DEBUG

@@ -45,7 +45,7 @@ final class DateSeparatorTableViewCell: BaseTableViewCell {
         }
     }
     
-    func configureCell(_ date: String) {
-        dateLabel.text = date
+    func configureCell(_ date: Date) {
+        dateLabel.text = date.formatted(.fullDateWithWeekday)
     }
 }

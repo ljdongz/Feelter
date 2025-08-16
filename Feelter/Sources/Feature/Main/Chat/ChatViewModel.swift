@@ -23,6 +23,7 @@ final class ChatViewModel: ViewModel {
     @Dependency private var chatRepository: ChatRepository
     
     private let roomID: String
+    private let currentUserID = "-" // TODO: 실제 사용자 ID로 변경 필요
     
     var disposeBag: DisposeBag = .init()
     
@@ -40,7 +41,8 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let messages):
-                    output.messages.accept(.fullReload(messages))
+                    let cellTypes = owner.convertToCellTypes(messages: messages)
+                    output.messages.accept(.fullReload(cellTypes))
                 case .failure(let error):
                     print(error.localizedDescription)
                 }
@@ -59,7 +61,8 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let message):
-                    print(message)
+                    let cellType = owner.convertToSingleCellType(message: message)
+                    output.messages.accept(.append(cellType))
                 case .failure(let error):
                     print(error)
                 }
@@ -70,13 +73,75 @@ final class ChatViewModel: ViewModel {
     }
 }
 
+// MARK: - Convert to MessageCellType Method
+
 extension ChatViewModel {
-    enum UpdateType {
-        /// 초기 로드, 재연결
-        case fullReload([ChatMessage])
-        /// 이전 메시지
-        case prepend([ChatMessage])
-        /// 새 메시지
-        case append(ChatMessage)
+    
+    private func convertToCellTypes(messages: [ChatMessage]) -> [MessageCellType] {
+        var cellTypes: [MessageCellType] = []
+        var lastDate: Date?
+        
+        for message in messages {
+            let messageDate = message.createdAt
+            
+            // 새로운 날짜인 경우 구분선 추가
+            if shouldAddDateSeparator(lastDate: lastDate, currentDate: messageDate) {
+                cellTypes.append(.dateSeparator(messageDate))
+                lastDate = messageDate
+            }
+            
+            // 메시지 추가
+            cellTypes.append(convertToSingleCellType(message: message))
+        }
+        
+        return cellTypes
+    }
+    
+    private func shouldAddDateSeparator(lastDate: Date?, currentDate: Date) -> Bool {
+        guard let lastDate = lastDate else { return true }
+        return !Calendar.current.isDate(lastDate, inSameDayAs: currentDate)
+    }
+    
+    private func convertToSingleCellType(message: ChatMessage) -> MessageCellType {
+        let isMe = message.sender.userID == currentUserID
+        
+        let sender = MessageItem.MessageSender(
+            name: message.sender.nickname,
+            profileImageURL: message.sender.profileImageURL,
+            isMe: isMe
+        )
+        
+        return .message(MessageItem(
+            sender: sender,
+            content: message.content,
+            timestamp: message.createdAt
+        ))
+    }
+}
+
+enum UpdateType {
+    /// 초기 로드, 재연결
+    case fullReload([MessageCellType])
+    /// 이전 메시지
+    case prepend([MessageCellType])
+    /// 새 메시지
+    case append(MessageCellType)
+}
+
+enum MessageCellType: Hashable {
+    case message(MessageItem)
+    case dateSeparator(Date)
+}
+
+struct MessageItem: Hashable {
+    let id = UUID()
+    let sender: MessageSender
+    let content: String
+    let timestamp: Date
+    
+    struct MessageSender: Hashable {
+        let name: String
+        let profileImageURL: String?
+        let isMe: Bool
     }
 }

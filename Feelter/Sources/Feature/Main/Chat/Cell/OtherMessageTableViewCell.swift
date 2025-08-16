@@ -106,11 +106,14 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         }
     }
     
-    func configureCell(content: String, date: String) {
-        messageLabel.text = content
-        dateLabel.text = date
+    func configureCell(message: MessageItem) {
+        messageLabel.text = message.content
+        dateLabel.text = message.timestamp.formatted(.timeOnly)
         
-        nameLabel.text = "윤새싹"
-        profileImageView.image = .sample
+        nameLabel.text = message.sender.name
+        ImageLoader.applyAuthenticatedImage(
+            for: profileImageView,
+            path: message.sender.profileImageURL ?? ""
+        )
     }
 }
