@@ -54,6 +54,8 @@ final class ChatMessageInputField: BaseView {
         let view = UIView()
         view.backgroundColor = .deepTurquoise
         view.layer.cornerRadius = 15
+        view.isUserInteractionEnabled = false
+        view.alpha = 0.5
         return view
     }()
 
@@ -141,17 +143,32 @@ final class ChatMessageInputField: BaseView {
 extension ChatMessageInputField: UITextViewDelegate {
     
     func textViewDidChange(_ textView: UITextView) {
+
+        // 전송버튼 활성화 상태 업데이트
+        updateSendButtonEnabled()
+        
+        // 텍스트 뷰 높이 동적 조절
+        updateTextViewHeightConstraint()
+    }
+    
+    private func updateSendButtonEnabled() {
+        let isEnabled = !messageInputTextView.text.isEmpty
+        sendButton.isUserInteractionEnabled = isEnabled
+        sendButton.alpha = isEnabled ? 1 : 0.5
+    }
+    
+    private func updateTextViewHeightConstraint() {
         guard self.messageInputTextView.bounds.width > 0 else { return }
         
         // 현재 텍스트에 맞는 높이 계산
-        let fixedWidth = textView.bounds.width
-        let estimatedSize = textView.sizeThatFits(.init(width: fixedWidth, height: .greatestFiniteMagnitude))
+        let fixedWidth = messageInputTextView.bounds.width
+        let estimatedSize = messageInputTextView.sizeThatFits(.init(width: fixedWidth, height: .greatestFiniteMagnitude))
         let newHeight = max(minHeight, min(estimatedSize.height, maxHeight))
         
         // 제약조건 업데이트
         textViewHeightConstraint?.layoutConstraints.first?.constant = newHeight
         
-        textView.isScrollEnabled = estimatedSize.height > maxHeight
+        messageInputTextView.isScrollEnabled = estimatedSize.height > maxHeight
         
         // 부모 뷰의 레이아웃 업데이트
         self.superview?.layoutIfNeeded()
