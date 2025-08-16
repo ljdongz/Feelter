@@ -8,6 +8,7 @@
 import Foundation
 
 struct AuthToken {
+    let userID: String
     let accessToken: String
     let refreshToken: String
 }

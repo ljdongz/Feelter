@@ -21,9 +21,9 @@ final class ChatViewModel: ViewModel {
     }
     
     @Dependency private var chatRepository: ChatRepository
+    @Dependency private var tokenManager: TokenManager
     
     private let roomID: String
-    private let currentUserID = "-" // TODO: 실제 사용자 ID로 변경 필요
     
     var disposeBag: DisposeBag = .init()
     
@@ -103,7 +103,7 @@ extension ChatViewModel {
     }
     
     private func convertToSingleCellType(message: ChatMessage) -> MessageCellType {
-        let isMe = message.sender.userID == currentUserID
+        let isMe = message.sender.userID == tokenManager.userID
         
         let sender = MessageItem.MessageSender(
             name: message.sender.nickname,

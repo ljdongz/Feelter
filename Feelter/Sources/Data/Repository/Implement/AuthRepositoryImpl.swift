@@ -59,7 +59,8 @@ struct AuthRepositoryImpl: AuthRepository {
             
             tokenManager.updateToken(
                 access: response.accessToken,
-                refresh: response.refreshToken
+                refresh: response.refreshToken,
+                userID: response.userID
             )
         } catch {
             try handleAuthError(error)
@@ -81,7 +82,8 @@ struct AuthRepositoryImpl: AuthRepository {
             
             tokenManager.updateToken(
                 access: response.accessToken,
-                refresh: response.refreshToken
+                refresh: response.refreshToken,
+                userID: response.userID
             )
             
         } catch {
@@ -107,7 +109,8 @@ struct AuthRepositoryImpl: AuthRepository {
             
             tokenManager.updateToken(
                 access: response.accessToken,
-                refresh: response.refreshToken
+                refresh: response.refreshToken,
+                userID: response.userID
             )
         } catch {
             try handleAuthError(error)
@@ -131,7 +134,8 @@ struct AuthRepositoryImpl: AuthRepository {
             
             tokenManager.updateToken(
                 access: response.accessToken,
-                refresh: response.refreshToken
+                refresh: response.refreshToken,
+                userID: response.userID
             )
         } catch {
             try handleAuthError(error)

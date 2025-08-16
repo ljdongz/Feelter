@@ -54,7 +54,8 @@ private extension SplashViewController {
                     
                     tokenManager.updateToken(
                         access: token.accessToken,
-                        refresh: token.refreshToken
+                        refresh: token.refreshToken,
+                        userID: token.userID
                     )
                     
                     await MainActor.run {
