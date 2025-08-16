@@ -60,7 +60,9 @@ final class ChatRoomViewController: RxBaseViewController {
             .disposed(by: disposeBag)
         
         tableView.rx.itemSelected
-            .map { output.chatRooms.value[$0.row] }
+            .compactMap { [weak self] indexPath in
+                self?.dataSource.itemIdentifier(for: indexPath)
+            }
             .subscribe(with: self) { owner, room in
                 let viewModel = ChatViewModel(roomID: room.roomID)
                 let vc = ChatViewController(viewModel: viewModel)
