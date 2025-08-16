@@ -8,7 +8,7 @@
 import Foundation
 
 final class DIContainer {
-    public static let shared = DIContainer()
+    static let shared = DIContainer()
     private var dependencies: [String: Any] = [:]
     
     private init() {}

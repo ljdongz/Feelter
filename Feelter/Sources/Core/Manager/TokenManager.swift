@@ -18,17 +18,21 @@ final class TokenManager {
         self.keychainStorage = keychainStorage
         self.accessToken = try? keychainStorage.load(forKey: .accessToken)
         self.refreshToken = try? keychainStorage.load(forKey: .refreshToken)
+        print("Access Token: \(accessToken ?? "-")")
+        print("Refresh Token: \(refreshToken ?? "-")")
     }
     
     func updateToken(access: String? = nil, refresh: String? = nil) {
         if let access {
             accessToken = access
             try? keychainStorage.save(access, forKey: .accessToken)
+            print("Access Token Updated: \(access)")
         }
         
         if let refresh {
             refreshToken = refresh
             try? keychainStorage.save(refresh, forKey: .refreshToken)
+            print("Refresh Token Updated: \(refresh)")
         }
     }
     
