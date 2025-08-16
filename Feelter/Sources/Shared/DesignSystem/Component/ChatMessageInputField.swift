@@ -78,6 +78,7 @@ final class ChatMessageInputField: BaseView {
         set {
             messageInputTextView.text = newValue
             updateSendButtonEnabled()
+            updateTextViewHeightConstraint()
         }
     }
     
