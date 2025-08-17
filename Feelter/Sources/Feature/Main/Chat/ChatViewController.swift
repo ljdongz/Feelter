@@ -30,6 +30,7 @@ final class ChatViewController: RxBaseViewController {
         return view
     }()
     
+    private let dateSeparatorGenerator = DateSeparatorGenerator()
     private let viewModel: ChatViewModel
     
     private var messageInputFieldBottomConstraint: Constraint?
@@ -196,21 +197,31 @@ extension ChatViewController {
 
 // MARK: - Update DataSource
 extension ChatViewController {
-    private func initializeDataSource(_ messages: [MessageCellType]) {
+    private func initializeDataSource(_ messages: [ChatMessage]) {
+        let cellTypes = dateSeparatorGenerator.generateCellTypes(
+            from: messages,
+            currentUserID: viewModel.userID
+        )
+        
         var snapShot = dataSource.snapshot()
         snapShot.appendSections([0])
         
-        snapShot.appendItems(messages)
+        snapShot.appendItems(cellTypes)
         dataSource.apply(snapShot, animatingDifferences: false)
     }
     
-    private func prependDataSource(_ messages: [MessageCellType]) {
+    private func prependDataSource(_ messages: [ChatMessage]) {
         
     }
     
-    private func appendDataSource(_ messages: [MessageCellType]) {
+    private func appendDataSource(_ message: ChatMessage) {
+        let cellTypes = dateSeparatorGenerator.generateCellTypes(
+            from: [message],
+            currentUserID: viewModel.userID
+        )
+        
         var snapShot = dataSource.snapshot()
-        snapShot.appendItems(messages)
+        snapShot.appendItems(cellTypes)
         dataSource.apply(snapShot, animatingDifferences: true)
     }
 }
