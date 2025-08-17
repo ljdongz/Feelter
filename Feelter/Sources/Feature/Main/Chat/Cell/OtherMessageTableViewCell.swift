@@ -21,7 +21,7 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         return view
     }()
 
-    private let contentStackView: UIStackView = {
+    private let contentVerticalStackView: UIStackView = {
         let view = UIStackView()
         view.axis = .vertical
         view.alignment = .leading
@@ -35,6 +35,14 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         view.font = .hakgyoansimMulgyeol(size: 14, weight: .bold)
         view.setContentHuggingPriority(.required, for: .vertical)
         view.setContentCompressionResistancePriority(.required, for: .vertical)
+        return view
+    }()
+    
+    private let contentHorizontalStackView: UIStackView = {
+        let view = UIStackView()
+        view.axis = .horizontal
+        view.spacing = 5
+        view.alignment = .bottom
         return view
     }()
 
@@ -59,6 +67,8 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         let view = UILabel()
         view.textColor = .gray75
         view.font = .pretendard(size: 11, weight: .medium)
+        view.textAlignment = .left
+        view.setContentHuggingPriority(.defaultLow, for: .horizontal)
         return view
     }()
 
@@ -69,13 +79,17 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
     override func setupSubviews() {
         contentView.addSubviews([
             profileImageView,
-            contentStackView,
-            dateLabel
+            contentVerticalStackView,
         ])
         
-        contentStackView.addArrangedSubviews([
+        contentVerticalStackView.addArrangedSubviews([
             nameLabel,
-            messageContainerView
+            contentHorizontalStackView
+        ])
+        
+        contentHorizontalStackView.addArrangedSubviews([
+            messageContainerView,
+            dateLabel
         ])
         
         messageContainerView.addSubview(messageLabel)
@@ -88,7 +102,7 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
             make.size.equalTo(35)
         }
         
-        contentStackView.snp.makeConstraints { make in
+        contentVerticalStackView.snp.makeConstraints { make in
             make.top.equalTo(profileImageView.snp.top).offset(2)
             make.leading.equalToSuperview().inset(65)
             make.trailing.lessThanOrEqualToSuperview().inset(85)
@@ -100,10 +114,10 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
             make.horizontalEdges.equalToSuperview().inset(14)
         }
         
-        dateLabel.snp.makeConstraints { make in
-            make.leading.equalTo(contentStackView.snp.trailing).offset(5)
-            make.bottom.equalTo(contentStackView.snp.bottom).offset(-2)
-        }
+//        dateLabel.snp.makeConstraints { make in
+//            make.leading.equalTo(contentVerticalStackView.snp.trailing).offset(5)
+//            make.bottom.equalTo(contentVerticalStackView.snp.bottom).offset(-2)
+//        }
     }
     
     func configureCell(message: MessageItem) {

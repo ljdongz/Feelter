@@ -20,6 +20,7 @@ final class ChatViewController: RxBaseViewController {
         view.separatorStyle = .none
         view.delegate = self
         view.contentInset.top = 20
+        view.contentInset.bottom = 20
         view.estimatedRowHeight = 100
         return view
     }()
