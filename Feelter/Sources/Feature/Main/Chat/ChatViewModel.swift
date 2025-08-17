@@ -32,10 +32,21 @@ final class ChatViewModel: ViewModel {
         self.roomID = roomID
     }
     
+    deinit {
+        chatRepository.disconnectRoom()
+    }
+    
     func transform(input: Input) -> Output {
         let output = Output()
         
         input.viewDidLoad
+            .do(onNext: { [weak self] _ in
+                guard let self else { return }
+                self.chatRepository.connectRoom(roomID: self.roomID) { message in
+                    let cellType = self.convertToCellTypes(messages: [message])
+                    output.messages.accept(.append(cellType))
+                }
+            })
             .withAsyncResult(with: self) { owner, _ in
                 try await owner.chatRepository.fetchMessages(from: owner.roomID, after: nil)
             }
@@ -62,9 +73,7 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let message):
-                    // TODO: 연속 프로필 처리 필요
-                    let cellType = owner.convertToSingleCellType(message: message)
-                    output.messages.accept(.append(cellType))
+                    print("보내기 성공")
                 case .failure(let error):
                     print(error)
                 }
@@ -202,7 +211,7 @@ enum UpdateType {
     /// 이전 메시지
     case prepend([MessageCellType])
     /// 새 메시지
-    case append(MessageCellType)
+    case append([MessageCellType])
 }
 
 enum MessageCellType: Hashable {

@@ -92,8 +92,8 @@ final class ChatViewController: RxBaseViewController {
                     owner.initializeDataSource(messages)
                 case .prepend(let messages):
                     owner.prependDataSource(messages)
-                case .append(let message):
-                    owner.appendDataSource(message)
+                case .append(let messages):
+                    owner.appendDataSource(messages)
                 }
             }
             .disposed(by: disposeBag)
@@ -207,8 +207,10 @@ extension ChatViewController {
         
     }
     
-    private func appendDataSource(_ message: MessageCellType) {
-        
+    private func appendDataSource(_ messages: [MessageCellType]) {
+        var snapShot = dataSource.snapshot()
+        snapShot.appendItems(messages)
+        dataSource.apply(snapShot, animatingDifferences: true)
     }
 }
 
