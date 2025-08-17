@@ -62,7 +62,7 @@ private extension SplashViewController {
                     }
                     
                 } catch {
-                    print(error)
+                    print("Splash View Error: \(error)")
                     // TODO: 각 에러상황 별 화면 분기 처리 고민
                     tokenManager.clearToken()
                     

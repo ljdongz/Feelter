@@ -42,11 +42,32 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension AppDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        
-        let token = deviceToken.reduce("") { $0 + String(format: "%02X", $1) }
+        print(#function)
+        let newToken = deviceToken.reduce("") { $0 + String(format: "%02X", $1) }
         
         let tokenManager = DIContainer.shared.resolve(TokenManager.self)
-        tokenManager.updateDeviceToken(token)
+        
+        // 디바이스 토큰이 저장되있지 않은 경우 (로그인 화면), 저장
+        guard let current = tokenManager.deviceToken else {
+            tokenManager.updateDeviceToken(newToken)
+            return
+        }
+        
+        // 기존 디바이스 토큰과 새로 발급받은 디바이스 토큰이 동일한 경우, 종료
+        guard current != newToken else { return }
+        
+        let networkProvider = DIContainer.shared.resolve(NetworkProvider.self)
+        Task {
+            do {
+                let request = UpdateDeviceTokenRequestDTO(deviceToken: newToken)
+                try await networkProvider.request(
+                    endpoint: AuthAPI.updateDeviceToken(request)
+                )
+                tokenManager.updateDeviceToken(newToken)
+            } catch {
+                print("Update Device Token Error: \(error)")
+            }
+        }
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
