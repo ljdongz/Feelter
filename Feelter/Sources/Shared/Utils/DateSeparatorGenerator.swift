@@ -21,6 +21,7 @@ struct MessageItem: Hashable {
     let showTime: Bool // 시간 표시 여부
     
     struct MessageSender: Hashable {
+        let userID: String
         let name: String
         let profileImageURL: String?
         let isMe: Bool
@@ -138,6 +139,7 @@ struct DateSeparatorGenerator {
         let isMe = message.sender.userID == currentUserID
         
         let sender = MessageItem.MessageSender(
+            userID: message.sender.userID,
             name: message.sender.nickname,
             profileImageURL: message.sender.profileImageURL,
             isMe: isMe

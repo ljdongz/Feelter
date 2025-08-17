@@ -221,14 +221,28 @@ extension ChatViewController {
     }
     
     private func appendDataSource(_ message: ChatMessage) {
-        let cellTypes = dateSeparatorGenerator.generateCellTypes(
+        var cellTypes = dateSeparatorGenerator.generateCellTypes(
             from: [message],
             currentUserID: viewModel.userID
         )
         
         var snapShot = dataSource.snapshot()
+        
+        // 현재 DataSource에 반영된 마지막 채팅 데이터 날짜와 비교해서 구분선 중복 제거
+        // TODO: 마지막 채팅 메시지와 비교해서 프로필, 날짜 표시 여부 수정
+        if let items = snapShot.itemIdentifiers as? [MessageCellType],
+           let lastItem = items.last,
+           case let MessageCellType.message(prevMessage) = lastItem {
+            
+            let prevTimeStamp = prevMessage.timestamp.formatted(.fullDateWithWeekday)
+            let currentTimeStamp = message.createdAt.formatted(.fullDateWithWeekday)
+            if prevTimeStamp == currentTimeStamp {
+                cellTypes.removeFirst()
+            }
+        }
+            
         snapShot.appendItems(cellTypes)
-        dataSource.apply(snapShot, animatingDifferences: true)
+        dataSource.apply(snapShot, animatingDifferences: false)
     }
 }
 
