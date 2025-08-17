@@ -20,9 +20,14 @@ final class ChatRoomViewModel: ViewModel {
         let chatRooms = BehaviorRelay<[ChatRoom]>(value: [])
     }
     
-    var disposeBag: DisposeBag = .init()
-    
     @Dependency private var chatRepository: ChatRepository
+    @Dependency private var tokenManager: TokenManager
+
+    var disposeBag: DisposeBag = .init()
+
+    var userID: String? {
+        tokenManager.userID
+    }
     
     func transform(input: Input) -> Output {
         let output = Output()

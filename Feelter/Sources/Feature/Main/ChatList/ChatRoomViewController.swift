@@ -66,7 +66,10 @@ final class ChatRoomViewController: RxBaseViewController {
             .subscribe(with: self) { owner, room in
                 let viewModel = ChatViewModel(roomID: room.roomID)
                 let vc = ChatViewController(viewModel: viewModel)
-                vc.title = room.participants.last?.nickname
+                
+                let userID = owner.viewModel.userID
+                let opponent = room.participants.first(where: { $0.userID != userID })
+                vc.title = opponent?.nickname
                 owner.navigationController?.pushViewController(vc, animated: true)
             }
             .disposed(by: disposeBag)
@@ -96,17 +99,22 @@ extension ChatRoomViewController {
     private func configureDiffableDataSource() {
         dataSource = UITableViewDiffableDataSource(
             tableView: tableView,
-            cellProvider: { tableView, indexPath, room in
-                guard let cell = tableView.dequeueReusableCell(
-                    withIdentifier: ChatRoomTableViewCell.identifier,
-                    for: indexPath
-                ) as? ChatRoomTableViewCell else { return .init() }
+            cellProvider: { [weak self] tableView, indexPath, room in
+                guard let self,
+                      let cell = tableView.dequeueReusableCell(
+                        withIdentifier: ChatRoomTableViewCell.identifier,
+                        for: indexPath
+                      ) as? ChatRoomTableViewCell else { return .init() }
                 
-                guard let profile = room.participants.last else { return .init() }
+                // TODO: 상대방 찾기
+                let userID = viewModel.userID
+                guard let opponent = room.participants.first(where: {
+                    $0.userID != userID
+                }) else { return .init() }
                 
                 cell.configureCell(.init(
-                    profileImageURL: profile.profileImageURL,
-                    name: profile.nickname,
+                    profileImageURL: opponent.profileImageURL,
+                    name: opponent.nickname,
                     message: room.lastChat?.content ?? "",
                     date: room.updatedAt.formatted(.basic),
                     unreadCount: 0

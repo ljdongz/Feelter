@@ -26,6 +26,10 @@ final class DateSeparatorTableViewCell: BaseTableViewCell {
         view.font = .pretendard(size: 11, weight: .medium)
         return view
     }()
+    
+    override func setupView() {
+        selectionStyle = .none
+    }
 
     override func setupSubviews() {
         contentView.addSubview(containerView)

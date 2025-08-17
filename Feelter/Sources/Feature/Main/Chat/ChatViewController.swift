@@ -208,6 +208,12 @@ extension ChatViewController {
         
         snapShot.appendItems(cellTypes)
         dataSource.apply(snapShot, animatingDifferences: false)
+        
+        tableView.scrollToRow(
+            at: IndexPath(row: cellTypes.count - 1, section: 0),
+            at: .bottom,
+            animated: false
+        )
     }
     
     private func prependDataSource(_ messages: [ChatMessage]) {
@@ -283,14 +289,8 @@ extension ChatViewController {
     }
 }
 
-extension ChatViewController: UITableViewDelegate {
-    
-}
+extension ChatViewController: UITableViewDelegate { }
 
-extension ChatViewController {
-    
-    
-}
 
 #if DEBUG
 import SwiftUI
