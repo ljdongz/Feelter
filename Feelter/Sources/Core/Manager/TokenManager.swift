@@ -32,6 +32,7 @@ final class TokenManager {
         
         print("Access Token: \(accessToken ?? "-")")
         print("Refresh Token: \(refreshToken ?? "-")")
+        print("Device Token: \(deviceToken ?? "-")")
     }
     
     func updateAuthToken(accessToken: String, refreshToken: String) {

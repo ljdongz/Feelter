@@ -12,4 +12,6 @@ protocol NetworkProvider {
         endpoint: APIEndpoint,
         type: T.Type
     ) async throws -> T
+    
+    func request(endpoint: APIEndpoint) async throws
 }
