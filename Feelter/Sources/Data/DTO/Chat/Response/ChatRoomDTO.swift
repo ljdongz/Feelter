@@ -10,7 +10,7 @@ import Foundation
 struct ChatRoomResponseDTO: Decodable {
     let roomID: String
     
-    let participants: [ProfileDTO]
+    let participants: [MessageSenderDTO]
     let lastChat: ChatMessageResponseDTO?
     
     let createdAt: String
