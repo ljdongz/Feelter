@@ -34,30 +34,6 @@ final class TokenManager {
         print("Refresh Token: \(refreshToken ?? "-")")
     }
     
-//    func updateToken(
-//        access: String? = nil,
-//        refresh: String? = nil,
-//        userID: String? = nil
-//    ) {
-//        if let access {
-//            accessToken = access
-//            try? keychainStorage.save(access, forKey: .accessToken)
-//            print("Access Token Updated: \(access)")
-//        }
-//        
-//        if let refresh {
-//            refreshToken = refresh
-//            try? keychainStorage.save(refresh, forKey: .refreshToken)
-//            print("Refresh Token Updated: \(refresh)")
-//        }
-//        
-//        if let userID {
-//            self.userID = userID
-//            userDefaults.set(userID, forKey: "userID")
-//            print("UserID Updated: \(userID)")
-//        }
-//    }
-    
     func updateAuthToken(accessToken: String, refreshToken: String) {
         try? keychainStorage.save(accessToken, forKey: .accessToken)
         try? keychainStorage.save(refreshToken, forKey: .refreshToken)

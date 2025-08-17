@@ -48,7 +48,7 @@ struct AuthRepositoryImpl: AuthRepository {
             phoneNumber: form.phoneNumber,
             introduction: form.introduction,
             hashTags: form.hashTags,
-            deviceToken: nil
+            deviceToken: tokenManager.deviceToken
         )
         
         do {
@@ -68,7 +68,7 @@ struct AuthRepositoryImpl: AuthRepository {
         let requestDTO = EmailSignInRequestDTO(
             email: email,
             password: password,
-            deviceToken: nil
+            deviceToken: tokenManager.deviceToken
         )
         
         do {
@@ -90,7 +90,7 @@ struct AuthRepositoryImpl: AuthRepository {
         
         let requestDTO = AppleSignInRequestDTO(
             idToken: appleAuthResult.identityToken,
-            deviceToken: nil,
+            deviceToken: tokenManager.deviceToken,
             nickname: appleAuthResult.nickname
         )
         
@@ -112,7 +112,7 @@ struct AuthRepositoryImpl: AuthRepository {
         
         let requestDTO = KakaoSignInRequestDTO(
             oauthToken: result.accessToken,
-            deviceToken: nil
+            deviceToken: tokenManager.deviceToken
         )
         
         do {

@@ -44,7 +44,9 @@ extension AppDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         
         let token = deviceToken.reduce("") { $0 + String(format: "%02X", $1) }
-        print(token)
+        
+        let tokenManager = DIContainer.shared.resolve(TokenManager.self)
+        tokenManager.updateDeviceToken(token)
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
