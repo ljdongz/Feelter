@@ -56,9 +56,9 @@ struct TokenInterceptor: RequestInterceptor {
                 let token = try await performAccessTokenRefresh(api: AuthAPI.refresh)
                 
                 // 새롭게 갱신된 액세스, 리프레시 토큰 저장
-                tokenManager.updateToken(
-                    access: token.accessToken,
-                    refresh: token.refreshToken
+                tokenManager.updateAuthToken(
+                    accessToken: token.accessToken,
+                    refreshToken: token.refreshToken
                 )
             } catch {
                 // 액세스 토큰 갱신 실패 = 리프레스 토큰 만료

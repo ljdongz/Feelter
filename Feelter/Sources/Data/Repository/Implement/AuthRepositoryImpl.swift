@@ -57,11 +57,8 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            tokenManager.updateToken(
-                access: response.accessToken,
-                refresh: response.refreshToken,
-                userID: response.userID
-            )
+            updateToken(response)
+            
         } catch {
             try handleAuthError(error)
         }
@@ -80,11 +77,7 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            tokenManager.updateToken(
-                access: response.accessToken,
-                refresh: response.refreshToken,
-                userID: response.userID
-            )
+            updateToken(response)
             
         } catch {
             try handleAuthError(error)
@@ -107,11 +100,7 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            tokenManager.updateToken(
-                access: response.accessToken,
-                refresh: response.refreshToken,
-                userID: response.userID
-            )
+            updateToken(response)
         } catch {
             try handleAuthError(error)
         }
@@ -132,19 +121,25 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            tokenManager.updateToken(
-                access: response.accessToken,
-                refresh: response.refreshToken,
-                userID: response.userID
-            )
+            updateToken(response)
         } catch {
             try handleAuthError(error)
         }
     }
 }
 
-private extension AuthRepositoryImpl {
-    func handleAuthError(_ error: Error) throws {
+extension AuthRepositoryImpl {
+    
+    private func updateToken(_ token: AuthTokenResponseDTO) {
+        tokenManager.updateAuthToken(
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken
+        )
+        
+        tokenManager.updateUserID(token.userID)
+    }
+    
+    private func handleAuthError(_ error: Error) throws {
         switch error {
         case HTTPResponseError.clientError(let code):
             if code == 409 {

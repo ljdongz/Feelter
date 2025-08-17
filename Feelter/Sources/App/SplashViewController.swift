@@ -52,9 +52,9 @@ private extension SplashViewController {
                     
                     let (token, _) = try await (response, sleep)
                     
-                    tokenManager.updateToken(
-                        access: token.accessToken,
-                        refresh: token.refreshToken
+                    tokenManager.updateAuthToken(
+                        accessToken: token.accessToken,
+                        refreshToken: token.refreshToken
                     )
                     
                     await MainActor.run {
