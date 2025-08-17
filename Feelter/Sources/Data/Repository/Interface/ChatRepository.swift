@@ -12,4 +12,7 @@ protocol ChatRepository {
     func fetchRooms() async throws -> [ChatRoom]
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage
     func fetchMessages(from roomID: String, after: String?) async throws -> [ChatMessage]
+    
+    func connectRoom(roomID: String, receiveMessage: @escaping (ChatMessage) -> Void)
+    func disconnectRoom()
 }

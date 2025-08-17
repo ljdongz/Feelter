@@ -10,9 +10,14 @@ import Foundation
 struct ChatRepositoryImpl: ChatRepository {
     
     private let networkProvider: NetworkProvider
+    private let socketProvider: SocketProvider
     
-    init(networkProvider: NetworkProvider) {
+    init(
+        networkProvider: NetworkProvider,
+        socketProvider: SocketProvider
+    ) {
         self.networkProvider = networkProvider
+        self.socketProvider = socketProvider
     }
     
     func createRoom(opponentID: String) async throws -> ChatRoom {
@@ -56,5 +61,13 @@ struct ChatRepositoryImpl: ChatRepository {
         )
         
         return response.messages.map { $0.toDomain() }
+    }
+    
+    func connectRoom(roomID: String, receiveMessage: @escaping (ChatMessage) -> Void) {
+        socketProvider.connect(roomID: roomID, receiveMessage: receiveMessage)
+    }
+    
+    func disconnectRoom() {
+        socketProvider.disconnect()
     }
 }
