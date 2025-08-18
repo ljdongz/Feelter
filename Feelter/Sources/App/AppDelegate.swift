@@ -7,12 +7,16 @@
 
 import UIKit
 
+import FirebaseCore
+import FirebaseMessaging
 import KakaoSDKCommon
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        FirebaseApp.configure()
         
         KakaoSDK.initSDK(appKey: AppConfiguration.kakaoApiKey)
         DIContainer.shared.registerDependencies()
@@ -75,14 +79,20 @@ extension AppDelegate {
     }
     
     private func configurePushNotification() {
+        Messaging.messaging().delegate = self
         let center = UNUserNotificationCenter.current()
-        
         center.delegate = self
         
         // 알림을 표시하기 위한 승인을 요청
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             print("Permission granted: \(granted)")
         }
+    }
+}
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("🟢", #function, fcmToken)
     }
 }
 
