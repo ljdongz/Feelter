@@ -48,6 +48,7 @@ extension DIContainer {
         let kakaoAuthService = KakaoAuthServiceImpl()
         let networkProvider = NetworkProviderImpl(tokenInterceptor: tokenInterceptor)
         let socketProvider = SocketProviderImpl(tokenManager: tokenManager)
+        let chatDataSource = ChatLocalDataSourceImpl()
         
         register(tokenManager, type: TokenManager.self)
         register(networkProvider, type: NetworkProvider.self)
@@ -69,7 +70,8 @@ extension DIContainer {
         )
         let chatRepository = ChatRepositoryImpl(
             networkProvider: networkProvider,
-            socketProvider: socketProvider
+            socketProvider: socketProvider,
+            chatDataSource: chatDataSource
         )
         
         register(authRepository, type: AuthRepository.self)

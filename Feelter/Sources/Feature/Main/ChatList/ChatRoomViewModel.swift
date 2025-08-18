@@ -32,7 +32,7 @@ final class ChatRoomViewModel: ViewModel {
     func transform(input: Input) -> Output {
         let output = Output()
         
-        let trigger = PublishRelay<Void>()
+        let serverFetchTrigger = PublishRelay<Void>()
         
         input.viewDidLoad
             .withAsyncResult(with: self, { owner, _ in
@@ -41,17 +41,15 @@ final class ChatRoomViewModel: ViewModel {
             .subscribe(with: self, onNext: { owner, result in
                 switch result {
                 case .success(let rooms):
-                    print("Fetch Local Success")
                     output.chatRooms.accept(rooms)
-                    trigger.accept(())
+                    serverFetchTrigger.accept(())
                 case .failure(let error):
-                    print("Fetch Local Error")
                     print(error)
                 }
             })
             .disposed(by: disposeBag)
         
-        trigger
+        serverFetchTrigger
             .asObservable()
             .withAsyncResult(with: self) { owner, _ in
                 try await owner.chatRepository.fetchRooms()
@@ -59,10 +57,8 @@ final class ChatRoomViewModel: ViewModel {
             .subscribe(with: self, onNext: { owner, result in
                 switch result {
                 case .success(let rooms):
-                    print("Fetch Server Success")
                     output.chatRooms.accept(rooms)
                 case .failure(let error):
-                    print("Fetch Server Error")
                     print(error)
                 }
             })

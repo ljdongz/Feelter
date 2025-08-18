@@ -11,13 +11,16 @@ struct ChatRepositoryImpl: ChatRepository {
     
     private let networkProvider: NetworkProvider
     private let socketProvider: SocketProvider
+    private let chatDataSource: ChatDataSource
     
     init(
         networkProvider: NetworkProvider,
-        socketProvider: SocketProvider
+        socketProvider: SocketProvider,
+        chatDataSource: ChatDataSource
     ) {
         self.networkProvider = networkProvider
         self.socketProvider = socketProvider
+        self.chatDataSource = chatDataSource
     }
     
     func createRoom(opponentID: String) async throws -> ChatRoom {
@@ -40,13 +43,13 @@ struct ChatRepositoryImpl: ChatRepository {
         let rooms = response.rooms.map { $0.toDomain() }
         
         // 서버에서 가져온 데이터를 Realm에 저장
-        try await RealmActor.shared.saveChatRooms(rooms)
+        try await chatDataSource.saveChatRooms(rooms)
         
         return rooms
     }
     
-    func fetchLocalRooms() async throws -> [ChatRoom] {
-        return try await RealmActor.shared.fetchChatRooms()
+    func fetchLocalRooms() async -> [ChatRoom] {
+        return await chatDataSource.fetchChatRooms()
     }
     
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage {
