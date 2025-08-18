@@ -10,6 +10,7 @@ import Foundation
 protocol ChatRepository {
     func createRoom(opponentID: String) async throws -> ChatRoom
     func fetchRooms() async throws -> [ChatRoom]
+    func fetchLocalRooms() async throws -> [ChatRoom]
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage
     func fetchMessages(from roomID: String, after: String?) async throws -> [ChatMessage]
     

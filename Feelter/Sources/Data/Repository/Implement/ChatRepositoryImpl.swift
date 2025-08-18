@@ -37,7 +37,16 @@ struct ChatRepositoryImpl: ChatRepository {
             type: ChatRoomListResponseDTO.self
         )
         
-        return response.rooms.map { $0.toDomain() }
+        let rooms = response.rooms.map { $0.toDomain() }
+        
+        // 서버에서 가져온 데이터를 Realm에 저장
+        try await RealmActor.shared.saveChatRooms(rooms)
+        
+        return rooms
+    }
+    
+    func fetchLocalRooms() async throws -> [ChatRoom] {
+        return try await RealmActor.shared.fetchChatRooms()
     }
     
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage {
