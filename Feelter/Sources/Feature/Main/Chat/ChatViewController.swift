@@ -102,14 +102,14 @@ final class ChatViewController: RxBaseViewController {
         
         
         NotificationCenter.default.rx
-            .notification(UIResponder.keyboardWillShowNotification)
+            .notification(.KeyboardWillShow)
             .subscribe(with: self, onNext: { owner, notification in
                 owner.handleKeyboardWillShow(notification: notification)
             })
             .disposed(by: disposeBag)
         
         NotificationCenter.default.rx
-            .notification(UIResponder.keyboardWillHideNotification)
+            .notification(.KeyboardWillHide)
             .subscribe(with: self, onNext: { owner, notification in
                 owner.handleKeyboardWillHide(notification: notification)
             })

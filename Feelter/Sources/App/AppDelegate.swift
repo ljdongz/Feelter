@@ -99,10 +99,26 @@ extension AppDelegate: MessagingDelegate {
 // MARK: - UNUserNotificationCenterDelegate
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    // foreground 상태일 때에도 알림 배너가 나오도록 설정
+    // foreground 상태일 때 푸시 알림 감지
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         print(#function)
         
+        let userInfo = notification.request.content.userInfo
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: userInfo)
+            let apnsPayload = try JSONDecoder().decode(APNsPayload.self, from: jsonData)
+            
+            print("🔔 APNs Payload decoded successfully:")
+            
+            NotificationCenter.default.post(
+                name: .ReceiveRemotePush,
+                object: apnsPayload
+            )
+        } catch {
+            print("❌ Failed to decode APNs payload: \(error)")
+            print("UserInfo: \(userInfo)")
+        }
     }
     
     // 푸시 알림 배너 클릭했을 시 실행
