@@ -18,6 +18,8 @@ final class SocketProviderImpl: SocketProvider {
     
     private var receiveMessageHandler: ((ChatMessage) -> Void)?
     
+    private var connectRoomID: String?
+    
     init(tokenManager: TokenManager) {
         self.tokenManager = tokenManager
     }
@@ -46,6 +48,8 @@ final class SocketProviderImpl: SocketProvider {
         // 특정 방의 네임스페이스에 연결
         socket = manager?.socket(forNamespace: "/chats-\(roomID)")
         
+        connectRoomID = roomID
+        
         receiveMessageHandler = receiveMessage
         
         setupSocketEvents()
@@ -58,10 +62,16 @@ final class SocketProviderImpl: SocketProvider {
         manager = nil
     }
     
+    func isConnected(roomID: String) -> Bool {
+        connectRoomID == roomID
+    }
+}
+
+extension SocketProviderImpl {
     private func setupSocketEvents() {
         // 연결 성공
         socket?.on(clientEvent: .connect) { data, ack in
-            print("✅ Socket connected to room")
+            print("✅ Socket connected to room: \(data)")
         }
         
         // 연결 실패
@@ -71,8 +81,9 @@ final class SocketProviderImpl: SocketProvider {
         }
         
         // 연결 해제
-        socket?.on(clientEvent: .disconnect) { data, ack in
+        socket?.on(clientEvent: .disconnect) { [weak self] data, ack in
             print("🔌 Socket disconnected: \(data)")
+            self?.connectRoomID = nil
         }
         
         // 새 채팅 메시지 수신
@@ -106,3 +117,4 @@ final class SocketProviderImpl: SocketProvider {
         }
     }
 }
+
