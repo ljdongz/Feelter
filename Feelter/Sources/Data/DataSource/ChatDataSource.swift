@@ -16,6 +16,9 @@ protocol ChatDataSource {
     func fetchChatRooms() -> [ChatRoom]
     @MainActor
     func saveChatRooms(_ rooms: [ChatRoom]) throws
+    @MainActor
+    func updateChatRoomUpdatedAt(roomID: String, updatedAt: Date) throws
+
     
     // 메시지 관련
     @MainActor
@@ -38,6 +41,17 @@ struct ChatDataSourceImpl: ChatDataSource {
         try realm.write {
             let realmRooms = rooms.map { RealmChatRoom(from: $0) }
             realm.add(realmRooms, update: .modified)
+        }
+    }
+    
+    func updateChatRoomUpdatedAt(roomID: String, updatedAt: Date) throws {
+        let realm = RealmStorage.shared.realm
+        try realm.write {
+            let room = realm.object(
+                ofType: RealmChatRoom.self,
+                forPrimaryKey: roomID
+            )
+            room?.updatedAt = updatedAt
         }
     }
     

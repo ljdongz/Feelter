@@ -220,9 +220,9 @@ extension ChatViewController {
         
     }
     
-    private func appendDataSource(_ message: ChatMessage) {
+    private func appendDataSource(_ messages: [ChatMessage]) {
         var cellTypes = dateSeparatorGenerator.generateCellTypes(
-            from: [message],
+            from: messages,
             currentUserID: viewModel.userID
         )
         
@@ -235,7 +235,7 @@ extension ChatViewController {
            case let MessageCellType.message(prevMessage) = lastItem {
             
             let prevTimeStamp = prevMessage.timestamp.formatted(.fullDateWithWeekday)
-            let currentTimeStamp = message.createdAt.formatted(.fullDateWithWeekday)
+            let currentTimeStamp = messages.first?.createdAt.formatted(.fullDateWithWeekday)
             if prevTimeStamp == currentTimeStamp {
                 cellTypes.removeFirst()
             }
@@ -306,14 +306,4 @@ extension ChatViewController {
 extension ChatViewController: UITableViewDelegate { }
 
 
-#if DEBUG
-import SwiftUI
-@available(iOS 17.0, *)
-#Preview {
-    UINavigationController(
-        rootViewController: ChatViewController(
-            viewModel: ChatViewModel(roomID: "")
-        )
-    )
-}
-#endif
+

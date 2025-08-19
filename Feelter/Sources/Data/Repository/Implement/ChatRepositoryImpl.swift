@@ -107,11 +107,28 @@ final class ChatRepositoryImpl: ChatRepository {
         
         try await chatDataSource.saveChatMessages(messages)
         
+        if let updatedAt = messages.last?.createdAt {
+            try await chatDataSource.updateChatRoomUpdatedAt(
+                roomID: roomID,
+                updatedAt: updatedAt
+            )
+        }
+        
         return messages
+    }
+    
+    func fetchLocalMessages(from roomID: String) async -> [ChatMessage] {
+        await chatDataSource.fetchChatMessages(roomID: roomID)
     }
     
     func saveMessage(_ message: ChatMessage) async throws -> ChatMessage {
         try await chatDataSource.saveChatMessages([message])
+        
+        try await chatDataSource.updateChatRoomUpdatedAt(
+            roomID: message.roomID,
+            updatedAt: message.createdAt
+        )
+        
         return message
     }
 }

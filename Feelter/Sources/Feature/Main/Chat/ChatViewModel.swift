@@ -16,7 +16,7 @@ enum UpdateType {
     /// 이전 메시지
     case prepend([ChatMessage])
     /// 새 메시지
-    case append(ChatMessage)
+    case append([ChatMessage])
 }
 
 final class ChatViewModel: ViewModel {
@@ -35,6 +35,7 @@ final class ChatViewModel: ViewModel {
     private let receiveMessageTrigger = PublishRelay<ChatMessage>()
     
     private let roomID: String
+    private let updatedAt: Date
     private let calendar = Calendar.current
     
     var userID: String? {
@@ -43,8 +44,9 @@ final class ChatViewModel: ViewModel {
     
     var disposeBag: DisposeBag = .init()
     
-    init(roomID: String) {
+    init(roomID: String, updatedAt: Date) {
         self.roomID = roomID
+        self.updatedAt = updatedAt
     }
     
     deinit {
@@ -54,6 +56,8 @@ final class ChatViewModel: ViewModel {
     func transform(input: Input) -> Output {
         let output = Output()
         
+        let serverFetchTrigger = PublishRelay<Void>()
+        
         input.viewDidLoad
             .do(onNext: { [weak self] _ in
                 guard let self else { return }
@@ -61,16 +65,14 @@ final class ChatViewModel: ViewModel {
                     self.receiveMessageTrigger.accept(message)
                 }
             })
-            .withAsyncResult(with: self) { owner, _ in
-                try await owner.chatRepository.fetchMessages(from: owner.roomID, after: nil)
+            .withAsync(with: self) { owner, _ in
+
+                await owner.chatRepository.fetchLocalMessages(from: owner.roomID)
             }
-            .subscribe(with: self) { owner, result in
-                switch result {
-                case .success(let messages):
-                    output.messages.accept(.fullReload(messages))
-                case .failure(let error):
-                    print(error)
-                }
+            .subscribe(with: self) { owner, messages in
+                output.messages.accept(.fullReload(messages))
+                
+                serverFetchTrigger.accept(())
             }
             .disposed(by: disposeBag)
         
@@ -100,13 +102,28 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let message):
-                    output.messages.accept(.append(message))
+                    output.messages.accept(.append([message]))
                 case .failure(let error):
                     print(error)
                 }
             }
             .disposed(by: disposeBag)
         
+        serverFetchTrigger.asObservable()
+            .withAsyncResult(with: self) { owner, _ in
+                let utcDate = UTCDateFormatter.shared.string(from: owner.updatedAt)
+                return try await owner.chatRepository.fetchMessages(from: owner.roomID, after: utcDate)
+            }
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success(let messages):
+                    output.messages.accept(.append(messages))
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            .disposed(by: disposeBag)
+            
         return output
     }
 }

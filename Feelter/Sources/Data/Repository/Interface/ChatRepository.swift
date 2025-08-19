@@ -15,10 +15,11 @@ protocol ChatRepository {
     // 채팅방 관련
     func createRoom(opponentID: String) async throws -> ChatRoom
     func fetchRooms() async throws -> [ChatRoom]
-    func fetchLocalRooms() async throws -> [ChatRoom]
+    func fetchLocalRooms() async -> [ChatRoom]
     
     // 메시지 관련
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage
     func fetchMessages(from roomID: String, after: String?) async throws -> [ChatMessage]
+    func fetchLocalMessages(from roomID: String) async -> [ChatMessage]
     func saveMessage(_ message: ChatMessage) async throws -> ChatMessage
 }

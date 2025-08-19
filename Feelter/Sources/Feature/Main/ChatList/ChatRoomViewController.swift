@@ -64,7 +64,10 @@ final class ChatRoomViewController: RxBaseViewController {
                 self?.dataSource.itemIdentifier(for: indexPath)
             }
             .subscribe(with: self) { owner, room in
-                let viewModel = ChatViewModel(roomID: room.roomID)
+                let viewModel = ChatViewModel(
+                    roomID: room.roomID,
+                    updatedAt: room.updatedAt
+                )
                 let vc = ChatViewController(viewModel: viewModel)
                 
                 let userID = owner.viewModel.userID
