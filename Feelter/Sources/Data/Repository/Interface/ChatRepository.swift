@@ -8,12 +8,17 @@
 import Foundation
 
 protocol ChatRepository {
+    // 소켓 관련
+    func connectRoom(roomID: String, receiveMessage: @escaping (ChatMessage) -> Void)
+    func disconnectRoom()
+    
+    // 채팅방 관련
     func createRoom(opponentID: String) async throws -> ChatRoom
     func fetchRooms() async throws -> [ChatRoom]
     func fetchLocalRooms() async throws -> [ChatRoom]
+    
+    // 메시지 관련
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage
     func fetchMessages(from roomID: String, after: String?) async throws -> [ChatMessage]
-    
-    func connectRoom(roomID: String, receiveMessage: @escaping (ChatMessage) -> Void)
-    func disconnectRoom()
+    func saveMessage(_ message: ChatMessage) async throws -> ChatMessage
 }

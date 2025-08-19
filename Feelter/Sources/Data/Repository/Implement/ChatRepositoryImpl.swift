@@ -23,6 +23,16 @@ struct ChatRepositoryImpl: ChatRepository {
         self.chatDataSource = chatDataSource
     }
     
+    // MARK: - 소켓 관련
+    func connectRoom(roomID: String, receiveMessage: @escaping (ChatMessage) -> Void) {
+        socketProvider.connect(roomID: roomID, receiveMessage: receiveMessage)
+    }
+    
+    func disconnectRoom() {
+        socketProvider.disconnect()
+    }
+    
+    // MARK: - 채팅방 관련
     func createRoom(opponentID: String) async throws -> ChatRoom {
         let requestDTO = CreateChatRoomRequestDTO(opponentID: opponentID)
         
@@ -52,6 +62,7 @@ struct ChatRepositoryImpl: ChatRepository {
         return await chatDataSource.fetchChatRooms()
     }
     
+    // MARK: - 메시지 관련
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage {
         let requestDTO = SendChatMessageRequestDTO(
             content: message.content,
@@ -72,14 +83,15 @@ struct ChatRepositoryImpl: ChatRepository {
             type: ChatMessageListResponseDTO.self
         )
         
-        return response.messages.map { $0.toDomain() }
+        let messages = response.messages.map { $0.toDomain() }
+        
+        try await chatDataSource.saveChatMessages(messages)
+        
+        return messages
     }
     
-    func connectRoom(roomID: String, receiveMessage: @escaping (ChatMessage) -> Void) {
-        socketProvider.connect(roomID: roomID, receiveMessage: receiveMessage)
-    }
-    
-    func disconnectRoom() {
-        socketProvider.disconnect()
+    func saveMessage(_ message: ChatMessage) async throws -> ChatMessage {
+        try await chatDataSource.saveChatMessages([message])
+        return message
     }
 }

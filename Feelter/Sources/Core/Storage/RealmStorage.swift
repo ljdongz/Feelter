@@ -20,5 +20,7 @@ final class RealmStorage {
     // 이 Realm 인스턴스는 반드시 메인 스레드에서만 사용해야 함.
     private(set) var realm: Realm = try! Realm()
     
-    private init() { }
+    private init() {
+        print("## Realm File DIR: \(Realm.Configuration.defaultConfiguration.fileURL!)")
+    }
 }

@@ -32,6 +32,8 @@ final class ChatViewModel: ViewModel {
     @Dependency private var chatRepository: ChatRepository
     @Dependency private var tokenManager: TokenManager
     
+    private let receiveMessageTrigger = PublishRelay<ChatMessage>()
+    
     private let roomID: String
     private let calendar = Calendar.current
     
@@ -55,8 +57,8 @@ final class ChatViewModel: ViewModel {
         input.viewDidLoad
             .do(onNext: { [weak self] _ in
                 guard let self else { return }
-                self.chatRepository.connectRoom(roomID: self.roomID) { message in
-                    output.messages.accept(.append(message))
+                chatRepository.connectRoom(roomID: self.roomID) { message in
+                    self.receiveMessageTrigger.accept(message)
                 }
             })
             .withAsyncResult(with: self) { owner, _ in
@@ -85,6 +87,20 @@ final class ChatViewModel: ViewModel {
                 switch result {
                 case .success(let message):
                     print("보내기 성공")
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        receiveMessageTrigger.asObservable()
+            .withAsyncResult(with: self) { owner, message in
+                try await owner.chatRepository.saveMessage(message)
+            }
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success(let message):
+                    output.messages.accept(.append(message))
                 case .failure(let error):
                     print(error)
                 }

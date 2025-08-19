@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>FirebaseAppDelegateProxyEnabled</key>
-	<string>NO</string>
+	<false/>
 	<key>ApiHeaderKey</key>
 	<string>$(API_HEADER_KEY)</string>
 	<key>BaseUrl</key>

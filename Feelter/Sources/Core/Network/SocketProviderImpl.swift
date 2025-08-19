@@ -67,6 +67,7 @@ final class SocketProviderImpl: SocketProvider {
         // 연결 실패
         socket?.on(clientEvent: .error) { data, ack in
             print("❌ Socket error: \(data)")
+            // TODO: 액세스 토큰 만료에 의한 에러 처리
         }
         
         // 연결 해제

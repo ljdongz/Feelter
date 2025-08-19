@@ -11,21 +11,22 @@ import RealmSwift
 
 // TODO: 구조 고민
 protocol ChatDataSource {
+    // 채팅방 관련
     @MainActor
     func fetchChatRooms() -> [ChatRoom]
-    
     @MainActor
     func saveChatRooms(_ rooms: [ChatRoom]) throws
     
+    // 메시지 관련
     @MainActor
     func fetchChatMessages(roomID: String) -> [ChatMessage]
-    
     @MainActor
     func saveChatMessages(_ messages: [ChatMessage]) throws
 }
 
-struct ChatLocalDataSourceImpl: ChatDataSource {
+struct ChatDataSourceImpl: ChatDataSource {
     
+    // MARK: - 채팅방 관련
     func fetchChatRooms() -> [ChatRoom] {
         let realm = RealmStorage.shared.realm
         let realmRooms = realm.objects(RealmChatRoom.self)
@@ -40,6 +41,7 @@ struct ChatLocalDataSourceImpl: ChatDataSource {
         }
     }
     
+    // MARK: - 메시지 관련
     func fetchChatMessages(roomID: String) -> [ChatMessage] {
         let realm = RealmStorage.shared.realm
         let realmMessages = realm.objects(RealmChatMessage.self)
