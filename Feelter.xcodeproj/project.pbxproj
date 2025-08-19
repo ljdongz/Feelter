@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		572774C12E52AFEB006E32E1 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 572774C02E52AFEB006E32E1 /* FirebaseCore */; };
 		572774C32E52AFEB006E32E1 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 572774C22E52AFEB006E32E1 /* FirebaseMessaging */; };
+		572775052E544DC5006E32E1 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 5790BF8A2E4C66B000E1496E /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		574E088B2E3A3B0B004485A7 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 574E088A2E3A3B0B004485A7 /* KakaoSDKAuth */; };
 		574E088D2E3A3B0B004485A7 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 574E088C2E3A3B0B004485A7 /* KakaoSDKCommon */; };
 		574E088F2E3A3B0B004485A7 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = 574E088E2E3A3B0B004485A7 /* KakaoSDKUser */; };
@@ -19,6 +20,20 @@
 		5790BF862E4C659A00E1496E /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 5790BF852E4C659A00E1496E /* SocketIO */; };
 		5790BF8B2E4C66B000E1496E /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5790BF8A2E4C66B000E1496E /* RealmSwift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		572775062E544DC5006E32E1 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				572775052E544DC5006E32E1 /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		577181CD2E2DBF6400EAA0FD /* Feelter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Feelter.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -93,6 +108,7 @@
 				577181C92E2DBF6400EAA0FD /* Sources */,
 				577181CA2E2DBF6400EAA0FD /* Frameworks */,
 				577181CB2E2DBF6400EAA0FD /* Resources */,
+				572775062E544DC5006E32E1 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
