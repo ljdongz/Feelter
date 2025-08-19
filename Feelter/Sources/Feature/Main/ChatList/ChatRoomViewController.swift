@@ -137,9 +137,11 @@ extension ChatRoomViewController {
         newSnapShot.appendSections([0])
         newSnapShot.appendItems(newRooms.sorted { $0.updatedAt > $1.updatedAt })
         
+        let isAnimating = dataSource.snapshot().numberOfItems != 0
+        
         // DiffableDataSource가 기존 데이터와 새 데이터를 비교해서
         // 실제로 변경된 부분만 애니메이션과 함께 업데이트
-        dataSource.apply(newSnapShot, animatingDifferences: true)
+        dataSource.apply(newSnapShot, animatingDifferences: isAnimating)
     }
 }
 

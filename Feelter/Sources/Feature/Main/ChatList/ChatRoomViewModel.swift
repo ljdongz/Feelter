@@ -35,17 +35,12 @@ final class ChatRoomViewModel: ViewModel {
         let serverFetchTrigger = PublishRelay<Void>()
         
         input.viewDidLoad
-            .withAsyncResult(with: self, { owner, _ in
-                try await owner.chatRepository.fetchLocalRooms()
+            .withAsync(with: self, { owner, _ in
+                await owner.chatRepository.fetchLocalRooms()
             })
-            .subscribe(with: self, onNext: { owner, result in
-                switch result {
-                case .success(let rooms):
-                    output.chatRooms.accept(rooms)
-                    serverFetchTrigger.accept(())
-                case .failure(let error):
-                    print(error)
-                }
+            .subscribe(with: self, onNext: { owner, rooms in
+                output.chatRooms.accept(rooms)
+                serverFetchTrigger.accept(())
             })
             .disposed(by: disposeBag)
         
