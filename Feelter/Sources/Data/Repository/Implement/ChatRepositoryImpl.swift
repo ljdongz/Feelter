@@ -7,11 +7,13 @@
 
 import Foundation
 
-struct ChatRepositoryImpl: ChatRepository {
+final class ChatRepositoryImpl: ChatRepository {
     
     private let networkProvider: NetworkProvider
     private let socketProvider: SocketProvider
     private let chatDataSource: ChatDataSource
+    
+    private var chatRooms: [ChatRoom] = []
     
     init(
         networkProvider: NetworkProvider,
@@ -45,21 +47,39 @@ struct ChatRepositoryImpl: ChatRepository {
     }
     
     func fetchRooms() async throws -> [ChatRoom] {
+        // 1. 서버에서 최신 채팅방 목록 가져오기
         let response = try await networkProvider.request(
             endpoint: ChatAPI.fetchRooms,
             type: ChatRoomListResponseDTO.self
         )
         
-        let rooms = response.rooms.map { $0.toDomain() }
+        // 2. 대화 내역이 있는 데이터만 Domain 모델로 변환
+        let serverRooms = response.rooms
+            .filter { $0.lastChat != nil }
+            .map { $0.toDomain() }
         
-        // 서버에서 가져온 데이터를 Realm에 저장
-        try await chatDataSource.saveChatRooms(rooms)
+        // 3. 로컬 데이터와 비교하여 업데이트 필요한 방 찾기
+        let localRoomsDict = Dictionary(
+            uniqueKeysWithValues: chatRooms.map { ($0.roomID, $0) }
+        )
+        let roomsToUpdate = findRoomsNeedingUpdate(
+            serverRooms: serverRooms,
+            localRoomsDict: localRoomsDict
+        )
         
-        return rooms
+        // 4. 변경된 채팅방들의 메시지 동기화
+        await syncMessagesForUpdatedRooms(roomsToUpdate, localRoomsDict: localRoomsDict)
+        
+        // 5. 채팅방 목록 저장 및 반환
+        try await chatDataSource.saveChatRooms(serverRooms)
+        self.chatRooms = serverRooms
+        return serverRooms
     }
     
     func fetchLocalRooms() async -> [ChatRoom] {
-        return await chatDataSource.fetchChatRooms()
+        let rooms = await chatDataSource.fetchChatRooms()
+        self.chatRooms = rooms
+        return rooms
     }
     
     // MARK: - 메시지 관련
@@ -93,5 +113,61 @@ struct ChatRepositoryImpl: ChatRepository {
     func saveMessage(_ message: ChatMessage) async throws -> ChatMessage {
         try await chatDataSource.saveChatMessages([message])
         return message
+    }
+}
+
+// MARK: - 채팅방 목록 DB 최신화
+
+extension ChatRepositoryImpl {
+    
+    private func findRoomsNeedingUpdate(
+        serverRooms: [ChatRoom],
+        localRoomsDict: [String: ChatRoom]
+    ) -> [ChatRoom] {
+        return serverRooms.filter { serverRoom in
+            guard let localRoom = localRoomsDict[serverRoom.roomID] else {
+                // 새로운 채팅방
+                return true
+            }
+            
+            // lastChat의 업데이트 시간 비교
+            return serverRoom.lastChat?.updatedAt != localRoom.lastChat?.updatedAt
+        }
+    }
+    
+    private func syncMessagesForUpdatedRooms(
+        _ roomsToUpdate: [ChatRoom],
+        localRoomsDict: [String: ChatRoom]
+    ) async {
+        await withTaskGroup(of: Void.self) { group in
+            for room in roomsToUpdate {
+                group.addTask { [weak self] in
+                    await self?.syncMessagesForRoom(
+                        room,
+                        localRoom: localRoomsDict[room.roomID]
+                    )
+                }
+            }
+        }
+    }
+    
+    private func syncMessagesForRoom(_ room: ChatRoom, localRoom: ChatRoom?) async {
+        do {
+            // 로컬 마지막 메시지 시점을 기준으로 after 파라미터 설정
+            let lastMessageTime = localRoom?.lastChat?.createdAt
+            let afterParameter = lastMessageTime.map {
+                UTCDateFormatter.shared.string(from: $0)
+            }
+            
+            let newMessages = try await fetchMessages(
+                from: room.roomID,
+                after: afterParameter
+            )
+            
+            try await chatDataSource.saveChatMessages(newMessages)
+            
+        } catch {
+            print("메시지 동기화 실패 - 채팅방 ID: \(room.roomID), 에러: \(error)")
+        }
     }
 }
