@@ -10,8 +10,12 @@ import Foundation
 struct ChatRoom: Hashable {
     let roomID: String
     let participants: [MessageSender]
-    let lastChat: ChatMessage?
+    
+    let lastMessage: String
+    let isLastMessageFile: Bool
+    
     let createdAt: Date
     let updatedAt: Date
+    let lastChatReceivedAt: Date
 }
 

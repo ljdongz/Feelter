@@ -25,12 +25,16 @@ struct ChatRoomResponseDTO: Decodable {
     }
     
     func toDomain() -> ChatRoom {
-        .init(
+        let isLastMessageFile = !(lastChat?.fileURLs.isEmpty ?? true)
+        
+        return .init(
             roomID: roomID,
             participants: participants.map { $0.toDomain() },
-            lastChat: lastChat?.toDomain(),
+            lastMessage: isLastMessageFile ? "파일을 보냈습니다." : lastChat?.content ?? "",
+            isLastMessageFile: isLastMessageFile,
             createdAt: UTCDateFormatter.shared.date(from: createdAt) ?? Date(),
-            updatedAt: UTCDateFormatter.shared.date(from: updatedAt) ?? Date()
+            updatedAt: UTCDateFormatter.shared.date(from: updatedAt) ?? Date(),
+            lastChatReceivedAt: UTCDateFormatter.shared.date(from: lastChat?.createdAt ?? "") ?? Date()
         )
     }
 }

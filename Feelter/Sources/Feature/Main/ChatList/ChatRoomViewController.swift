@@ -118,7 +118,7 @@ extension ChatRoomViewController {
                 cell.configureCell(.init(
                     profileImageURL: opponent.profileImageURL,
                     name: opponent.nickname,
-                    message: room.lastChat?.content ?? "",
+                    message: room.lastMessage,
                     date: room.updatedAt.formatted(.basic),
                     unreadCount: 0
                 ))
@@ -132,10 +132,15 @@ extension ChatRoomViewController {
 
 extension ChatRoomViewController {
     private func updateDataSource(with newRooms: [ChatRoom]) {
+        let sortedRooms = newRooms.sorted {
+            ($0.lastChatReceivedAt, $0.updatedAt) >
+            ($1.lastChatReceivedAt, $1.updatedAt)
+        }
+        
         // 새로운 스냅샷을 직접 생성 (DiffableDataSource가 차이점을 자동 계산)
         var newSnapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
         newSnapShot.appendSections([0])
-        newSnapShot.appendItems(newRooms.sorted { $0.updatedAt > $1.updatedAt })
+        newSnapShot.appendItems(sortedRooms)
         
         let isAnimating = dataSource.snapshot().numberOfItems != 0
         

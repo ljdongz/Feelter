@@ -147,8 +147,8 @@ extension ChatRepositoryImpl {
                 return true
             }
             
-            // lastChat의 업데이트 시간 비교
-            return serverRoom.lastChat?.updatedAt != localRoom.lastChat?.updatedAt
+            // 채팅방 업데이트 날짜 비교
+            return serverRoom.updatedAt != localRoom.updatedAt
         }
     }
     
@@ -170,8 +170,8 @@ extension ChatRepositoryImpl {
     
     private func syncMessagesForRoom(_ room: ChatRoom, localRoom: ChatRoom?) async {
         do {
-            // 로컬 마지막 메시지 시점을 기준으로 after 파라미터 설정
-            let lastMessageTime = localRoom?.lastChat?.createdAt
+            // 로컬 채팅방 업데이트된 날짜 기준으로 after 파라미터 설정
+            let lastMessageTime = localRoom?.updatedAt
             let afterParameter = lastMessageTime.map {
                 UTCDateFormatter.shared.string(from: $0)
             }

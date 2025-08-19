@@ -12,23 +12,32 @@ import RealmSwift
 final class RealmChatRoom: Object {
     @Persisted(primaryKey: true) var roomID: String
     @Persisted var participants: List<RealmMessageSender>
-    @Persisted var lastChat: RealmChatMessage?
+    @Persisted var lastMessage: String
+    @Persisted var isLastMessageFile: Bool
+    @Persisted var unReadCount: Int
     @Persisted var createdAt: Date
     @Persisted var updatedAt: Date
+    @Persisted var lastChatReceivedAt: Date
     
     convenience init(
         roomID: String,
         participants: List<RealmMessageSender>,
-        lastChat: RealmChatMessage? = nil,
+        lastMessage: String,
+        isLastMessageFile: Bool,
+        unReadCount: Int = 0,
         createdAt: Date,
-        updatedAt: Date
+        updatedAt: Date,
+        lastChatReceivedAt: Date
     ) {
         self.init()
         self.roomID = roomID
         self.participants = participants
-        self.lastChat = lastChat
+        self.lastMessage = lastMessage
+        self.isLastMessageFile = isLastMessageFile
+        self.unReadCount = unReadCount
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+        self.lastChatReceivedAt = lastChatReceivedAt
     }
     
     convenience init(from chatRoom: ChatRoom) {
@@ -41,18 +50,22 @@ final class RealmChatRoom: Object {
         })
         self.participants = participants
         
-        self.lastChat = chatRoom.lastChat.map { RealmChatMessage(from: $0) }
+        self.lastMessage = chatRoom.lastMessage
+        self.isLastMessageFile = chatRoom.isLastMessageFile
         self.createdAt = chatRoom.createdAt
         self.updatedAt = chatRoom.updatedAt
+        self.lastChatReceivedAt = chatRoom.lastChatReceivedAt
     }
     
     func toDomain() -> ChatRoom {
         .init(
             roomID: roomID,
             participants: Array(participants).map { $0.toDomain() },
-            lastChat: lastChat?.toDomain(),
+            lastMessage: lastMessage,
+            isLastMessageFile: isLastMessageFile,
             createdAt: createdAt,
-            updatedAt: updatedAt
+            updatedAt: updatedAt,
+            lastChatReceivedAt: lastChatReceivedAt
         )
     }
 }
