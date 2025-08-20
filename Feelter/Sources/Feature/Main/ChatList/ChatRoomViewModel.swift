@@ -15,6 +15,7 @@ final class ChatRoomViewModel: ViewModel {
     struct Input {
         let viewDidLoad: Observable<Void>
         let receivedAPNs: Observable<APNsPayload>
+        let receiveSocketMessage: Observable<Void>
     }
     
     struct Output {
@@ -59,6 +60,15 @@ final class ChatRoomViewModel: ViewModel {
                 case .failure(let error):
                     print(error)
                 }
+            }
+            .disposed(by: disposeBag)
+        
+        input.receiveSocketMessage
+            .withAsync(with: self) { owner, _ in
+                await owner.chatRepository.fetchLocalRooms()
+            }
+            .subscribe(with: self) { onwer, rooms in
+                output.chatRooms.accept(rooms)
             }
             .disposed(by: disposeBag)
         

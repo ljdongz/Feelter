@@ -33,8 +33,6 @@ final class ChatViewModel: ViewModel {
     @Dependency private var chatRepository: ChatRepository
     @Dependency private var tokenManager: TokenManager
     
-    private let receiveMessageTrigger = PublishRelay<ChatMessage>()
-    
     private let roomID: String
     private let updatedAt: Date
     private let calendar = Calendar.current
@@ -54,6 +52,7 @@ final class ChatViewModel: ViewModel {
         let output = Output()
         
         let serverFetchTrigger = PublishRelay<Void>()
+        let receiveMessageTrigger = PublishRelay<ChatMessage>()
         
         input.viewDidLoad
             .do(onNext: { [weak self] _ in
@@ -107,6 +106,11 @@ final class ChatViewModel: ViewModel {
                 switch result {
                 case .success(let message):
                     output.messages.accept(.append([message]))
+                    
+                    NotificationCenter.default.post(
+                        name: .ReceiveSocketMessage,
+                        object: nil
+                    )
                 case .failure(let error):
                     print(error)
                 }

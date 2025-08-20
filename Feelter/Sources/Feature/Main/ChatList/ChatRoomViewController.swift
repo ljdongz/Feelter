@@ -51,6 +51,10 @@ final class ChatRoomViewController: RxBaseViewController {
             receivedAPNs: NotificationCenter.default.rx
                 .notification(.ReceiveRemotePush)
                 .compactMap { $0.object as? APNsPayload }
+                .asObservable(),
+            receiveSocketMessage: NotificationCenter.default.rx
+                .notification(.ReceiveSocketMessage)
+                .map { _ in }
                 .asObservable()
         )
         

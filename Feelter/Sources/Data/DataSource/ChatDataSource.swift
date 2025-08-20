@@ -17,7 +17,12 @@ protocol ChatDataSource {
     @MainActor
     func saveChatRooms(_ rooms: [ChatRoom]) throws
     @MainActor
-    func updateChatRoomUpdatedAt(roomID: String, updatedAt: Date) throws
+    func updateChatRoom(
+        roomID: String,
+        updatedAt: Date,
+        lastMessage: String,
+        isLastMessageFile: Bool
+    ) throws
     @MainActor
     func updateChatRoom(from apns: APNsPayload) throws
 
@@ -46,7 +51,12 @@ struct ChatDataSourceImpl: ChatDataSource {
         }
     }
     
-    func updateChatRoomUpdatedAt(roomID: String, updatedAt: Date) throws {
+    func updateChatRoom(
+        roomID: String,
+        updatedAt: Date,
+        lastMessage: String,
+        isLastMessageFile: Bool
+    ) throws {
         let realm = RealmStorage.shared.realm
         try realm.write {
             let room = realm.object(
@@ -54,6 +64,9 @@ struct ChatDataSourceImpl: ChatDataSource {
                 forPrimaryKey: roomID
             )
             room?.updatedAt = updatedAt
+            room?.localUpdatedAt = updatedAt
+            room?.lastMessage = lastMessage
+            room?.isLastMessageFile = isLastMessageFile
         }
     }
     

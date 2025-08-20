@@ -112,13 +112,17 @@ final class ChatRepositoryImpl: ChatRepository {
         
         try await chatDataSource.saveChatMessages(messages)
         
-        if let updatedAt = messages.last?.createdAt {
-            try await chatDataSource.updateChatRoomUpdatedAt(
+        if let lastChat = messages.last {
+            try await chatDataSource.updateChatRoom(
                 roomID: roomID,
-                updatedAt: updatedAt
+                updatedAt: lastChat.updatedAt,
+                lastMessage: lastChat.content,
+                isLastMessageFile: lastChat.fileURLs.isEmpty
             )
+            
+            chatRooms = await chatDataSource.fetchChatRooms()
         }
-        
+            
         return messages
     }
     
@@ -129,10 +133,24 @@ final class ChatRepositoryImpl: ChatRepository {
     func saveMessage(_ message: ChatMessage) async throws -> ChatMessage {
         try await chatDataSource.saveChatMessages([message])
         
-        try await chatDataSource.updateChatRoomUpdatedAt(
+        try await chatDataSource.updateChatRoom(
             roomID: message.roomID,
-            updatedAt: message.createdAt
+            updatedAt: message.createdAt,
+            lastMessage: message.content,
+            isLastMessageFile: message.fileURLs.isEmpty
         )
+        
+        if let index = chatRooms.firstIndex(where: { $0.roomID == message.roomID }) {
+            chatRooms[index] = .init(
+                roomID: message.roomID,
+                participants: chatRooms[index].participants,
+                lastMessage: message.content,
+                isLastMessageFile: message.fileURLs.isEmpty,
+                createdAt: chatRooms[index].createdAt,
+                updatedAt: message.createdAt,
+                localUpdatedAt: message.createdAt
+            )
+        }
         
         return message
     }
