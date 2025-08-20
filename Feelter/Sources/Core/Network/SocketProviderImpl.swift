@@ -60,6 +60,7 @@ final class SocketProviderImpl: SocketProvider {
         socket?.disconnect()
         socket = nil
         manager = nil
+        receiveMessageHandler = nil
     }
     
     func isConnected(roomID: String) -> Bool {
@@ -70,8 +71,17 @@ final class SocketProviderImpl: SocketProvider {
 extension SocketProviderImpl {
     private func setupSocketEvents() {
         // 연결 성공
-        socket?.on(clientEvent: .connect) { data, ack in
-            print("✅ Socket connected to room: \(data)")
+        socket?.on(clientEvent: .connect) { [weak self] data, ack in
+            print("✅ Socket connected to room")
+            for value in data {
+                guard let v = value as? String,
+                      v.hasPrefix("/chats-") else { continue }
+                
+                let roomID = String(v.dropFirst("/chats-".count))
+                self?.connectRoomID = roomID
+                print("✅ Socket connected to room: \(data)")
+                return
+            }
         }
         
         // 연결 실패

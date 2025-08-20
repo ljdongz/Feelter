@@ -22,6 +22,7 @@ enum UpdateType {
 final class ChatViewModel: ViewModel {
     struct Input {
         let viewDidLoad: Observable<Void>
+        let viewWillDisappear: Observable<Void>
         let sendMessageButtonTapped: Observable<String>
     }
     
@@ -49,10 +50,6 @@ final class ChatViewModel: ViewModel {
         self.updatedAt = updatedAt
     }
     
-    deinit {
-        chatRepository.disconnectRoom()
-    }
-    
     func transform(input: Input) -> Output {
         let output = Output()
         
@@ -61,8 +58,9 @@ final class ChatViewModel: ViewModel {
         input.viewDidLoad
             .do(onNext: { [weak self] _ in
                 guard let self else { return }
-                chatRepository.connectRoom(roomID: self.roomID) { message in
-                    self.receiveMessageTrigger.accept(message)
+                chatRepository.connectRoom(roomID: self.roomID) { [weak self] message in
+                    guard let self else { return }
+                    receiveMessageTrigger.accept(message)
                 }
             })
             .withAsync(with: self) { owner, _ in
@@ -73,6 +71,12 @@ final class ChatViewModel: ViewModel {
                 output.messages.accept(.fullReload(messages))
                 
                 serverFetchTrigger.accept(())
+            }
+            .disposed(by: disposeBag)
+        
+        input.viewWillDisappear
+            .subscribe(with: self) { owner, _ in
+                owner.chatRepository.disconnectRoom()
             }
             .disposed(by: disposeBag)
         
