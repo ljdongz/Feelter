@@ -82,6 +82,10 @@ final class ChatRepositoryImpl: ChatRepository {
         return rooms
     }
     
+    func updateRoom(apnsPayload: APNsPayload) async throws {
+        try await chatDataSource.updateChatRoom(from: apnsPayload)
+    }
+    
     // MARK: - 메시지 관련
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage {
         let requestDTO = SendChatMessageRequestDTO(

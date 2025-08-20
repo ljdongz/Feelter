@@ -14,6 +14,7 @@ final class ChatRoomViewModel: ViewModel {
     
     struct Input {
         let viewDidLoad: Observable<Void>
+        let receivedAPNs: Observable<APNsPayload>
     }
     
     struct Output {
@@ -44,6 +45,23 @@ final class ChatRoomViewModel: ViewModel {
             })
             .disposed(by: disposeBag)
         
+        input.receivedAPNs
+            .withAsyncResult(with: self) { owner, payload in
+                try await owner.chatRepository.updateRoom(apnsPayload: payload)
+                
+                let rooms = await owner.chatRepository.fetchLocalRooms()
+                return rooms
+            }
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success(let rooms):
+                    output.chatRooms.accept(rooms)
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            .disposed(by: disposeBag)
+        
         serverFetchTrigger
             .asObservable()
             .withAsyncResult(with: self) { owner, _ in
@@ -61,5 +79,4 @@ final class ChatRoomViewModel: ViewModel {
         
         return output
     }
-    
 }

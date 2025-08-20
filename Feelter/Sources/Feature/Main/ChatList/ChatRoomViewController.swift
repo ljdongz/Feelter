@@ -47,7 +47,11 @@ final class ChatRoomViewController: RxBaseViewController {
     
     override func bind() {
         let input = ChatRoomViewModel.Input(
-            viewDidLoad: .just(())
+            viewDidLoad: .just(()),
+            receivedAPNs: NotificationCenter.default.rx
+                .notification(.ReceiveRemotePush)
+                .compactMap { $0.object as? APNsPayload }
+                .asObservable()
         )
         
         let output = viewModel.transform(input: input)

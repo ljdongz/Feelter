@@ -16,6 +16,7 @@ protocol ChatRepository {
     func createRoom(opponentID: String) async throws -> ChatRoom
     func fetchRooms() async throws -> [ChatRoom]
     func fetchLocalRooms() async -> [ChatRoom]
+    func updateRoom(apnsPayload: APNsPayload) async throws
     
     // 메시지 관련
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage

@@ -9,7 +9,7 @@ import Foundation
 
 struct APNsPayload: Decodable {
     let aps: APS
-    let roomID: String?
+    let roomID: String
     
     enum CodingKeys: String, CodingKey {
         case aps

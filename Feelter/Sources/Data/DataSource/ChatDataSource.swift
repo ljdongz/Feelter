@@ -18,6 +18,8 @@ protocol ChatDataSource {
     func saveChatRooms(_ rooms: [ChatRoom]) throws
     @MainActor
     func updateChatRoomUpdatedAt(roomID: String, updatedAt: Date) throws
+    @MainActor
+    func updateChatRoom(from apns: APNsPayload) throws
 
     
     // 메시지 관련
@@ -52,6 +54,20 @@ struct ChatDataSourceImpl: ChatDataSource {
                 forPrimaryKey: roomID
             )
             room?.updatedAt = updatedAt
+        }
+    }
+    
+    func updateChatRoom(from apns: APNsPayload) throws {
+        let realm = RealmStorage.shared.realm
+        try realm.write {
+            let room = realm.object(
+                ofType: RealmChatRoom.self,
+                forPrimaryKey: apns.roomID
+            )
+            // TODO: APNs 응답 형식에 맞춰 수정하기
+            room?.lastMessage = apns.aps.alert.body ?? "-"
+            room?.isLastMessageFile = false
+            room?.lastChatReceivedAt = Date()
         }
     }
     
