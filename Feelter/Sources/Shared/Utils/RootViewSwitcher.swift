@@ -58,9 +58,8 @@ private extension RootViewSwitcher {
             return UINavigationController(rootViewController: signInViewController)
             
         case .main:
-            // TODO: MainViewController 구현 후 변경
-            let mainViewController = HomeViewController()
-            return UINavigationController(rootViewController: mainViewController)
+            let mainViewController = TabBarViewController()
+            return mainViewController
         }
     }
 }
