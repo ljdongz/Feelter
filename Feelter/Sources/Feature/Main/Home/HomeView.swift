@@ -31,7 +31,6 @@ final class HomeView: BaseView {
         view.contentInsetAdjustmentBehavior = .never
         view.showsVerticalScrollIndicator = false
         view.backgroundColor = .clear
-        view.bounces = false
         return view
     }()
     
