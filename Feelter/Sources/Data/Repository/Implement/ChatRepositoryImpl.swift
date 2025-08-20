@@ -137,7 +137,7 @@ final class ChatRepositoryImpl: ChatRepository {
             roomID: message.roomID,
             updatedAt: message.createdAt,
             lastMessage: message.content,
-            isLastMessageFile: message.fileURLs.isEmpty
+            isLastMessageFile: !message.fileURLs.isEmpty
         )
         
         if let index = chatRooms.firstIndex(where: { $0.roomID == message.roomID }) {
@@ -145,7 +145,7 @@ final class ChatRepositoryImpl: ChatRepository {
                 roomID: message.roomID,
                 participants: chatRooms[index].participants,
                 lastMessage: message.content,
-                isLastMessageFile: message.fileURLs.isEmpty,
+                isLastMessageFile: !message.fileURLs.isEmpty,
                 createdAt: chatRooms[index].createdAt,
                 updatedAt: message.createdAt,
                 localUpdatedAt: message.createdAt

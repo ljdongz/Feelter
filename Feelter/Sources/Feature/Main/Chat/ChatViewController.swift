@@ -210,6 +210,7 @@ extension ChatViewController {
         snapShot.appendItems(cellTypes)
         dataSource.apply(snapShot, animatingDifferences: false)
         
+        guard !cellTypes.isEmpty else { return }
         tableView.scrollToRow(
             at: IndexPath(row: cellTypes.count - 1, section: 0),
             at: .bottom,

@@ -28,7 +28,7 @@ struct NetworkProviderImpl: NetworkProvider {
         
         // 토큰 인터셉터를 설정한 경우, adapt 호출
         if let tokenInterceptor {
-            request = try await tokenInterceptor.adapt(request)
+            request = tokenInterceptor.adapt(request)
         }
         
         do {
@@ -52,7 +52,7 @@ struct NetworkProviderImpl: NetworkProvider {
         
         // 토큰 인터셉터를 설정한 경우, adapt 호출
         if let tokenInterceptor {
-            request = try await tokenInterceptor.adapt(request)
+            request = tokenInterceptor.adapt(request)
         }
         
         do {
@@ -124,7 +124,7 @@ private extension NetworkProviderImpl {
         switch retryResult {
         case .retry:
             // 갱신된 토큰을 URLRequest 헤더에 등록
-            let retryRequest = try await tokenInterceptor.adapt(request)
+            let retryRequest = tokenInterceptor.adapt(request)
             return retryRequest
         case .doNotRetry:
             throw error

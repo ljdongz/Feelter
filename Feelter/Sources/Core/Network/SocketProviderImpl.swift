@@ -61,10 +61,11 @@ final class SocketProviderImpl: SocketProvider {
         socket = nil
         manager = nil
         receiveMessageHandler = nil
+        connectRoomID = nil
     }
     
     func isConnected(roomID: String) -> Bool {
-        connectRoomID == roomID
+        (connectRoomID == roomID) && (socket?.status == .connected)
     }
 }
 

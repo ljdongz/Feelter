@@ -13,6 +13,6 @@ enum RetryResult {
 }
 
 protocol RequestInterceptor {
-    func adapt(_ request: URLRequest) async throws -> URLRequest
+    func adapt(_ request: URLRequest) -> URLRequest
     func retry(_ request: URLRequest, for error: Error) async throws -> RetryResult
 }

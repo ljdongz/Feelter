@@ -17,7 +17,7 @@ struct TokenInterceptor: RequestInterceptor {
     }
     
     // 요청 전에 액세스 토큰 추가
-    func adapt(_ request: URLRequest) async -> URLRequest {
+    func adapt(_ request: URLRequest) -> URLRequest {
         // 액세스 토큰이 존재하는지 확인 (없으면 엑세스 토큰을 설정할 필요 없는 API)
         guard let accessToken = tokenManager.accessToken,
               let refreshToken = tokenManager.refreshToken else {
@@ -84,7 +84,7 @@ struct TokenInterceptor: RequestInterceptor {
         }
         
         // 헤더에 액세스, 리프레시 토큰 설정
-        request = await self.adapt(request)
+        request = self.adapt(request)
         
         let (data, response): (Data, URLResponse)
         do {
