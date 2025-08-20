@@ -34,7 +34,7 @@ struct ChatRoomResponseDTO: Decodable {
             isLastMessageFile: isLastMessageFile,
             createdAt: UTCDateFormatter.shared.date(from: createdAt) ?? Date(),
             updatedAt: UTCDateFormatter.shared.date(from: updatedAt) ?? Date(),
-            lastChatReceivedAt: UTCDateFormatter.shared.date(from: lastChat?.createdAt ?? "") ?? Date()
+            localUpdatedAt: UTCDateFormatter.shared.date(from: lastChat?.createdAt ?? "") ?? Date()
         )
     }
 }

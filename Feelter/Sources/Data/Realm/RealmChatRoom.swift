@@ -17,7 +17,7 @@ final class RealmChatRoom: Object {
     @Persisted var unReadCount: Int
     @Persisted var createdAt: Date
     @Persisted var updatedAt: Date
-    @Persisted var lastChatReceivedAt: Date
+    @Persisted var localUpdatedAt: Date
     
     convenience init(
         roomID: String,
@@ -27,7 +27,7 @@ final class RealmChatRoom: Object {
         unReadCount: Int = 0,
         createdAt: Date,
         updatedAt: Date,
-        lastChatReceivedAt: Date
+        localUpdatedAt: Date
     ) {
         self.init()
         self.roomID = roomID
@@ -37,7 +37,7 @@ final class RealmChatRoom: Object {
         self.unReadCount = unReadCount
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.lastChatReceivedAt = lastChatReceivedAt
+        self.localUpdatedAt = localUpdatedAt
     }
     
     convenience init(from chatRoom: ChatRoom) {
@@ -54,7 +54,7 @@ final class RealmChatRoom: Object {
         self.isLastMessageFile = chatRoom.isLastMessageFile
         self.createdAt = chatRoom.createdAt
         self.updatedAt = chatRoom.updatedAt
-        self.lastChatReceivedAt = chatRoom.lastChatReceivedAt
+        self.localUpdatedAt = chatRoom.localUpdatedAt
     }
     
     func toDomain() -> ChatRoom {
@@ -65,7 +65,7 @@ final class RealmChatRoom: Object {
             isLastMessageFile: isLastMessageFile,
             createdAt: createdAt,
             updatedAt: updatedAt,
-            lastChatReceivedAt: lastChatReceivedAt
+            localUpdatedAt: localUpdatedAt
         )
     }
 }

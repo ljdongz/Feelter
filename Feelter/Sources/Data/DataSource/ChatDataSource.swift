@@ -67,7 +67,7 @@ struct ChatDataSourceImpl: ChatDataSource {
             // TODO: APNs 응답 형식에 맞춰 수정하기
             room?.lastMessage = apns.aps.alert.body ?? "-"
             room?.isLastMessageFile = false
-            room?.lastChatReceivedAt = Date()
+            room?.localUpdatedAt = Date()
         }
     }
     
