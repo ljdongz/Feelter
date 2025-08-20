@@ -20,6 +20,7 @@ final class ChatViewController: RxBaseViewController {
         view.separatorStyle = .none
         view.delegate = self
         view.contentInset.top = 20
+        view.contentInset.bottom = 20
         view.estimatedRowHeight = 100
         return view
     }()
@@ -29,6 +30,7 @@ final class ChatViewController: RxBaseViewController {
         return view
     }()
     
+    private let dateSeparatorGenerator = DateSeparatorGenerator()
     private let viewModel: ChatViewModel
     
     private var messageInputFieldBottomConstraint: Constraint?
@@ -71,6 +73,7 @@ final class ChatViewController: RxBaseViewController {
     override func bind() {
         let input = ChatViewModel.Input(
             viewDidLoad: .just(()),
+            viewWillDisappear: rx.viewWillDisappear.asObservable(),
             sendMessageButtonTapped: messageInputField.sendButton.rx
                 .tap
                 .compactMap { [weak self] _ in
@@ -92,22 +95,22 @@ final class ChatViewController: RxBaseViewController {
                     owner.initializeDataSource(messages)
                 case .prepend(let messages):
                     owner.prependDataSource(messages)
-                case .append(let message):
-                    owner.appendDataSource(message)
+                case .append(let messages):
+                    owner.appendDataSource(messages)
                 }
             }
             .disposed(by: disposeBag)
         
         
         NotificationCenter.default.rx
-            .notification(UIResponder.keyboardWillShowNotification)
+            .notification(.KeyboardWillShow)
             .subscribe(with: self, onNext: { owner, notification in
                 owner.handleKeyboardWillShow(notification: notification)
             })
             .disposed(by: disposeBag)
         
         NotificationCenter.default.rx
-            .notification(UIResponder.keyboardWillHideNotification)
+            .notification(.KeyboardWillHide)
             .subscribe(with: self, onNext: { owner, notification in
                 owner.handleKeyboardWillHide(notification: notification)
             })
@@ -195,20 +198,53 @@ extension ChatViewController {
 
 // MARK: - Update DataSource
 extension ChatViewController {
-    private func initializeDataSource(_ messages: [MessageCellType]) {
+    private func initializeDataSource(_ messages: [ChatMessage]) {
+        let cellTypes = dateSeparatorGenerator.generateCellTypes(
+            from: messages,
+            currentUserID: viewModel.userID
+        )
+        
         var snapShot = dataSource.snapshot()
         snapShot.appendSections([0])
         
-        snapShot.appendItems(messages)
+        snapShot.appendItems(cellTypes)
         dataSource.apply(snapShot, animatingDifferences: false)
+        
+        guard !cellTypes.isEmpty else { return }
+        tableView.scrollToRow(
+            at: IndexPath(row: cellTypes.count - 1, section: 0),
+            at: .bottom,
+            animated: false
+        )
     }
     
-    private func prependDataSource(_ messages: [MessageCellType]) {
+    private func prependDataSource(_ messages: [ChatMessage]) {
         
     }
     
-    private func appendDataSource(_ message: MessageCellType) {
+    private func appendDataSource(_ messages: [ChatMessage]) {
+        var cellTypes = dateSeparatorGenerator.generateCellTypes(
+            from: messages,
+            currentUserID: viewModel.userID
+        )
         
+        var snapShot = dataSource.snapshot()
+        
+        // 현재 DataSource에 반영된 마지막 채팅 데이터 날짜와 비교해서 구분선 중복 제거
+        // TODO: 마지막 채팅 메시지와 비교해서 프로필, 날짜 표시 여부 수정
+        if let items = snapShot.itemIdentifiers as? [MessageCellType],
+           let lastItem = items.last,
+           case let MessageCellType.message(prevMessage) = lastItem {
+            
+            let prevTimeStamp = prevMessage.timestamp.formatted(.fullDateWithWeekday)
+            let currentTimeStamp = messages.first?.createdAt.formatted(.fullDateWithWeekday)
+            if prevTimeStamp == currentTimeStamp {
+                cellTypes.removeFirst()
+            }
+        }
+            
+        snapShot.appendItems(cellTypes)
+        dataSource.apply(snapShot, animatingDifferences: false)
     }
 }
 
@@ -269,23 +305,7 @@ extension ChatViewController {
     }
 }
 
-extension ChatViewController: UITableViewDelegate {
-    
-}
+extension ChatViewController: UITableViewDelegate { }
 
-extension ChatViewController {
-    
-    
-}
 
-#if DEBUG
-import SwiftUI
-@available(iOS 17.0, *)
-#Preview {
-    UINavigationController(
-        rootViewController: ChatViewController(
-            viewModel: ChatViewModel(roomID: "")
-        )
-    )
-}
-#endif
+

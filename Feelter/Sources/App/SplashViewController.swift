@@ -52,9 +52,9 @@ private extension SplashViewController {
                     
                     let (token, _) = try await (response, sleep)
                     
-                    tokenManager.updateToken(
-                        access: token.accessToken,
-                        refresh: token.refreshToken
+                    tokenManager.updateAuthToken(
+                        accessToken: token.accessToken,
+                        refreshToken: token.refreshToken
                     )
                     
                     await MainActor.run {
@@ -62,7 +62,7 @@ private extension SplashViewController {
                     }
                     
                 } catch {
-                    print(error)
+                    print("Splash View Error: \(error)")
                     // TODO: 각 에러상황 별 화면 분기 처리 고민
                     tokenManager.clearToken()
                     

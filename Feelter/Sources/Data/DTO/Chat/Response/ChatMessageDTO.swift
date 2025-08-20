@@ -11,7 +11,7 @@ struct ChatMessageResponseDTO: Decodable {
     let chatID: String
     let roomID: String
     let content: String
-    let sender: ProfileDTO
+    let sender: MessageSenderDTO
     let fileURLs: [String]
     
     let createdAt: String

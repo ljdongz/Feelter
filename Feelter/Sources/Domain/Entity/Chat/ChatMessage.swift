@@ -12,7 +12,7 @@ struct ChatMessage: Hashable {
     let roomID: String
     let content: String
     let fileURLs: [String]
-    let sender: Profile
+    let sender: MessageSender
     let createdAt: Date
     let updatedAt: Date
 }

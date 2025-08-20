@@ -12,6 +12,7 @@ final class TokenManager {
     private(set) var accessToken: String?
     private(set) var refreshToken: String?
     
+    private(set) var deviceToken: String?
     private(set) var userID: String?
     
     private let keychainStorage: KeychainStorage
@@ -27,41 +28,45 @@ final class TokenManager {
         self.accessToken = try? keychainStorage.load(forKey: .accessToken)
         self.refreshToken = try? keychainStorage.load(forKey: .refreshToken)
         self.userID = userDefaults.string(forKey: "userID")
+        self.deviceToken = userDefaults.string(forKey: "deviceToken")
         
         print("Access Token: \(accessToken ?? "-")")
         print("Refresh Token: \(refreshToken ?? "-")")
+        print("Device Token: \(deviceToken ?? "-")")
     }
     
-    func updateToken(
-        access: String? = nil,
-        refresh: String? = nil,
-        userID: String? = nil
-    ) {
-        if let access {
-            accessToken = access
-            try? keychainStorage.save(access, forKey: .accessToken)
-            print("Access Token Updated: \(access)")
-        }
+    func updateAuthToken(accessToken: String, refreshToken: String) {
+        try? keychainStorage.save(accessToken, forKey: .accessToken)
+        try? keychainStorage.save(refreshToken, forKey: .refreshToken)
         
-        if let refresh {
-            refreshToken = refresh
-            try? keychainStorage.save(refresh, forKey: .refreshToken)
-            print("Refresh Token Updated: \(refresh)")
-        }
+        self.accessToken = accessToken
+        self.refreshToken = refreshToken
         
-        if let userID {
-            self.userID = userID
-            userDefaults.set(userID, forKey: "userID")
-            print("UserID Updated: \(userID)")
-        }
+        print("Access Token Updated: \(accessToken)")
+        print("Refresh Token Updated: \(refreshToken)")
+    }
+    
+    func updateUserID(_ userID: String) {
+        userDefaults.set(userID, forKey: "userID")
+        self.userID = userID
+        print("UserID Updated: \(userID)")
+    }
+    
+    func updateDeviceToken(_ deviceToken: String) {
+        userDefaults.set(deviceToken, forKey: "deviceToken")
+        self.deviceToken = deviceToken
+        print("Device Token Updated: \(deviceToken)")
     }
     
     func clearToken() {
         accessToken = nil
         refreshToken = nil
         userID = nil
+        deviceToken = nil
+        
         try? keychainStorage.delete(forKey: .accessToken)
         try? keychainStorage.delete(forKey: .refreshToken)
         userDefaults.removeObject(forKey: "userID")
+        userDefaults.removeObject(forKey: "deviceToken")
     }
 }

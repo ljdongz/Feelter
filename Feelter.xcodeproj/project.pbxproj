@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		572774C12E52AFEB006E32E1 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 572774C02E52AFEB006E32E1 /* FirebaseCore */; };
+		572774C32E52AFEB006E32E1 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 572774C22E52AFEB006E32E1 /* FirebaseMessaging */; };
+		572775052E544DC5006E32E1 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 5790BF8A2E4C66B000E1496E /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		574E088B2E3A3B0B004485A7 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 574E088A2E3A3B0B004485A7 /* KakaoSDKAuth */; };
 		574E088D2E3A3B0B004485A7 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 574E088C2E3A3B0B004485A7 /* KakaoSDKCommon */; };
 		574E088F2E3A3B0B004485A7 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = 574E088E2E3A3B0B004485A7 /* KakaoSDKUser */; };
@@ -17,6 +20,20 @@
 		5790BF862E4C659A00E1496E /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 5790BF852E4C659A00E1496E /* SocketIO */; };
 		5790BF8B2E4C66B000E1496E /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5790BF8A2E4C66B000E1496E /* RealmSwift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		572775062E544DC5006E32E1 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				572775052E544DC5006E32E1 /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		577181CD2E2DBF6400EAA0FD /* Feelter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Feelter.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -54,8 +71,10 @@
 				57684ED42E43200200A8FA31 /* Kingfisher in Frameworks */,
 				574E088F2E3A3B0B004485A7 /* KakaoSDKUser in Frameworks */,
 				577181EA2E2DC65600EAA0FD /* SnapKit in Frameworks */,
+				572774C12E52AFEB006E32E1 /* FirebaseCore in Frameworks */,
 				574E088D2E3A3B0B004485A7 /* KakaoSDKCommon in Frameworks */,
 				5790BF8B2E4C66B000E1496E /* RealmSwift in Frameworks */,
+				572774C32E52AFEB006E32E1 /* FirebaseMessaging in Frameworks */,
 				574E088B2E3A3B0B004485A7 /* KakaoSDKAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -89,6 +108,7 @@
 				577181C92E2DBF6400EAA0FD /* Sources */,
 				577181CA2E2DBF6400EAA0FD /* Frameworks */,
 				577181CB2E2DBF6400EAA0FD /* Resources */,
+				572775062E544DC5006E32E1 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -108,6 +128,8 @@
 				57684ED32E43200200A8FA31 /* Kingfisher */,
 				5790BF852E4C659A00E1496E /* SocketIO */,
 				5790BF8A2E4C66B000E1496E /* RealmSwift */,
+				572774C02E52AFEB006E32E1 /* FirebaseCore */,
+				572774C22E52AFEB006E32E1 /* FirebaseMessaging */,
 			);
 			productName = Feelter;
 			productReference = 577181CD2E2DBF6400EAA0FD /* Feelter.app */;
@@ -144,6 +166,7 @@
 				57684ED22E43200200A8FA31 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				5790BF842E4C659900E1496E /* XCRemoteSwiftPackageReference "socket" */,
 				5790BF872E4C66B000E1496E /* XCRemoteSwiftPackageReference "realm-swift" */,
+				572774BF2E52AFEB006E32E1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 577181CE2E2DBF6400EAA0FD /* Products */;
@@ -397,6 +420,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		572774BF2E52AFEB006E32E1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.1.0;
+			};
+		};
 		574E08892E3A3B0B004485A7 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
@@ -448,6 +479,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		572774C02E52AFEB006E32E1 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 572774BF2E52AFEB006E32E1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		572774C22E52AFEB006E32E1 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 572774BF2E52AFEB006E32E1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
 		574E088A2E3A3B0B004485A7 /* KakaoSDKAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 574E08892E3A3B0B004485A7 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;

@@ -28,7 +28,7 @@ struct NetworkProviderImpl: NetworkProvider {
         
         // 토큰 인터셉터를 설정한 경우, adapt 호출
         if let tokenInterceptor {
-            request = try await tokenInterceptor.adapt(request)
+            request = tokenInterceptor.adapt(request)
         }
         
         do {
@@ -41,6 +41,30 @@ struct NetworkProviderImpl: NetworkProvider {
                 error: error
             )
             return try await performRequest(request: retryRequest, type: type)
+        }
+    }
+    
+    func request(endpoint: APIEndpoint) async throws {
+        // URLRequest 객체 생성
+        guard var request = endpoint.asURLRequest() else {
+            throw NetworkError.notCreatedURLRequest
+        }
+        
+        // 토큰 인터셉터를 설정한 경우, adapt 호출
+        if let tokenInterceptor {
+            request = tokenInterceptor.adapt(request)
+        }
+        
+        do {
+            // API 요청
+            return try await performRequest(request: request)
+        } catch  {
+            // 에러 응답인 경우, 액세스 토큰 만료 에러인지 확인 후 재요청
+            let retryRequest = try await handleTokenInterceptor(
+                request: request,
+                error: error
+            )
+            return try await performRequest(request: retryRequest)
         }
     }
 }
@@ -72,6 +96,25 @@ private extension NetworkProviderImpl {
         }
     }
     
+    func performRequest(request: URLRequest) async throws {
+        // URLSession 통신
+        let (_, response): (Data, URLResponse)
+        do {
+            (_, response) = try await session.data(for: request)
+        } catch {
+            throw NetworkError.urlSessionError(error)
+        }
+        
+        // HTTP Response 코드 확인
+        if let httpResponse = response as? HTTPURLResponse {
+            guard 200...299 ~= httpResponse.statusCode else {
+                throw mapStatusCodeToError(httpResponse.statusCode)
+            }
+        }
+        
+        return
+    }
+    
     func handleTokenInterceptor(request: URLRequest, error: Error) async throws -> URLRequest {
         guard let tokenInterceptor else { throw error }
         
@@ -81,7 +124,7 @@ private extension NetworkProviderImpl {
         switch retryResult {
         case .retry:
             // 갱신된 토큰을 URLRequest 헤더에 등록
-            let retryRequest = try await tokenInterceptor.adapt(request)
+            let retryRequest = tokenInterceptor.adapt(request)
             return retryRequest
         case .doNotRetry:
             throw error

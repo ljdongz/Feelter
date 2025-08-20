@@ -16,6 +16,8 @@ enum AuthAPI {
     case emailLogin(Encodable)
     case appleLogin(Encodable)
     case kakaoLogin(Encodable)
+    
+    case updateDeviceToken(Encodable)
 }
 
 extension AuthAPI: APIEndpoint {
@@ -37,6 +39,8 @@ extension AuthAPI: APIEndpoint {
             "/v1/users/login/apple"
         case .kakaoLogin:
             "/v1/users/login/kakao"
+        case .updateDeviceToken:
+            "/v1/users/deviceToken"
         }
     }
     
@@ -48,6 +52,7 @@ extension AuthAPI: APIEndpoint {
         case .emailLogin: .post
         case .appleLogin: .post
         case .kakaoLogin: .post
+        case .updateDeviceToken: .put
         }
     }
     
@@ -64,6 +69,8 @@ extension AuthAPI: APIEndpoint {
         case .appleLogin(let data):
                 .requestJSONEncodable(data)
         case .kakaoLogin(let data):
+                .requestJSONEncodable(data)
+        case .updateDeviceToken(let data):
                 .requestJSONEncodable(data)
         }
     }

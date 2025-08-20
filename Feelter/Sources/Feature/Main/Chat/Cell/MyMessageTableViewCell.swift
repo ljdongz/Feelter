@@ -54,7 +54,7 @@ final class MyMessageTableViewCell: BaseTableViewCell {
     override func setupConstraints() {
         dateLabel.snp.makeConstraints { make in
             make.trailing.equalTo(messageContainerView.snp.leading).offset(-5)
-            make.bottom.equalTo(messageContainerView.snp.bottom).offset(-2)
+            make.bottom.equalTo(messageContainerView.snp.bottom)
         }
         
         messageContainerView.snp.makeConstraints { make in

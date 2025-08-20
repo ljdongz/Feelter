@@ -47,7 +47,15 @@ final class ChatRoomViewController: RxBaseViewController {
     
     override func bind() {
         let input = ChatRoomViewModel.Input(
-            viewDidLoad: .just(())
+            viewDidLoad: .just(()),
+            receivedAPNs: NotificationCenter.default.rx
+                .notification(.ReceiveRemotePush)
+                .compactMap { $0.object as? APNsPayload }
+                .asObservable(),
+            receiveSocketMessage: NotificationCenter.default.rx
+                .notification(.ReceiveSocketMessage)
+                .map { _ in }
+                .asObservable()
         )
         
         let output = viewModel.transform(input: input)
@@ -64,9 +72,15 @@ final class ChatRoomViewController: RxBaseViewController {
                 self?.dataSource.itemIdentifier(for: indexPath)
             }
             .subscribe(with: self) { owner, room in
-                let viewModel = ChatViewModel(roomID: room.roomID)
+                let viewModel = ChatViewModel(
+                    roomID: room.roomID,
+                    updatedAt: room.updatedAt
+                )
                 let vc = ChatViewController(viewModel: viewModel)
-                vc.title = room.participants.last?.nickname
+                
+                let userID = owner.viewModel.userID
+                let opponent = room.participants.first(where: { $0.userID != userID })
+                vc.title = opponent?.nickname
                 owner.navigationController?.pushViewController(vc, animated: true)
             }
             .disposed(by: disposeBag)
@@ -96,19 +110,24 @@ extension ChatRoomViewController {
     private func configureDiffableDataSource() {
         dataSource = UITableViewDiffableDataSource(
             tableView: tableView,
-            cellProvider: { tableView, indexPath, room in
-                guard let cell = tableView.dequeueReusableCell(
-                    withIdentifier: ChatRoomTableViewCell.identifier,
-                    for: indexPath
-                ) as? ChatRoomTableViewCell else { return .init() }
+            cellProvider: { [weak self] tableView, indexPath, room in
+                guard let self,
+                      let cell = tableView.dequeueReusableCell(
+                        withIdentifier: ChatRoomTableViewCell.identifier,
+                        for: indexPath
+                      ) as? ChatRoomTableViewCell else { return .init() }
                 
-                guard let profile = room.participants.last else { return .init() }
+                // TODO: 상대방 찾기
+                let userID = viewModel.userID
+                guard let opponent = room.participants.first(where: {
+                    $0.userID != userID
+                }) else { return .init() }
                 
                 cell.configureCell(.init(
-                    profileImageURL: profile.profileImageURL,
-                    name: profile.nickname,
-                    message: room.lastChat?.content ?? "",
-                    date: room.updatedAt.formatted(.basic),
+                    profileImageURL: opponent.profileImageURL,
+                    name: opponent.nickname,
+                    message: room.lastMessage,
+                    date: room.localUpdatedAt.formatted(.basic),
                     unreadCount: 0
                 ))
                 return cell
@@ -121,14 +140,21 @@ extension ChatRoomViewController {
 
 extension ChatRoomViewController {
     private func updateDataSource(with newRooms: [ChatRoom]) {
+        let sortedRooms = newRooms.sorted {
+            ($0.localUpdatedAt, $0.updatedAt) >
+            ($1.localUpdatedAt, $1.updatedAt)
+        }
+        
         // 새로운 스냅샷을 직접 생성 (DiffableDataSource가 차이점을 자동 계산)
         var newSnapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
         newSnapShot.appendSections([0])
-        newSnapShot.appendItems(newRooms.sorted { $0.updatedAt > $1.updatedAt })
+        newSnapShot.appendItems(sortedRooms)
+        
+        let isAnimating = dataSource.snapshot().numberOfItems != 0
         
         // DiffableDataSource가 기존 데이터와 새 데이터를 비교해서
         // 실제로 변경된 부분만 애니메이션과 함께 업데이트
-        dataSource.apply(newSnapShot, animatingDifferences: true)
+        dataSource.apply(newSnapShot, animatingDifferences: isAnimating)
     }
 }
 

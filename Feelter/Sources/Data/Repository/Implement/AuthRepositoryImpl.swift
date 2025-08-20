@@ -48,7 +48,7 @@ struct AuthRepositoryImpl: AuthRepository {
             phoneNumber: form.phoneNumber,
             introduction: form.introduction,
             hashTags: form.hashTags,
-            deviceToken: nil
+            deviceToken: tokenManager.deviceToken
         )
         
         do {
@@ -57,11 +57,8 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            tokenManager.updateToken(
-                access: response.accessToken,
-                refresh: response.refreshToken,
-                userID: response.userID
-            )
+            updateToken(response)
+            
         } catch {
             try handleAuthError(error)
         }
@@ -71,7 +68,7 @@ struct AuthRepositoryImpl: AuthRepository {
         let requestDTO = EmailSignInRequestDTO(
             email: email,
             password: password,
-            deviceToken: nil
+            deviceToken: tokenManager.deviceToken
         )
         
         do {
@@ -80,11 +77,7 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            tokenManager.updateToken(
-                access: response.accessToken,
-                refresh: response.refreshToken,
-                userID: response.userID
-            )
+            updateToken(response)
             
         } catch {
             try handleAuthError(error)
@@ -97,7 +90,7 @@ struct AuthRepositoryImpl: AuthRepository {
         
         let requestDTO = AppleSignInRequestDTO(
             idToken: appleAuthResult.identityToken,
-            deviceToken: nil,
+            deviceToken: tokenManager.deviceToken,
             nickname: appleAuthResult.nickname
         )
         
@@ -107,11 +100,7 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            tokenManager.updateToken(
-                access: response.accessToken,
-                refresh: response.refreshToken,
-                userID: response.userID
-            )
+            updateToken(response)
         } catch {
             try handleAuthError(error)
         }
@@ -123,7 +112,7 @@ struct AuthRepositoryImpl: AuthRepository {
         
         let requestDTO = KakaoSignInRequestDTO(
             oauthToken: result.accessToken,
-            deviceToken: nil
+            deviceToken: tokenManager.deviceToken
         )
         
         do {
@@ -132,19 +121,25 @@ struct AuthRepositoryImpl: AuthRepository {
                 type: AuthTokenResponseDTO.self
             )
             
-            tokenManager.updateToken(
-                access: response.accessToken,
-                refresh: response.refreshToken,
-                userID: response.userID
-            )
+            updateToken(response)
         } catch {
             try handleAuthError(error)
         }
     }
 }
 
-private extension AuthRepositoryImpl {
-    func handleAuthError(_ error: Error) throws {
+extension AuthRepositoryImpl {
+    
+    private func updateToken(_ token: AuthTokenResponseDTO) {
+        tokenManager.updateAuthToken(
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken
+        )
+        
+        tokenManager.updateUserID(token.userID)
+    }
+    
+    private func handleAuthError(_ error: Error) throws {
         switch error {
         case HTTPResponseError.clientError(let code):
             if code == 409 {
