@@ -28,8 +28,8 @@ final class FilterPresetsCollectionViewCell: BaseCollectionViewCell {
         }
     }
 
-    func configureCell(item: FilterDetailView.FilterAttributeSectionItem) {
-        filterAttributeGridView.applyValue(attribute: item.attribute)
+    func configureCell(item: FilterAttribute) {
+        filterAttributeGridView.applyValue(attribute: item)
     }
 }
 

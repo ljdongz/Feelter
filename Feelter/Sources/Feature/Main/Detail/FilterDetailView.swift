@@ -62,11 +62,12 @@ final class FilterDetailView: BaseView {
             originalImageUrl: filter.imageURLs[0],
             filteredImageUrl: filter.imageURLs[1]
         )
-        let counterState = CounterStateSectionItem(
+        let counterState = CounterStateCellItem(
+            price: filter.price,
             downloadCount: filter.buyerCount,
             likeCount: filter.likeCount
         )
-        let attribute = FilterAttributeSectionItem(attribute: filter.attribute)
+        let attribute = filter.attribute
         let metadata = PhotoMetadataSectionItem(metadata: filter.photoMetadata)
         let profile = AuthorProfileSectionItem(
             profileImageURL: filter.author.profileImageURL,
@@ -199,7 +200,7 @@ private extension FilterDetailView {
                     return cell
                     
                 case .counterState:
-                    guard let item = itemIdentifier as? CounterStateSectionItem,
+                    guard let item = itemIdentifier as? CounterStateCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: CounterStateCollectionViewCell.identifier,
                             for: indexPath
@@ -211,7 +212,7 @@ private extension FilterDetailView {
                     return cell
                     
                 case .presets:
-                    guard let item = itemIdentifier as? FilterAttributeSectionItem,
+                    guard let item = itemIdentifier as? FilterAttribute,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: FilterPresetsCollectionViewCell.identifier,
                             for: indexPath
@@ -311,15 +312,6 @@ extension FilterDetailView {
     struct ImageSliderSectionItem: Hashable {
         let originalImageUrl: String
         let filteredImageUrl: String
-    }
-    
-    struct CounterStateSectionItem: Hashable {
-        let downloadCount: Int
-        let likeCount: Int
-    }
-    
-    struct FilterAttributeSectionItem: Hashable {
-        let attribute: FilterAttribute
     }
     
     struct PhotoMetadataSectionItem: Hashable {
