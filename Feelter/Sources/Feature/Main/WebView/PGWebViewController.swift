@@ -19,10 +19,22 @@ final class PGWebViewController: BaseViewController {
         view.backgroundColor = .clear
         return view
     }()
-
-    override func setupView() {
+    
+    private let paymentInfo: PaymentInfo
+    
+    init(paymentInfo: PaymentInfo) {
+        self.paymentInfo = paymentInfo
+        super.init(nibName: nil, bundle: nil)
+        
         modalPresentationStyle = .fullScreen
         modalTransitionStyle = .coverVertical
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func setupView() {
         view.backgroundColor = .white
     }
     
@@ -37,12 +49,22 @@ final class PGWebViewController: BaseViewController {
             make.leading.trailing.bottom.equalToSuperview()
         }
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        requestPayment(paymentInfo: paymentInfo)
+    }
 }
 
 extension PGWebViewController {
-    private func requestPayment() {
+    private func requestPayment(paymentInfo: PaymentInfo) {
         let userCode = AppConfiguration.iamportUserCode
-        let payment = createPaymentData()
+        let payment = createPaymentData(
+            orderCode: paymentInfo.orderCode,
+            filterName: paymentInfo.filterName,
+            price: paymentInfo.price
+        )
         
         Iamport.shared.paymentWebView(
             webViewMode: webView,
@@ -56,19 +78,21 @@ extension PGWebViewController {
         }
     }
     
-    private func createPaymentData() -> IamportPayment {
+    private func createPaymentData(
+        orderCode: String,
+        filterName: String,
+        price: Int
+    ) -> IamportPayment {
         let display = CardQuota()
         display.card_quota = []
-        
-        let orderCode = "-"
         
         return IamportPayment(
             pg: PG.html5_inicis.makePgRawName(pgId: "INIpayTest"),
             merchant_uid: orderCode,
-            amount: "1000"
+            amount: "\(price)"
         ).then {
             $0.pay_method = PayMethod.card.rawValue
-            $0.name = "상품 이름"
+            $0.name = filterName
             $0.buyer_name = "사용자 이름"
             $0.app_scheme = "feelter"
         }

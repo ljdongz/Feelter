@@ -53,6 +53,8 @@ final class FilterDetailViewController: RxBaseViewController {
             viewDidLoad: .just(()),
             likekButtonTapped: navigationRightBarButton.rx
                 .tap
+                .asObservable(),
+            paymentButtonTapped: mainView.paymentButtonTapTrigger
                 .asObservable()
         )
 
@@ -77,9 +79,11 @@ final class FilterDetailViewController: RxBaseViewController {
             }
             .disposed(by: disposeBag)
         
-        mainView.paymentButtonTapTrigger
-            .subscribe(with: self) { owner, _ in
-                print("결제하기 버튼 탭")
+        output.receiveOrderCode
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, paymentInfo in
+                let vc = PGWebViewController(paymentInfo: paymentInfo)
+                owner.present(vc, animated: true)
             }
             .disposed(by: disposeBag)
     }

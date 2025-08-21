@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+struct PaymentInfo {
+    let orderCode: String
+    let filterName: String
+    let price: Int
+    let buyerName: String
+}
