@@ -37,7 +37,7 @@ extension PaymentAPI: APIEndpoint {
         switch self {
         case .validation(let data):
                 .requestJSONEncodable(data)
-        case .inquiry(let orderCode):
+        case .inquiry:
                 .requestPlain
         }
     }
