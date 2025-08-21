@@ -11,7 +11,7 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
-final class FilterDetailView: BaseView {
+final class FilterDetailView: RxBaseView {
     
     typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
 
@@ -40,7 +40,6 @@ final class FilterDetailView: BaseView {
     private weak var imageSliderCell: ImageSliderCollectionViewCell?
     
     let paymentButtonTapTrigger = PublishRelay<Void>()
-    private var disposeBag = DisposeBag()
     
     override func setupView() {
         setupCollectionView()

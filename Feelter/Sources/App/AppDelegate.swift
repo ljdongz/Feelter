@@ -47,6 +47,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print(#function)
+        
+        // Device Token을 FCM에 등록
+        Messaging.messaging().apnsToken = deviceToken
+        
         let newToken = deviceToken.reduce("") { $0 + String(format: "%02X", $1) }
         
         let tokenManager = DIContainer.shared.resolve(TokenManager.self)
@@ -86,6 +90,14 @@ extension AppDelegate {
         // 알림을 표시하기 위한 승인을 요청
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             print("Permission granted: \(granted)")
+        }
+        
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+            } else if let token = token {
+                print("FCM registration token: \(token)")
+            }
         }
     }
 }
