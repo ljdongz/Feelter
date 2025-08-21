@@ -38,8 +38,8 @@ struct OrderDetailResponseDTO: Decodable {
             orderCode: orderCode,
             filter: filter.toDomain(),
             paidAt: paidAt,
-            createdAt: createdAt,
-            updatedAt: updatedAt
+            createdAt: UTCDateFormatter.shared.date(from: createdAt) ?? .distantPast,
+            updatedAt: UTCDateFormatter.shared.date(from: updatedAt) ?? .distantPast
         )
     }
 }

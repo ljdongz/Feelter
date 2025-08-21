@@ -12,8 +12,8 @@ struct DetailOrder {
     let orderCode: String
     let filter: DetailOrderFilter
     let paidAt: String
-    let createdAt: String
-    let updatedAt: String
+    let createdAt: Date
+    let updatedAt: Date
 }
 
 struct DetailOrderFilter {
