@@ -14,6 +14,16 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
+			<string>feelter.example</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>feelter</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
 			<string></string>
 			<key>CFBundleURLSchemes</key>
 			<array>
@@ -29,9 +39,47 @@
 		<string>kakaolink</string>
 		<string>kakaoplus</string>
 		<string>kakaotalk</string>
+		<string>kftc-bankpay</string>
+		<string>ispmobile</string>
+		<string>itms-apps</string>
+		<string>hdcardappcardansimclick</string>
+		<string>smhyundaiansimclick</string>
+		<string>shinhan-sr-ansimclick</string>
+		<string>smshinhanansimclick</string>
+		<string>kb-acp</string>
+		<string>kb-auth</string>
+		<string>kb-screen</string>
+		<string>kbbank</string>
+		<string>liivbank</string>
+		<string>newliiv</string>
+		<string>mpocket.online.ansimclick</string>
+		<string>ansimclickscard</string>
+		<string>ansimclickipcollect</string>
+		<string>vguardstart</string>
+		<string>samsungpay</string>
+		<string>scardcertiapp</string>
+		<string>lottesmartpay</string>
+		<string>lotteappcard</string>
+		<string>cloudpay</string>
+		<string>nhappcardansimclick</string>
+		<string>nonghyupcardansimclick</string>
+		<string>citispay</string>
+		<string>citicardappkr</string>
+		<string>citimobileapp</string>
+		<string>payco</string>
+		<string>chaipayment</string>
+		<string>hyundaicardappcardid</string>
+		<string>com.wooricard.wcard</string>
+		<string>lmslpay</string>
+		<string>lguthepay-xpay</string>
+		<string>supertoss</string>
+		<string>newsmartpib</string>
+		<string>kakaobank</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
