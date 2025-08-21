@@ -37,7 +37,7 @@ extension PhotoMetadataCollectionViewCell {
     static func layoutSection() -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(layoutSize: .init(
             widthDimension: .fractionalWidth(1),
-            heightDimension: .fractionalHeight(1)
+            heightDimension: .estimated(150)
         ))
         
         let group = NSCollectionLayoutGroup.horizontal(

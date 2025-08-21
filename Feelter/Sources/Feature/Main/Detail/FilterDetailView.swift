@@ -39,6 +39,9 @@ final class FilterDetailView: BaseView {
     private var dataSource: DataSourceType!
     private weak var imageSliderCell: ImageSliderCollectionViewCell?
     
+    let paymentButtonTapTrigger = PublishRelay<Void>()
+    private var disposeBag = DisposeBag()
+    
     override func setupView() {
         setupCollectionView()
     }
@@ -67,7 +70,7 @@ final class FilterDetailView: BaseView {
             downloadCount: filter.buyerCount,
             likeCount: filter.likeCount
         )
-        let attribute = filter.attribute
+        let presets = FilterPresetsCellItem(isPaid: filter.isDownloaded, attribute: filter.attribute)
         let metadata = PhotoMetadataSectionItem(metadata: filter.photoMetadata)
         let profile = AuthorProfileSectionItem(
             profileImageURL: filter.author.profileImageURL,
@@ -79,7 +82,7 @@ final class FilterDetailView: BaseView {
         
         snapShot.appendItems([imageSlider], toSection: .imageSlider)
         snapShot.appendItems([counterState], toSection: .counterState)
-        snapShot.appendItems([attribute], toSection: .presets)
+        snapShot.appendItems([presets], toSection: .presets)
         snapShot.appendItems([metadata], toSection: .photoMetadata)
         snapShot.appendItems([profile], toSection: .authorProfile)
         snapShot.appendItems(hashTags, toSection: .authorHashTags)
@@ -185,6 +188,7 @@ private extension FilterDetailView {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
             cellProvider: { [weak self] collectionView, indexPath, itemIdentifier in
+                guard let self else { return .init() }
                 switch Section(rawValue: indexPath.section) {
                 case .imageSlider:
                     guard let item = itemIdentifier as? ImageSliderSectionItem,
@@ -194,7 +198,7 @@ private extension FilterDetailView {
                           ) as? ImageSliderCollectionViewCell else {
                         return .init()
                     }
-                    self?.imageSliderCell = cell
+                    self.imageSliderCell = cell
                     
                     cell.configureCell(item: item)
                     return cell
@@ -212,7 +216,7 @@ private extension FilterDetailView {
                     return cell
                     
                 case .presets:
-                    guard let item = itemIdentifier as? FilterAttribute,
+                    guard let item = itemIdentifier as? FilterPresetsCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: FilterPresetsCollectionViewCell.identifier,
                             for: indexPath
@@ -221,6 +225,10 @@ private extension FilterDetailView {
                     }
                     
                     cell.configureCell(item: item)
+                    cell.paymentButton.rx
+                        .tap
+                        .bind(to: self.paymentButtonTapTrigger)
+                        .disposed(by: disposeBag)
                     return cell
                     
                 case .photoMetadata:

@@ -76,6 +76,12 @@ final class FilterDetailViewController: RxBaseViewController {
                 )
             }
             .disposed(by: disposeBag)
+        
+        mainView.paymentButtonTapTrigger
+            .subscribe(with: self) { owner, _ in
+                print("결제하기 버튼 탭")
+            }
+            .disposed(by: disposeBag)
     }
 }
 
