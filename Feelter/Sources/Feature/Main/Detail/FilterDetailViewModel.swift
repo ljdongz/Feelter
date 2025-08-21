@@ -104,15 +104,26 @@ final class FilterDetailViewModel: ViewModel {
             .disposed(by: disposeBag)
         
         input.succeedPayment
-            .do(onNext: { [weak self] _ in
-                self?.filter?.isDownloaded = true
-            })
-            .compactMap { [weak self] in self?.filter }
+            .compactMap { [weak self] in
+                guard let filter = self?.filter else { return nil }
+                let newFilter = self?.updateDownloadStatus(from: filter)
+                return newFilter
+            }
             .subscribe(with: self) { owner, filter in
                 output.filterDetail.accept(filter)
             }
             .disposed(by: disposeBag)
         
         return output
+    }
+}
+
+extension FilterDetailViewModel {
+    private func updateDownloadStatus(
+        from filter: FilterDetail
+    ) -> FilterDetail {
+        var newFilter = filter
+        newFilter.isDownloaded = true
+        return newFilter
     }
 }
