@@ -77,7 +77,7 @@ final class HomeViewController: RxBaseViewController {
 
 private extension HomeViewController {
     func presentWebViewController(with urlString: String) {
-        let webViewController = WebViewController(urlString: urlString)
+        let webViewController = BannerWebViewController(urlString: urlString)
         present(webViewController, animated: true)
     }
 }
