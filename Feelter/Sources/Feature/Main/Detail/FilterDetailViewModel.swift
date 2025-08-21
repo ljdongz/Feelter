@@ -15,6 +15,7 @@ final class FilterDetailViewModel: ViewModel {
         let viewDidLoad: Observable<Void>
         let likekButtonTapped: Observable<Void>
         let paymentButtonTapped: Observable<Void>
+        let succeedPayment: Observable<Void>
     }
     
     struct Output {
@@ -99,6 +100,16 @@ final class FilterDetailViewModel: ViewModel {
                 case .failure(let error):
                     print(error)
                 }
+            }
+            .disposed(by: disposeBag)
+        
+        input.succeedPayment
+            .do(onNext: { [weak self] _ in
+                self?.filter?.isDownloaded = true
+            })
+            .compactMap { [weak self] in self?.filter }
+            .subscribe(with: self) { owner, filter in
+                output.filterDetail.accept(filter)
             }
             .disposed(by: disposeBag)
         

@@ -18,7 +18,7 @@ struct FilterDetail {
     let photoMetadata: PhotoMetadata?
     let attribute: FilterAttribute
     let isLiked: Bool
-    let isDownloaded: Bool
+    var isDownloaded: Bool
     let likeCount: Int
     let buyerCount: Int
     let createdAt: String

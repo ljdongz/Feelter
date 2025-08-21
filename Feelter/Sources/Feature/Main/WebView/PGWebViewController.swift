@@ -9,10 +9,20 @@ import UIKit
 import WebKit
 
 import iamport_ios
+import RxCocoa
 import RxSwift
 import SnapKit
 
-final class PGWebViewController: BaseViewController {
+final class PGWebViewController: RxBaseViewController {
+    
+    struct PaymentAlertStatus {
+        let title: String
+        let message: String
+        let isSuccess: Bool
+        
+        static let success = PaymentAlertStatus(title: "결제가 완료되었습니다.", message: "", isSuccess: true)
+        static let failure = PaymentAlertStatus(title: "결제가 실패되었습니다.", message: "", isSuccess: false)
+    }
 
     private lazy var webView: WKWebView = {
         var view = WKWebView()
@@ -20,7 +30,13 @@ final class PGWebViewController: BaseViewController {
         return view
     }()
     
+    private let viewModel = PGWebViewModel()
     private let paymentInfo: PaymentInfo
+    
+    private let paymentResultTrigger = PublishRelay<String>()
+    private let alertTrigger = PublishRelay<PaymentAlertStatus>()
+    
+    var successPaymentCompletion: (() -> Void)?
     
     init(paymentInfo: PaymentInfo) {
         self.paymentInfo = paymentInfo
@@ -55,6 +71,43 @@ final class PGWebViewController: BaseViewController {
         
         requestPayment(paymentInfo: paymentInfo)
     }
+    
+    override func bind() {
+        let input = PGWebViewModel.Input(
+            validPayment: paymentResultTrigger.asObservable()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.validationResult
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success:
+                    owner.alertTrigger.accept(.success)
+                case .failure:
+                    owner.alertTrigger.accept(.failure)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        alertTrigger
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, status in
+                
+                let alertController = UIAlertController(
+                    title: status.title,
+                    message: status.message,
+                    preferredStyle: .alert
+                )
+                let action = UIAlertAction(title: "확인", style: .default) { _ in
+                    if status.isSuccess { owner.successPaymentCompletion?() }
+                    owner.dismiss(animated: true)
+                }
+                alertController.addAction(action)
+                owner.present(alertController, animated: true)
+            }
+            .disposed(by: disposeBag)
+    }
 }
 
 extension PGWebViewController {
@@ -71,10 +124,20 @@ extension PGWebViewController {
             userCode: userCode,
             payment: payment
         ) { [weak self] response in
-            print("------------------------------------------")
-            print("결과 왔습니다~~")
             print("Iamport Payment response: \(String(describing: response))")
-            print("------------------------------------------")
+            
+            guard let self = self,
+                  let isSuccess = response?.success,
+                  let impUID = response?.imp_uid else {
+                self?.dismiss(animated: true)
+                return
+            }
+            
+            if isSuccess {
+                self.paymentResultTrigger.accept(impUID)
+            } else {
+                self.alertTrigger.accept(.failure)
+            }
         }
     }
     
