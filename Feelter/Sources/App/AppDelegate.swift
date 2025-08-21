@@ -9,6 +9,7 @@ import UIKit
 
 import FirebaseCore
 import FirebaseMessaging
+import iamport_ios
 import KakaoSDKCommon
 
 @main
@@ -39,6 +40,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        Iamport.shared.close()
     }
 }
 
@@ -116,7 +121,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         print(#function)
         
         let userInfo = notification.request.content.userInfo
-        
+        print(userInfo)
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: userInfo)
             let apnsPayload = try JSONDecoder().decode(APNsPayload.self, from: jsonData)
