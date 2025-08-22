@@ -85,12 +85,13 @@ final class FilterAttributeGridView: BaseView {
     
     private let paidFilterBlurOverlayView: PaidFilterBlurOverlayView = {
         let view = PaidFilterBlurOverlayView()
+        view.isHidden = true
         return view
     }()
     
-    var isHiddenAttribute: Bool = false {
+    var isAttributeLocked: Bool = false {
         didSet {
-            paidFilterBlurOverlayView.isHidden = isHiddenAttribute
+            paidFilterBlurOverlayView.isHidden = !isAttributeLocked
         }
     }
 

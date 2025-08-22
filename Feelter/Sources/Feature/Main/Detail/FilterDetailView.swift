@@ -227,7 +227,7 @@ private extension FilterDetailView {
                     cell.paymentButton.rx
                         .tap
                         .bind(to: self.paymentButtonTapTrigger)
-                        .disposed(by: disposeBag)
+                        .disposed(by: cell.disposeBag)
                     return cell
                     
                 case .photoMetadata:

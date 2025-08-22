@@ -7,6 +7,7 @@
 
 import UIKit
 
+import RxSwift
 import SnapKit
 
 typealias FilterPresetsCellItem = FilterPresetsCollectionViewCell.Item
@@ -14,6 +15,8 @@ typealias FilterPresetsCellItem = FilterPresetsCollectionViewCell.Item
 final class FilterPresetsCollectionViewCell: BaseCollectionViewCell {
     
     static let identifier = "FilterPresetsCollectionViewCell"
+    
+    private(set) var disposeBag = DisposeBag()
     
     struct Item: Hashable {
         let isPaid: Bool
@@ -31,6 +34,12 @@ final class FilterPresetsCollectionViewCell: BaseCollectionViewCell {
         view.layer.cornerRadius = 8
         return view
     }()
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        disposeBag = DisposeBag()
+    }
     
     override func setupSubviews() {
         contentView.addSubviews([
@@ -65,7 +74,7 @@ final class FilterPresetsCollectionViewCell: BaseCollectionViewCell {
             paymentButton.backgroundColor = .brightTurquoise
         }
         
-        filterAttributeGridView.isHiddenAttribute = item.isPaid
+        filterAttributeGridView.isAttributeLocked = !item.isPaid
         paymentButton.isEnabled = !item.isPaid
     }
 }

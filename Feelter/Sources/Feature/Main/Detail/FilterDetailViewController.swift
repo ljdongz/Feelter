@@ -53,7 +53,7 @@ final class FilterDetailViewController: RxBaseViewController {
     override func bind() {
         let input = FilterDetailViewModel.Input(
             viewDidLoad: .just(()),
-            likekButtonTapped: navigationRightBarButton.rx
+            likeButtonTapped: navigationRightBarButton.rx
                 .tap
                 .asObservable(),
             paymentButtonTapped: mainView.paymentButtonTapTrigger

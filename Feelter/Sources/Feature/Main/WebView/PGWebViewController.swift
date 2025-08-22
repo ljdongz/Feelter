@@ -50,6 +50,12 @@ final class PGWebViewController: RxBaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        requestPayment(paymentInfo: paymentInfo)
+    }
+    
     override func setupView() {
         view.backgroundColor = .white
     }
@@ -64,12 +70,6 @@ final class PGWebViewController: RxBaseViewController {
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.leading.trailing.bottom.equalToSuperview()
         }
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        requestPayment(paymentInfo: paymentInfo)
     }
     
     override func bind() {
@@ -129,7 +129,9 @@ extension PGWebViewController {
             guard let self = self,
                   let isSuccess = response?.success,
                   let impUID = response?.imp_uid else {
-                self?.dismiss(animated: true)
+                Task { @MainActor in
+                    self?.dismiss(animated: true)
+                }
                 return
             }
             

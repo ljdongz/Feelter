@@ -13,7 +13,7 @@ import RxSwift
 final class FilterDetailViewModel: ViewModel {
     struct Input {
         let viewDidLoad: Observable<Void>
-        let likekButtonTapped: Observable<Void>
+        let likeButtonTapped: Observable<Void>
         let paymentButtonTapped: Observable<Void>
         let succeedPayment: Observable<Void>
     }
@@ -57,7 +57,7 @@ final class FilterDetailViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
         
-        input.likekButtonTapped
+        input.likeButtonTapped
             .withAsyncResult(with: self) { owner, _ in
                 try await owner.filterRepository.updateLikeStatus(
                     filterID: owner.filterID,
@@ -105,12 +105,16 @@ final class FilterDetailViewModel: ViewModel {
         
         input.succeedPayment
             .compactMap { [weak self] in
-                guard let filter = self?.filter else { return nil }
+                self?.filter
+            }
+            .compactMap { [weak self] filter in
                 let newFilter = self?.updateDownloadStatus(from: filter)
                 return newFilter
             }
-            .subscribe(with: self) { owner, filter in
-                output.filterDetail.accept(filter)
+            .subscribe(with: self) { owner, newFilter in
+                owner.filter = newFilter
+                
+                output.filterDetail.accept(newFilter)
             }
             .disposed(by: disposeBag)
         
