@@ -9,6 +9,7 @@ import Foundation
 
 enum UserAPI {
     case todayAuthor
+    case myProfile
 }
 
 extension UserAPI: APIEndpoint {
@@ -20,18 +21,23 @@ extension UserAPI: APIEndpoint {
         switch self {
         case .todayAuthor:
             "/v1/users/today-author"
+        case .myProfile:
+            "/v1/users/me/profile"
         }
     }
     
     var method: HTTPMethod {
         switch self {
         case .todayAuthor: .get
+        case .myProfile: .get
         }
     }
     
     var task: HTTPTask {
         switch self {
         case .todayAuthor:
+                .requestPlain
+        case .myProfile:
                 .requestPlain
         }
     }
