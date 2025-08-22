@@ -60,3 +60,20 @@ enum FilterAttributeType {
     /// 블랙 포인트 (-1.0 ~ 1.0)
     case blackPoint
 }
+
+extension FilterAttribute {
+    static let zero = FilterAttribute(
+        brightness: 0,
+        exposure: 0,
+        contrast: 0,
+        saturation: 0,
+        sharpness: 0,
+        blur: 0,
+        vignette: 0,
+        noiseReduction: 0,
+        highlights: 0,
+        shadows: 0,
+        temperature: 0,
+        blackPoint: 0
+    )
+}

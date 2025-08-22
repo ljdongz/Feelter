@@ -8,10 +8,11 @@
 import UIKit
 import WebKit
 
+import RxCocoa
 import RxSwift
 import SnapKit
 
-final class WebViewController: UIViewController {
+final class BannerWebViewController: UIViewController {
     
     // MARK: - UI Components
     
@@ -160,7 +161,7 @@ final class WebViewController: UIViewController {
 
 // MARK: - WKNavigationDelegate
 
-extension WebViewController: WKNavigationDelegate {
+extension BannerWebViewController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         loadingIndicator.startAnimating()
     }
@@ -185,7 +186,7 @@ extension WebViewController: WKNavigationDelegate {
     }
 }
 
-extension WebViewController: WKScriptMessageHandler {
+extension BannerWebViewController: WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         
         switch message.name {

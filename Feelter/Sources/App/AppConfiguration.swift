@@ -12,6 +12,7 @@ enum AppConfiguration {
     static let apiKey = Self.value(forKey: "ApiHeaderKey")
     static let baseURL = Self.value(forKey: "BaseUrl")
     static let kakaoApiKey = Self.value(forKey: "KakaoApiKey")
+    static let iamportUserCode = Self.value(forKey: "IamportUserCode")
     
     private static func value(forKey: String) -> String {
         guard let value = Bundle.main.object(forInfoDictionaryKey: forKey) as? String else {

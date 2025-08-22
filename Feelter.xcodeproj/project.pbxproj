@@ -19,6 +19,7 @@
 		57718BCA2E375FFC00EAA0FD /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 57718BC92E375FFC00EAA0FD /* RxSwift */; };
 		5790BF862E4C659A00E1496E /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 5790BF852E4C659A00E1496E /* SocketIO */; };
 		5790BF8B2E4C66B000E1496E /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5790BF8A2E4C66B000E1496E /* RealmSwift */; };
+		57E9C08B2E570C48003DAE04 /* iamport-ios in Frameworks */ = {isa = PBXBuildFile; productRef = 57E9C08A2E570C48003DAE04 /* iamport-ios */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -68,6 +69,7 @@
 				57718BCA2E375FFC00EAA0FD /* RxSwift in Frameworks */,
 				5790BF862E4C659A00E1496E /* SocketIO in Frameworks */,
 				577181F02E2DC78900EAA0FD /* RxCocoa in Frameworks */,
+				57E9C08B2E570C48003DAE04 /* iamport-ios in Frameworks */,
 				57684ED42E43200200A8FA31 /* Kingfisher in Frameworks */,
 				574E088F2E3A3B0B004485A7 /* KakaoSDKUser in Frameworks */,
 				577181EA2E2DC65600EAA0FD /* SnapKit in Frameworks */,
@@ -130,6 +132,7 @@
 				5790BF8A2E4C66B000E1496E /* RealmSwift */,
 				572774C02E52AFEB006E32E1 /* FirebaseCore */,
 				572774C22E52AFEB006E32E1 /* FirebaseMessaging */,
+				57E9C08A2E570C48003DAE04 /* iamport-ios */,
 			);
 			productName = Feelter;
 			productReference = 577181CD2E2DBF6400EAA0FD /* Feelter.app */;
@@ -167,6 +170,7 @@
 				5790BF842E4C659900E1496E /* XCRemoteSwiftPackageReference "socket" */,
 				5790BF872E4C66B000E1496E /* XCRemoteSwiftPackageReference "realm-swift" */,
 				572774BF2E52AFEB006E32E1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				57E9C0892E570C48003DAE04 /* XCRemoteSwiftPackageReference "iamport-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 577181CE2E2DBF6400EAA0FD /* Products */;
@@ -238,6 +242,8 @@
 		};
 		577181E22E2DBF6500EAA0FD /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 577181CF2E2DBF6400EAA0FD /* Feelter */;
+			baseConfigurationReferenceRelativePath = Resources/Config/Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -340,6 +346,8 @@
 		};
 		577181E42E2DBF6500EAA0FD /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 577181CF2E2DBF6400EAA0FD /* Feelter */;
+			baseConfigurationReferenceRelativePath = Resources/Config/Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -476,6 +484,14 @@
 				minimumVersion = 20.0.3;
 			};
 		};
+		57E9C0892E570C48003DAE04 /* XCRemoteSwiftPackageReference "iamport-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/iamport/iamport-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.4.7;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -533,6 +549,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5790BF872E4C66B000E1496E /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		57E9C08A2E570C48003DAE04 /* iamport-ios */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 57E9C0892E570C48003DAE04 /* XCRemoteSwiftPackageReference "iamport-ios" */;
+			productName = "iamport-ios";
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

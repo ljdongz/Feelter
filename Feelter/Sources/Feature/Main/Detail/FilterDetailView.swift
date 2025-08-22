@@ -11,7 +11,7 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
-final class FilterDetailView: BaseView {
+final class FilterDetailView: RxBaseView {
     
     typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
 
@@ -39,6 +39,8 @@ final class FilterDetailView: BaseView {
     private var dataSource: DataSourceType!
     private weak var imageSliderCell: ImageSliderCollectionViewCell?
     
+    let paymentButtonTapTrigger = PublishRelay<Void>()
+    
     override func setupView() {
         setupCollectionView()
     }
@@ -62,11 +64,12 @@ final class FilterDetailView: BaseView {
             originalImageUrl: filter.imageURLs[0],
             filteredImageUrl: filter.imageURLs[1]
         )
-        let counterState = CounterStateSectionItem(
+        let counterState = CounterStateCellItem(
+            price: filter.price,
             downloadCount: filter.buyerCount,
             likeCount: filter.likeCount
         )
-        let attribute = FilterAttributeSectionItem(attribute: filter.attribute)
+        let presets = FilterPresetsCellItem(isPaid: filter.isDownloaded, attribute: filter.attribute)
         let metadata = PhotoMetadataSectionItem(metadata: filter.photoMetadata)
         let profile = AuthorProfileSectionItem(
             profileImageURL: filter.author.profileImageURL,
@@ -78,7 +81,7 @@ final class FilterDetailView: BaseView {
         
         snapShot.appendItems([imageSlider], toSection: .imageSlider)
         snapShot.appendItems([counterState], toSection: .counterState)
-        snapShot.appendItems([attribute], toSection: .presets)
+        snapShot.appendItems([presets], toSection: .presets)
         snapShot.appendItems([metadata], toSection: .photoMetadata)
         snapShot.appendItems([profile], toSection: .authorProfile)
         snapShot.appendItems(hashTags, toSection: .authorHashTags)
@@ -184,6 +187,7 @@ private extension FilterDetailView {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
             cellProvider: { [weak self] collectionView, indexPath, itemIdentifier in
+                guard let self else { return .init() }
                 switch Section(rawValue: indexPath.section) {
                 case .imageSlider:
                     guard let item = itemIdentifier as? ImageSliderSectionItem,
@@ -193,13 +197,13 @@ private extension FilterDetailView {
                           ) as? ImageSliderCollectionViewCell else {
                         return .init()
                     }
-                    self?.imageSliderCell = cell
+                    self.imageSliderCell = cell
                     
                     cell.configureCell(item: item)
                     return cell
                     
                 case .counterState:
-                    guard let item = itemIdentifier as? CounterStateSectionItem,
+                    guard let item = itemIdentifier as? CounterStateCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: CounterStateCollectionViewCell.identifier,
                             for: indexPath
@@ -211,7 +215,7 @@ private extension FilterDetailView {
                     return cell
                     
                 case .presets:
-                    guard let item = itemIdentifier as? FilterAttributeSectionItem,
+                    guard let item = itemIdentifier as? FilterPresetsCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: FilterPresetsCollectionViewCell.identifier,
                             for: indexPath
@@ -220,6 +224,10 @@ private extension FilterDetailView {
                     }
                     
                     cell.configureCell(item: item)
+                    cell.paymentButton.rx
+                        .tap
+                        .bind(to: self.paymentButtonTapTrigger)
+                        .disposed(by: cell.disposeBag)
                     return cell
                     
                 case .photoMetadata:
@@ -311,15 +319,6 @@ extension FilterDetailView {
     struct ImageSliderSectionItem: Hashable {
         let originalImageUrl: String
         let filteredImageUrl: String
-    }
-    
-    struct CounterStateSectionItem: Hashable {
-        let downloadCount: Int
-        let likeCount: Int
-    }
-    
-    struct FilterAttributeSectionItem: Hashable {
-        let attribute: FilterAttribute
     }
     
     struct PhotoMetadataSectionItem: Hashable {

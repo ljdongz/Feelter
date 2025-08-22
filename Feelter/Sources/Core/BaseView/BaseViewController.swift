@@ -80,9 +80,11 @@ private extension BaseViewController {
     }
     
     func setupNavigationBarBackButton() {
-        guard navigationController != nil else { return }
+        guard let _ = navigationController else { return }
         
         navigationItem.hidesBackButton = true
+    
+        guard !isRootViewController() else { return }
         
         let backButton = UIButton(type: .custom)
         backButton.setImage(.chevron, for: .normal)
@@ -92,6 +94,30 @@ private extension BaseViewController {
         
         let backBarButtonItem = UIBarButtonItem(customView: backButton)
         navigationItem.leftBarButtonItem = backBarButtonItem
+    }
+    
+    /// 현재 뷰컨트롤러가 루트 뷰컨트롤러인지 판별
+    private func isRootViewController() -> Bool {
+        guard let navigationController = navigationController else { return true }
+        
+        // 1. TabBar의 루트 뷰컨트롤러인 경우
+        if let tabBarController = tabBarController,
+           tabBarController.selectedViewController == navigationController,
+           navigationController.viewControllers.first == self {
+            return true
+        }
+        
+        // 2. 네비게이션 스택의 첫 번째 뷰컨트롤러인 경우 (일반적인 루트)
+        if navigationController.viewControllers.first == self {
+            return true
+        }
+        
+        // 3. 네비게이션 스택에 뷰컨트롤러가 1개뿐인 경우
+        if navigationController.viewControllers.count == 1 {
+            return true
+        }
+        
+        return false
     }
     
     func setupKeyboardAdjustmentIfNeeded() {

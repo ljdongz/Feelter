@@ -23,6 +23,8 @@ final class FilterDetailViewController: RxBaseViewController {
     
     private let viewModel: FilterDetailViewModel
     
+    private let succeedPaymentTrigger = PublishRelay<Void>()
+    
     var onChangeLikeStatus: ((Bool) -> Void)?
     
     init(viewModel: FilterDetailViewModel) {
@@ -51,9 +53,12 @@ final class FilterDetailViewController: RxBaseViewController {
     override func bind() {
         let input = FilterDetailViewModel.Input(
             viewDidLoad: .just(()),
-            likekButtonTapped: navigationRightBarButton.rx
+            likeButtonTapped: navigationRightBarButton.rx
                 .tap
-                .asObservable()
+                .asObservable(),
+            paymentButtonTapped: mainView.paymentButtonTapTrigger
+                .asObservable(),
+            succeedPayment: succeedPaymentTrigger.asObservable()
         )
 
         let output = viewModel.transform(input: input)
@@ -74,6 +79,17 @@ final class FilterDetailViewController: RxBaseViewController {
                     isLiked ? .likeFill : .likeEmpty,
                     for: .normal
                 )
+            }
+            .disposed(by: disposeBag)
+        
+        output.receiveOrderCode
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, paymentInfo in
+                let vc = PGWebViewController(paymentInfo: paymentInfo)
+                vc.successPaymentCompletion = {
+                    owner.succeedPaymentTrigger.accept(())
+                }
+                owner.present(vc, animated: true)
             }
             .disposed(by: disposeBag)
     }

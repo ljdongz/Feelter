@@ -82,6 +82,18 @@ final class FilterAttributeGridView: BaseView {
             return view
         }
     }()
+    
+    private let paidFilterBlurOverlayView: PaidFilterBlurOverlayView = {
+        let view = PaidFilterBlurOverlayView()
+        view.isHidden = true
+        return view
+    }()
+    
+    var isAttributeLocked: Bool = false {
+        didSet {
+            paidFilterBlurOverlayView.isHidden = !isAttributeLocked
+        }
+    }
 
     override func setupSubviews() {
         addSubview(containerView)
@@ -91,7 +103,10 @@ final class FilterAttributeGridView: BaseView {
             attributeContainerView
         ])
         
-        attributeContainerView.addSubview(attributeStackView)
+        attributeContainerView.addSubviews([
+            attributeStackView,
+            paidFilterBlurOverlayView
+        ])
         
         headerView.addSubviews([
             headerLeadingLabel,
@@ -140,6 +155,10 @@ final class FilterAttributeGridView: BaseView {
         
         attributeStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(15)
+        }
+        
+        paidFilterBlurOverlayView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(2)
         }
     }
     

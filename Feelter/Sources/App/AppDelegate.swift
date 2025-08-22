@@ -9,6 +9,7 @@ import UIKit
 
 import FirebaseCore
 import FirebaseMessaging
+import iamport_ios
 import KakaoSDKCommon
 
 @main
@@ -40,6 +41,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        Iamport.shared.close()
+    }
 }
 
 // MARK: - Remote Notification
@@ -47,6 +52,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print(#function)
+        
+        // Device Token을 FCM에 등록
+        Messaging.messaging().apnsToken = deviceToken
+        
         let newToken = deviceToken.reduce("") { $0 + String(format: "%02X", $1) }
         
         let tokenManager = DIContainer.shared.resolve(TokenManager.self)
@@ -87,6 +96,14 @@ extension AppDelegate {
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             print("Permission granted: \(granted)")
         }
+        
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+            } else if let token = token {
+                print("FCM registration token: \(token)")
+            }
+        }
     }
 }
 
@@ -104,7 +121,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         print(#function)
         
         let userInfo = notification.request.content.userInfo
-        
+        print(userInfo)
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: userInfo)
             let apnsPayload = try JSONDecoder().decode(APNsPayload.self, from: jsonData)

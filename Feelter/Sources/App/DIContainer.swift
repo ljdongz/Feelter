@@ -73,11 +73,19 @@ extension DIContainer {
             socketProvider: socketProvider,
             chatDataSource: chatDataSource
         )
+        let orderRepository = OrderRepositoryImpl(
+            networkProvider: networkProvider
+        )
+        let paymentRepository = PaymentRepositoryImpl(
+            networkProvider: networkProvider
+        )
         
         register(authRepository, type: AuthRepository.self)
         register(userRepository, type: UserRepository.self)
         register(filterRepository, type: FilterRepository.self)
         register(bannerRepository, type: BannerRepository.self)
         register(chatRepository, type: ChatRepository.self)
+        register(orderRepository, type: OrderRepository.self)
+        register(paymentRepository, type: PaymentRepository.self)
     }
 }

@@ -7,6 +7,7 @@
 
 import UIKit
 
+import iamport_ios
 import KakaoSDKAuth
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -19,17 +20,20 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window = UIWindow(windowScene: windowScene)
         
-        let viewController = SplashViewController()
+        let vc = SplashViewController()
         
-        window?.rootViewController = viewController
+        window?.rootViewController = vc
         window?.makeKeyAndVisible()
         window?.windowScene = windowScene
     }
     
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        print(URLContexts)
         if let url = URLContexts.first?.url {
             if (AuthApi.isKakaoTalkLoginUrl(url)) {
                 _ = AuthController.handleOpenUrl(url: url)
+            } else {
+                Iamport.shared.receivedURL(url)
             }
         }
     }

@@ -1,5 +1,5 @@
 {
-  "originHash" : "946901fb184527b2011032ec2d80164e5b2b48caa115468cf086067e05ef06be",
+  "originHash" : "417bedb2b5990c00c77d94b3ad7dd8c59cf3901cd71ed5a348f6b80781c95584",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -89,6 +89,15 @@
       "state" : {
         "revision" : "fb7f2740b1570d2f7599c6bb9531bf4fad6974b7",
         "version" : "5.0.0"
+      }
+    },
+    {
+      "identity" : "iamport-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/iamport/iamport-ios",
+      "state" : {
+        "revision" : "cfa5ca2bb0f2be4e51981f14fd20d32d6c9d3636",
+        "version" : "1.4.7"
       }
     },
     {
@@ -206,6 +215,15 @@
       "state" : {
         "revision" : "102a647b573f60f73afdce5613a51d71349fe507",
         "version" : "1.30.0"
+      }
+    },
+    {
+      "identity" : "then",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/devxoul/Then.git",
+      "state" : {
+        "revision" : "e421a7b3440a271834337694e6050133a3958bc7",
+        "version" : "2.7.0"
       }
     }
   ],

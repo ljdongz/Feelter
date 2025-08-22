@@ -9,12 +9,35 @@ import UIKit
 
 import SnapKit
 
+typealias CounterStateCellItem = CounterStateCollectionViewCell.Item
+
 final class CounterStateCollectionViewCell: BaseCollectionViewCell {
     
     static let identifier = "CounterStateCollectionViewCell"
     
+    struct Item: Hashable {
+        let price: Int
+        let downloadCount: Int
+        let likeCount: Int
+    }
+    
     private let containerView: UIView = {
         let view = UIView()
+        return view
+    }()
+    
+    private let priceLabel: UILabel = {
+        let view = UILabel()
+        view.textColor = .gray30
+        view.font = .hakgyoansimMulgyeol(size: 32, weight: .bold)
+        return view
+    }()
+    
+    private let coinLabel: UILabel = {
+        let view = UILabel()
+        view.text = "Coin"
+        view.textColor = .gray75
+        view.font = .hakgyoansimMulgyeol(size: 20, weight: .bold)
         return view
     }()
     
@@ -68,6 +91,8 @@ final class CounterStateCollectionViewCell: BaseCollectionViewCell {
         contentView.addSubview(containerView)
         
         containerView.addSubviews([
+            priceLabel,
+            coinLabel,
             downloadContainerView,
             likeContainerView
         ])
@@ -88,9 +113,19 @@ final class CounterStateCollectionViewCell: BaseCollectionViewCell {
             make.edges.equalToSuperview()
         }
         
+        priceLabel.snp.makeConstraints { make in
+            make.top.leading.equalToSuperview()
+        }
+        
+        coinLabel.snp.makeConstraints { make in
+            make.leading.equalTo(priceLabel.snp.trailing).offset(8)
+            make.bottom.equalTo(priceLabel.snp.bottom)
+        }
+        
         downloadContainerView.snp.makeConstraints { make in
-            make.leading.verticalEdges.equalToSuperview()
+            make.top.equalTo(priceLabel.snp.bottom).offset(28)
             make.trailing.equalTo(containerView.snp.centerX).offset(-4)
+            make.leading.bottom.equalToSuperview()
         }
         
         downloadLabel.snp.makeConstraints { make in
@@ -105,7 +140,8 @@ final class CounterStateCollectionViewCell: BaseCollectionViewCell {
         }
         
         likeContainerView.snp.makeConstraints { make in
-            make.verticalEdges.trailing.equalToSuperview()
+            make.top.equalTo(downloadContainerView.snp.top)
+            make.trailing.bottom.equalToSuperview()
             make.leading.equalTo(containerView.snp.centerX).offset(4)
         }
         
@@ -121,7 +157,8 @@ final class CounterStateCollectionViewCell: BaseCollectionViewCell {
         }
     }
 
-    func configureCell(item: FilterDetailView.CounterStateSectionItem) {
+    func configureCell(item: CounterStateCellItem) {
+        priceLabel.text = CustomNumberFormatter.shared.decimal(from: item.price)
         downloadCounterLabel.text = "\(item.downloadCount)"
         likeCounterLabel.text = "\(item.likeCount)"
     }
@@ -132,13 +169,13 @@ extension CounterStateCollectionViewCell {
     static func layoutSection() -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(layoutSize: .init(
             widthDimension: .fractionalWidth(0.6),
-            heightDimension: .fractionalHeight(1)
+            heightDimension: .estimated(115)
         ))
         
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: .init(
                 widthDimension: .fractionalWidth(1),
-                heightDimension: .absolute(56)
+                heightDimension: .estimated(115)
             ),
             subitems: [item]
         )

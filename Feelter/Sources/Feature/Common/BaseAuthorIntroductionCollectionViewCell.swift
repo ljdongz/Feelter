@@ -80,7 +80,7 @@ extension BaseAuthorIntroductionCollectionViewCell {
         )
         
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = .init(top: 20, leading: 20, bottom: 130, trailing: 20)
+        section.contentInsets = .init(top: 20, leading: 20, bottom: 150, trailing: 20)
         
         return section
     }

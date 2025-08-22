@@ -125,7 +125,7 @@ extension FilterFeedListCollectionViewCell {
         )
         
         section.boundarySupplementaryItems = [header]
-        section.contentInsets = .init(top: 0, leading: 20, bottom: 50, trailing: 20)
+        section.contentInsets = .init(top: 0, leading: 20, bottom: 150, trailing: 20)
         
         section.visibleItemsInvalidationHandler = visibleHandler
         return section
