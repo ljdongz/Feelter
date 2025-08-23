@@ -12,4 +12,6 @@ extension Notification.Name {
     static let KeyboardWillHide = UIResponder.keyboardWillHideNotification
     static let ReceiveRemotePush = Notification.Name("ReceiveRemotePush")
     static let ReceiveSocketMessage = Notification.Name("ReceiveSocketMessage")
+    static let ShowTabBar = Notification.Name("showTabBar")
+    static let HideTabBar = Notification.Name("hideTabBar")
 }

@@ -27,6 +27,18 @@ final class ChatRoomViewController: RxBaseViewController {
 
     private let viewModel = ChatRoomViewModel()
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        hideTabBar()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        showTabBar()
+    }
+    
     override func setupView() {
         title = "Chat"
         view.backgroundColor = .gray100
