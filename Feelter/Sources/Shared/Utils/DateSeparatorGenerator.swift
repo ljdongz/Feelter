@@ -9,7 +9,7 @@ import Foundation
 
 enum MessageCellType: Hashable {
     case message(MessageItem)
-    case dateSeparator(Date)
+    case dateSeparator(DateSeparatorItem)
 }
 
 struct MessageItem: Hashable {
@@ -26,6 +26,11 @@ struct MessageItem: Hashable {
         let profileImageURL: String?
         let isMe: Bool
     }
+}
+
+struct DateSeparatorItem: Hashable {
+    let id = UUID()
+    let date: Date
 }
 
 struct DateSeparatorGenerator {
@@ -49,7 +54,7 @@ struct DateSeparatorGenerator {
             
             // 새로운 날짜인 경우 구분선 추가
             if isDateSeparator {
-                cellTypes.append(.dateSeparator(messageDate))
+                cellTypes.append(.dateSeparator(.init(date: messageDate)))
                 lastDate = messageDate
             }
             

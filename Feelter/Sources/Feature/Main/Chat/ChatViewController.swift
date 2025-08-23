@@ -94,7 +94,8 @@ final class ChatViewController: RxBaseViewController {
                 .do(onNext: { [weak self] _ in
                     self?.messageInputField.message = ""
                 })
-                .asObservable()
+                .asObservable(),
+            loadMoreMessages: .empty()
         )
         
         let output = viewModel.transform(input: input)
@@ -176,7 +177,7 @@ extension ChatViewController {
                         for: indexPath
                     ) as? DateSeparatorTableViewCell else { return .init() }
                     
-                    cell.configureCell(date)
+                    cell.configureCell(date.date)
                     return cell
                     
                 // 메시지
@@ -211,6 +212,7 @@ extension ChatViewController {
 // MARK: - Update DataSource
 extension ChatViewController {
     private func initializeDataSource(_ messages: [ChatMessage]) {
+        print(#function)
         let cellTypes = dateSeparatorGenerator.generateCellTypes(
             from: messages,
             currentUserID: viewModel.userID
@@ -235,6 +237,7 @@ extension ChatViewController {
     }
     
     private func appendDataSource(_ messages: [ChatMessage]) {
+        print(#function)
         var cellTypes = dateSeparatorGenerator.generateCellTypes(
             from: messages,
             currentUserID: viewModel.userID
