@@ -150,6 +150,12 @@ final class ChatViewController: RxBaseViewController {
                 owner.handleKeyboardWillHide(notification: notification)
             })
             .disposed(by: disposeBag)
+        
+        tableView.rx.tap
+            .subscribe(with: self) { owner, _ in
+                owner.view.endEditing(true)
+            }
+            .disposed(by: disposeBag)
     }
 }
 

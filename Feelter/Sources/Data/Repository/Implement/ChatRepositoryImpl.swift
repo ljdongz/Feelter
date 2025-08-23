@@ -142,7 +142,7 @@ final class ChatRepositoryImpl: ChatRepository {
         await chatDataSource.fetchChatMessages(
             roomID: roomID,
             before: lastMessageAt,
-            limit: 20
+            limit: 30
         )
     }
     
@@ -209,6 +209,9 @@ extension ChatRepositoryImpl {
     
     private func syncMessagesForRoom(_ room: ChatRoom, localRoom: ChatRoom?) async {
         do {
+            // TODO: 새로운 기기에서 유저가 로그인 했을 경우, 각 채팅방 데이터의 채팅 메시지를 어느날짜부터 가져올 것인지 고민 필요
+            // -> 현재는 로컬에 저장되지 않은 채팅방인 경우, 해당 채팅방에 존재하는 모든 메시지를 가져옴
+            //
             // 로컬 채팅방 업데이트된 날짜 기준으로 after 파라미터 설정
             let lastMessageTime = localRoom?.updatedAt
             let afterParameter = lastMessageTime.map {
