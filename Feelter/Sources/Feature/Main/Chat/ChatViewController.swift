@@ -36,6 +36,10 @@ final class ChatViewController: RxBaseViewController {
     private var messageInputFieldBottomConstraint: Constraint?
     private var dataSource: DataSourceType!
     
+    private var didInitDataSource = false
+    private var isLoadingMoreMessages = false
+    private var isFullLoadMessage = false
+    
     init(viewModel: ChatViewModel) {
         self.viewModel = viewModel
         
@@ -95,7 +99,25 @@ final class ChatViewController: RxBaseViewController {
                     self?.messageInputField.message = ""
                 })
                 .asObservable(),
-            loadMoreMessages: .empty()
+            loadMoreMessages: tableView.rx.contentOffset
+                .filter { [weak self] _ in
+                    guard let self else { return false }
+                    return self.didInitDataSource && !self.isLoadingMoreMessages && !isFullLoadMessage
+                }
+                .map { [weak self] offset in
+                    guard let self else { return false }
+                    let offsetY = offset.y
+                    let contentHeight = self.tableView.contentSize.height
+                    let frameHeight = self.tableView.frame.height
+                    return offsetY <= 50 && contentHeight > frameHeight
+                }
+                .distinctUntilChanged()
+                .filter { $0 }
+                .do(onNext: { [weak self] _ in
+                    self?.isLoadingMoreMessages = true
+                })
+                .map { _ in () }
+                .asObservable()
         )
         
         let output = viewModel.transform(input: input)
@@ -212,7 +234,6 @@ extension ChatViewController {
 // MARK: - Update DataSource
 extension ChatViewController {
     private func initializeDataSource(_ messages: [ChatMessage]) {
-        print(#function)
         let cellTypes = dateSeparatorGenerator.generateCellTypes(
             from: messages,
             currentUserID: viewModel.userID
@@ -230,14 +251,57 @@ extension ChatViewController {
             at: .bottom,
             animated: false
         )
+        
+        didInitDataSource = true
     }
     
     private func prependDataSource(_ messages: [ChatMessage]) {
+        if messages.isEmpty {
+            isFullLoadMessage = true
+            return
+        }
         
+        let cellTypes = dateSeparatorGenerator.generateCellTypes(
+            from: messages,
+            currentUserID: viewModel.userID
+        )
+        
+        // 현재 첫 번째 가시 셀의 IndexPath 저장
+        let firstVisibleIndexPath = tableView.indexPathsForVisibleRows?.first
+        
+        // 기존 아이템들 가져오기
+        let currentItems = dataSource.snapshot().itemIdentifiers
+        
+        // 새로운 스냅샷 생성
+        var newSnapshot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
+        newSnapshot.appendSections([0])
+        
+        // 새 메시지 + 기존 메시지 순서로 추가
+        let newItems = cellTypes.map { $0 as AnyHashable }
+        newSnapshot.appendItems(newItems + currentItems)
+        
+        // 스냅샷 적용
+        dataSource.apply(newSnapshot, animatingDifferences: false)
+        
+        // 레이아웃 강제 업데이트
+        tableView.layoutIfNeeded()
+        
+        // 스크롤 위치 복원
+        if let firstVisibleIndexPath = firstVisibleIndexPath {
+            let newIndexPath = IndexPath(
+                row: firstVisibleIndexPath.row + cellTypes.count,
+                section: firstVisibleIndexPath.section
+            )
+            
+            // 복원된 위치로 스크롤 (애니메이션 없이)
+            tableView.scrollToRow(at: newIndexPath, at: .top, animated: false)
+        }
+        
+        // 로딩 상태 해제
+        isLoadingMoreMessages = false
     }
     
     private func appendDataSource(_ messages: [ChatMessage]) {
-        print(#function)
         var cellTypes = dateSeparatorGenerator.generateCellTypes(
             from: messages,
             currentUserID: viewModel.userID
