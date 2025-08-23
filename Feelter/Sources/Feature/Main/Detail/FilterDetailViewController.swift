@@ -58,7 +58,9 @@ final class FilterDetailViewController: RxBaseViewController {
                 .asObservable(),
             paymentButtonTapped: mainView.paymentButtonTapTrigger
                 .asObservable(),
-            succeedPayment: succeedPaymentTrigger.asObservable()
+            succeedPayment: succeedPaymentTrigger.asObservable(),
+            chatMessageButtonTapped: mainView.chatButtonTapTrigger
+                .asObservable()
         )
 
         let output = viewModel.transform(input: input)

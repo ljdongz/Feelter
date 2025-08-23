@@ -7,6 +7,7 @@
 
 import UIKit
 
+import RxSwift
 import SnapKit
 
 final class AuthorProfileCollectionViewCell: BaseCollectionViewCell {
@@ -17,14 +18,54 @@ final class AuthorProfileCollectionViewCell: BaseCollectionViewCell {
         let view = ProfileView()
         return view
     }()
+    
+    let chatButton: UIView = {
+        let view = UIView()
+        view.backgroundColor = .deepTurquoise
+        view.layer.cornerRadius = 8
+        return view
+    }()
+
+    private let chatImageView: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFit
+        view.image = .message
+        view.tintColor = .gray30
+        return view
+    }()
+    
+    private(set) var disposeBag = DisposeBag()
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        disposeBag = DisposeBag()
+    }
 
     override func setupSubviews() {
-        contentView.addSubview(profileView)
+        contentView.addSubviews([
+            profileView,
+            chatButton
+        ])
+        
+        chatButton.addSubview(chatImageView)
     }
     
     override func setupConstraints() {
         profileView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.leading.verticalEdges.equalToSuperview()
+            make.trailing.equalTo(chatButton.snp.leading).offset(-15)
+        }
+        
+        chatButton.snp.makeConstraints { make in
+            make.trailing.equalToSuperview()
+            make.size.equalTo(44)
+            make.centerY.equalToSuperview()
+        }
+        
+        chatImageView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.size.equalTo(32)
         }
     }
     

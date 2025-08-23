@@ -16,6 +16,7 @@ final class FilterDetailViewModel: ViewModel {
         let likeButtonTapped: Observable<Void>
         let paymentButtonTapped: Observable<Void>
         let succeedPayment: Observable<Void>
+        let chatMessageButtonTapped: Observable<Void>
     }
     
     struct Output {

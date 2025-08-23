@@ -40,6 +40,7 @@ final class FilterDetailView: RxBaseView {
     private weak var imageSliderCell: ImageSliderCollectionViewCell?
     
     let paymentButtonTapTrigger = PublishRelay<Void>()
+    let chatButtonTapTrigger = PublishRelay<Void>()
     
     override func setupView() {
         setupCollectionView()
@@ -262,6 +263,12 @@ private extension FilterDetailView {
                         phoneNumber: "",
                         hashTags: []
                     ))
+                    
+                    cell.chatButton.rx
+                        .tap
+                        .bind(to: self.chatButtonTapTrigger)
+                        .disposed(by: cell.disposeBag)
+                    
                     return cell
                     
                 case .authorHashTags:
