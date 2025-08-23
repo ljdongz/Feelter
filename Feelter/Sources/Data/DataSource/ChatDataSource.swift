@@ -42,6 +42,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     func fetchChatRooms() -> [ChatRoom] {
         let realm = RealmStorage.shared.realm
         let realmRooms = realm.objects(RealmChatRoom.self)
+            .filter { $0.lastMessage != nil }
         return Array(realmRooms).map { $0.toDomain() }
     }
     

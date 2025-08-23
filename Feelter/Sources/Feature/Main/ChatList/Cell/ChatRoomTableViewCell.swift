@@ -19,7 +19,7 @@ final class ChatRoomTableViewCell: BaseTableViewCell {
         let profileImageURL: String?
         let name: String
         let message: String
-        let date: String
+        let date: Date
         let unreadCount: Int
     }
 
@@ -140,7 +140,7 @@ final class ChatRoomTableViewCell: BaseTableViewCell {
         
         nameLabel.text = item.name
         messageLabel.text = item.message
-        dateLabel.text = item.date
+        dateLabel.text = item.date.formatted(.basic)
         
         if item.unreadCount > 0 {
             unreadBadgeView.isHidden = false

@@ -129,17 +129,17 @@ extension ChatRoomViewController {
                         for: indexPath
                       ) as? ChatRoomTableViewCell else { return .init() }
                 
-                // TODO: 상대방 찾기
                 let userID = viewModel.userID
                 guard let opponent = room.participants.first(where: {
                     $0.userID != userID
                 }) else { return .init() }
+                let message = room.isLastMessageFile ? "파일을 보냈습니다." : room.lastMessage ?? ""
                 
                 cell.configureCell(.init(
                     profileImageURL: opponent.profileImageURL,
                     name: opponent.nickname,
-                    message: room.lastMessage,
-                    date: room.localUpdatedAt.formatted(.basic),
+                    message: message,
+                    date: room.localUpdatedAt,
                     unreadCount: 0
                 ))
                 return cell

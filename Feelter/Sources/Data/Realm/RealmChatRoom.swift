@@ -12,7 +12,7 @@ import RealmSwift
 final class RealmChatRoom: Object {
     @Persisted(primaryKey: true) var roomID: String
     @Persisted var participants: List<RealmMessageSender>
-    @Persisted var lastMessage: String
+    @Persisted var lastMessage: String?
     @Persisted var isLastMessageFile: Bool
     @Persisted var unReadCount: Int
     @Persisted var createdAt: Date
@@ -22,7 +22,7 @@ final class RealmChatRoom: Object {
     convenience init(
         roomID: String,
         participants: List<RealmMessageSender>,
-        lastMessage: String,
+        lastMessage: String?,
         isLastMessageFile: Bool,
         unReadCount: Int = 0,
         createdAt: Date,
