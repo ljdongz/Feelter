@@ -36,6 +36,11 @@ final class ChatRepositoryImpl: ChatRepository {
     
     // MARK: - 채팅방 관련
     func createRoom(opponentID: String) async throws -> ChatRoom {
+        // 이미 기존에 Realm에 저장된 채팅방이 있을 경우, 서버 통신 없이 반환
+        if let localRoom = await chatDataSource.findChatRoom(opponentID: opponentID) {
+            return localRoom
+        }
+        
         let requestDTO = CreateChatRoomRequestDTO(opponentID: opponentID)
         
         let response = try await networkProvider.request(
@@ -43,7 +48,11 @@ final class ChatRepositoryImpl: ChatRepository {
             type: ChatRoomResponseDTO.self
         )
         
-        return response.toDomain()
+        let chatRoom = response.toDomain()
+        
+        try await chatDataSource.saveChatRooms([chatRoom])
+        
+        return chatRoom
     }
     
     func fetchRooms() async throws -> [ChatRoom] {
@@ -112,6 +121,7 @@ final class ChatRepositoryImpl: ChatRepository {
         
         try await chatDataSource.saveChatMessages(messages)
         
+        // TODO: 서버로부터 특정 날짜 이후에 해당하는 새로운 메시지를 받은 경우 외 아무런 메시지를 받지 않은 경우, 업데이트 날짜만 현재 날짜로 변경하기 (채팅방 입장할 때마다 불필요한 API 호출 방지)
         if let lastChat = messages.last {
             try await chatDataSource.updateChatRoom(
                 roomID: roomID,
@@ -121,6 +131,8 @@ final class ChatRepositoryImpl: ChatRepository {
             )
             
             chatRooms = await chatDataSource.fetchChatRooms()
+        } else {
+            // TODO: 업데이트 날짜만 현재 날짜(파라미터로 전달받은 after)로 변경
         }
             
         return messages
@@ -170,8 +182,11 @@ extension ChatRepositoryImpl {
                 return true
             }
             
+            // TODO: 서버 업데이트 날짜 > 로컬 업데이트 날짜인 경우만 고려해보기
+            // -> 채팅방 입장 후 업데이트 
+            //
             // 채팅방 업데이트 날짜 비교
-            return serverRoom.updatedAt != localRoom.updatedAt
+            return serverRoom.updatedAt > localRoom.updatedAt
         }
     }
     

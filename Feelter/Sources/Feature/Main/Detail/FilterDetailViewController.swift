@@ -94,6 +94,18 @@ final class FilterDetailViewController: RxBaseViewController {
                 owner.present(vc, animated: true)
             }
             .disposed(by: disposeBag)
+        
+        output.receiveChatRoom
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, room in
+                let vm = ChatViewModel(
+                    roomID: room.roomID,
+                    updatedAt: room.updatedAt
+                )
+                let vc = ChatViewController(viewModel: vm)
+                owner.navigationController?.pushViewController(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
 }
 

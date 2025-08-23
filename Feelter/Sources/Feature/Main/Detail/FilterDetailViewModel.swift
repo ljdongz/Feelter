@@ -23,10 +23,12 @@ final class FilterDetailViewModel: ViewModel {
         let filterDetail = PublishRelay<FilterDetail>()
         let updatedLikeStatus = PublishRelay<Bool>()
         let receiveOrderCode = PublishRelay<PaymentInfo>()
+        let receiveChatRoom = PublishRelay<ChatRoom>()
     }
     
     @Dependency private var filterRepository: FilterRepository
     @Dependency private var orderRepository: OrderRepository
+    @Dependency private var chatRepository: ChatRepository
     
     private let filterID: String
     private(set) var isLiked: Bool
@@ -116,6 +118,23 @@ final class FilterDetailViewModel: ViewModel {
                 owner.filter = newFilter
                 
                 output.filterDetail.accept(newFilter)
+            }
+            .disposed(by: disposeBag)
+        
+        input.chatMessageButtonTapped
+            .compactMap { [weak self] in
+                self?.filter?.author.userID
+            }
+            .withAsyncResult(with: self) { owner, opponentID in
+                try await owner.chatRepository.createRoom(opponentID: opponentID)
+            }
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success(let room):
+                    output.receiveChatRoom.accept(room)
+                case .failure(let error):
+                    print(error)
+                }
             }
             .disposed(by: disposeBag)
         
