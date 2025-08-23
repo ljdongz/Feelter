@@ -31,7 +31,11 @@ protocol ChatDataSource {
     
     // 메시지 관련
     @MainActor
-    func fetchChatMessages(roomID: String) -> [ChatMessage]
+    func fetchChatMessages(
+        roomID: String,
+        before lastMessageAt: Date,
+        limit: Int
+    ) -> [ChatMessage]
     @MainActor
     func saveChatMessages(_ messages: [ChatMessage]) throws
 }
@@ -100,11 +104,16 @@ struct ChatDataSourceImpl: ChatDataSource {
     }
     
     // MARK: - 메시지 관련
-    func fetchChatMessages(roomID: String) -> [ChatMessage] {
+    func fetchChatMessages(
+        roomID: String,
+        before lastMessageAt: Date,
+        limit: Int
+    ) -> [ChatMessage] {
         let realm = RealmStorage.shared.realm
         let realmMessages = realm.objects(RealmChatMessage.self)
-            .where { $0.roomID == roomID }
+            .where { $0.roomID == roomID && $0.createdAt < lastMessageAt }
             .sorted(by: \.createdAt, ascending: true)
+            .suffix(limit)
         return Array(realmMessages).map { $0.toDomain() }
     }
     

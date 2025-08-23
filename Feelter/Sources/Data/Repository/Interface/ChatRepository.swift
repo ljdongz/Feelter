@@ -21,6 +21,9 @@ protocol ChatRepository {
     // 메시지 관련
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage
     func fetchMessages(from roomID: String, after: String?) async throws -> [ChatMessage]
-    func fetchLocalMessages(from roomID: String) async -> [ChatMessage]
+    func fetchLocalMessages(
+        from roomID: String,
+        before lastMessageAt: Date
+    ) async -> [ChatMessage]
     func saveMessage(_ message: ChatMessage) async throws -> ChatMessage
 }

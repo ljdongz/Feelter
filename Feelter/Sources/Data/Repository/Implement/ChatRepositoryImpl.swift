@@ -135,8 +135,15 @@ final class ChatRepositoryImpl: ChatRepository {
         return messages
     }
     
-    func fetchLocalMessages(from roomID: String) async -> [ChatMessage] {
-        await chatDataSource.fetchChatMessages(roomID: roomID)
+    func fetchLocalMessages(
+        from roomID: String,
+        before lastMessageAt: Date
+    ) async -> [ChatMessage] {
+        await chatDataSource.fetchChatMessages(
+            roomID: roomID,
+            before: lastMessageAt,
+            limit: 20
+        )
     }
     
     func saveMessage(_ message: ChatMessage) async throws -> ChatMessage {

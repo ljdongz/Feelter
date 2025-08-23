@@ -24,6 +24,7 @@ final class ChatViewModel: ViewModel {
         let viewDidLoad: Observable<Void>
         let viewWillDisappear: Observable<Void>
         let sendMessageButtonTapped: Observable<String>
+        let loadMoreMessages: Observable<Void>
     }
     
     struct Output {
@@ -36,6 +37,7 @@ final class ChatViewModel: ViewModel {
     private let roomID: String
     private let updatedAt: Date
     private let calendar = Calendar.current
+    private var lastMessageAt = Date()
     
     var userID: String? {
         tokenManager.userID
@@ -63,9 +65,14 @@ final class ChatViewModel: ViewModel {
             })
             .withAsync(with: self) { owner, _ in
 
-                await owner.chatRepository.fetchLocalMessages(from: owner.roomID)
+                await owner.chatRepository.fetchLocalMessages(
+                    from: owner.roomID,
+                    before: owner.lastMessageAt
+                )
             }
             .subscribe(with: self) { owner, messages in
+                owner.lastMessageAt = messages.first?.createdAt ?? .distantPast
+                
                 output.messages.accept(.fullReload(messages))
                 
                 serverFetchTrigger.accept(())
@@ -91,6 +98,25 @@ final class ChatViewModel: ViewModel {
                 switch result {
                 case .success(let message):
                     print("보내기 성공")
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        input.loadMoreMessages
+            .withAsyncResult(with: self) { owner, _ in
+                await owner.chatRepository.fetchLocalMessages(
+                    from: owner.roomID,
+                    before: owner.lastMessageAt
+                )
+            }
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success(let messages):
+                    owner.lastMessageAt = messages.first?.createdAt ?? .distantPast
+                    
+                    output.messages.accept(.prepend(messages))
                 case .failure(let error):
                     print(error)
                 }
