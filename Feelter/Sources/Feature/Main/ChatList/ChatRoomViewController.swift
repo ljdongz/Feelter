@@ -152,15 +152,11 @@ extension ChatRoomViewController {
 
 extension ChatRoomViewController {
     private func updateDataSource(with newRooms: [ChatRoom]) {
-        let sortedRooms = newRooms.sorted {
-            ($0.localUpdatedAt, $0.updatedAt) >
-            ($1.localUpdatedAt, $1.updatedAt)
-        }
         
         // 새로운 스냅샷을 직접 생성 (DiffableDataSource가 차이점을 자동 계산)
         var newSnapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
         newSnapShot.appendSections([0])
-        newSnapShot.appendItems(sortedRooms)
+        newSnapShot.appendItems(newRooms)
         
         let isAnimating = dataSource.snapshot().numberOfItems != 0
         

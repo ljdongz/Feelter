@@ -42,7 +42,11 @@ struct ChatDataSourceImpl: ChatDataSource {
     func fetchChatRooms() -> [ChatRoom] {
         let realm = RealmStorage.shared.realm
         let realmRooms = realm.objects(RealmChatRoom.self)
-            .filter { $0.lastMessage != nil }
+            .where { $0.lastMessage != nil || $0.isLastMessageFile } // 채팅 메시지가 존재하는 채팅방만 가져오기
+            .sorted(by: [
+                .init(keyPath: "localUpdatedAt", ascending: false),
+                .init(keyPath: "updatedAt", ascending: false)
+            ])
         return Array(realmRooms).map { $0.toDomain() }
     }
     
@@ -57,7 +61,8 @@ struct ChatDataSourceImpl: ChatDataSource {
     func findChatRoom(opponentID: String) -> ChatRoom? {
         let realm = RealmStorage.shared.realm
         let localRoom = realm.objects(RealmChatRoom.self)
-            .first { $0.participants.contains(where: { $0.userID == opponentID }) }
+            .where { $0.participants.userID == opponentID }
+            .first
         return localRoom?.toDomain()
     }
     
@@ -98,8 +103,8 @@ struct ChatDataSourceImpl: ChatDataSource {
     func fetchChatMessages(roomID: String) -> [ChatMessage] {
         let realm = RealmStorage.shared.realm
         let realmMessages = realm.objects(RealmChatMessage.self)
-            .filter("roomID == %@", roomID)
-            .sorted(byKeyPath: "createdAt", ascending: true)
+            .where { $0.roomID == roomID }
+            .sorted(by: \.createdAt, ascending: true)
         return Array(realmMessages).map { $0.toDomain() }
     }
     
