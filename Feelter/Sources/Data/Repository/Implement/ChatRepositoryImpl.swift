@@ -36,6 +36,11 @@ final class ChatRepositoryImpl: ChatRepository {
     
     // MARK: - 채팅방 관련
     func createRoom(opponentID: String) async throws -> ChatRoom {
+        // 이미 기존에 Realm에 저장된 채팅방이 있을 경우, 서버 통신 없이 반환
+        if let localRoom = await chatDataSource.findChatRoom(opponentID: opponentID) {
+            return localRoom
+        }
+        
         let requestDTO = CreateChatRoomRequestDTO(opponentID: opponentID)
         
         let response = try await networkProvider.request(
@@ -43,7 +48,11 @@ final class ChatRepositoryImpl: ChatRepository {
             type: ChatRoomResponseDTO.self
         )
         
-        return response.toDomain()
+        let chatRoom = response.toDomain()
+        
+        try await chatDataSource.saveChatRooms([chatRoom])
+        
+        return chatRoom
     }
     
     func fetchRooms() async throws -> [ChatRoom] {

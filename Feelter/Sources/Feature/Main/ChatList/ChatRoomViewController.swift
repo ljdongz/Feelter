@@ -27,6 +27,18 @@ final class ChatRoomViewController: RxBaseViewController {
 
     private let viewModel = ChatRoomViewModel()
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        hideTabBar()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        showTabBar()
+    }
+    
     override func setupView() {
         title = "Chat"
         view.backgroundColor = .gray100
@@ -117,17 +129,17 @@ extension ChatRoomViewController {
                         for: indexPath
                       ) as? ChatRoomTableViewCell else { return .init() }
                 
-                // TODO: 상대방 찾기
                 let userID = viewModel.userID
                 guard let opponent = room.participants.first(where: {
                     $0.userID != userID
                 }) else { return .init() }
+                let message = room.isLastMessageFile ? "파일을 보냈습니다." : room.lastMessage ?? ""
                 
                 cell.configureCell(.init(
                     profileImageURL: opponent.profileImageURL,
                     name: opponent.nickname,
-                    message: room.lastMessage,
-                    date: room.localUpdatedAt.formatted(.basic),
+                    message: message,
+                    date: room.localUpdatedAt,
                     unreadCount: 0
                 ))
                 return cell
@@ -140,15 +152,11 @@ extension ChatRoomViewController {
 
 extension ChatRoomViewController {
     private func updateDataSource(with newRooms: [ChatRoom]) {
-        let sortedRooms = newRooms.sorted {
-            ($0.localUpdatedAt, $0.updatedAt) >
-            ($1.localUpdatedAt, $1.updatedAt)
-        }
         
         // 새로운 스냅샷을 직접 생성 (DiffableDataSource가 차이점을 자동 계산)
         var newSnapShot = NSDiffableDataSourceSnapshot<Int, ChatRoom>()
         newSnapShot.appendSections([0])
-        newSnapShot.appendItems(sortedRooms)
+        newSnapShot.appendItems(newRooms)
         
         let isAnimating = dataSource.snapshot().numberOfItems != 0
         

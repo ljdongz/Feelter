@@ -133,3 +133,13 @@ private extension BaseViewController {
         navigationController?.popViewController(animated: true)
     }
 }
+
+extension BaseViewController {
+    func showTabBar() {
+        NotificationCenter.default.post(name: .ShowTabBar, object: nil)
+    }
+    
+    func hideTabBar() {
+        NotificationCenter.default.post(name: .HideTabBar, object: nil)
+    }
+}

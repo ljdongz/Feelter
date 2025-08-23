@@ -7,9 +7,11 @@
 
 import UIKit
 
+import RxCocoa
+import RxSwift
 import SnapKit
 
-final class TabBarViewController: BaseViewController {
+final class TabBarViewController: RxBaseViewController {
     
     // MARK: - UI Components
     private lazy var containerView: UIView = {
@@ -36,7 +38,7 @@ final class TabBarViewController: BaseViewController {
         let vc2 = UINavigationController(rootViewController: FilterFeedViewController())
         let vc3 = UINavigationController(rootViewController: FilterMakeViewController())
         let vc4 = UIViewController()
-        let vc5 = UIViewController()
+        let vc5 = UINavigationController(rootViewController: MyPageViewController())
         
         vc4.view.backgroundColor = .brightTurquoise
         vc5.view.backgroundColor = .deepTurquoise
@@ -61,6 +63,38 @@ final class TabBarViewController: BaseViewController {
             make.horizontalEdges.equalToSuperview().inset(20)
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
+    }
+    
+    override func bind() {
+        NotificationCenter.default.rx
+            .notification(.ShowTabBar)
+            .subscribe(with: self) { owner, _ in
+                
+                UIView.animate(
+                    withDuration: 0.2,
+                    delay: 0.1,
+                    options: .curveEaseIn
+                ) {
+                    owner.tabBarView.alpha = 1.0
+                    owner.tabBarView.transform = .identity
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        NotificationCenter.default.rx
+            .notification(.HideTabBar)
+            .subscribe(with: self) { owner, _ in
+                
+                UIView.animate(
+                    withDuration: 0.2,
+                    delay: 0,
+                    options: .curveEaseOut
+                ) {
+                    owner.tabBarView.alpha = 0.0
+                    owner.tabBarView.transform = CGAffineTransform(translationX: 0, y: 100)
+                }
+            }
+            .disposed(by: disposeBag)
     }
 }
 

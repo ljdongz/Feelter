@@ -58,7 +58,9 @@ final class FilterDetailViewController: RxBaseViewController {
                 .asObservable(),
             paymentButtonTapped: mainView.paymentButtonTapTrigger
                 .asObservable(),
-            succeedPayment: succeedPaymentTrigger.asObservable()
+            succeedPayment: succeedPaymentTrigger.asObservable(),
+            chatMessageButtonTapped: mainView.chatButtonTapTrigger
+                .asObservable()
         )
 
         let output = viewModel.transform(input: input)
@@ -90,6 +92,18 @@ final class FilterDetailViewController: RxBaseViewController {
                     owner.succeedPaymentTrigger.accept(())
                 }
                 owner.present(vc, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        output.receiveChatRoom
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, room in
+                let vm = ChatViewModel(
+                    roomID: room.roomID,
+                    updatedAt: room.updatedAt
+                )
+                let vc = ChatViewController(viewModel: vm)
+                owner.navigationController?.pushViewController(vc, animated: true)
             }
             .disposed(by: disposeBag)
     }

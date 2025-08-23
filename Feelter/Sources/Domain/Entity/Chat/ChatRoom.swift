@@ -11,7 +11,7 @@ struct ChatRoom: Hashable {
     let roomID: String
     let participants: [MessageSender]
     
-    let lastMessage: String
+    let lastMessage: String?
     let isLastMessageFile: Bool
     
     let createdAt: Date

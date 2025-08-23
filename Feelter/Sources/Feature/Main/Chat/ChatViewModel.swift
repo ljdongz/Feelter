@@ -57,8 +57,7 @@ final class ChatViewModel: ViewModel {
         input.viewDidLoad
             .do(onNext: { [weak self] _ in
                 guard let self else { return }
-                chatRepository.connectRoom(roomID: self.roomID) { [weak self] message in
-                    guard let self else { return }
+                chatRepository.connectRoom(roomID: self.roomID) { message in
                     receiveMessageTrigger.accept(message)
                 }
             })

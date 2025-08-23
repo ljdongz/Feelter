@@ -25,4 +25,13 @@ struct UserRepositoryImpl: UserRepository {
         
         return .init(profile: profile, filters: filters)
     }
+    
+    func fetchMyProfile() async throws -> Profile {
+        let response = try await networkProvider.request(
+            endpoint: UserAPI.myProfile,
+            type: ProfileDTO.self
+        )
+        
+        return response.toDomain()
+    }
 }

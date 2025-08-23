@@ -55,12 +55,24 @@ extension AppDelegate {
         
         // Device Token을 FCM에 등록
         Messaging.messaging().apnsToken = deviceToken
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+                return
+            }
+            
+            if let token = token {
+                print("FCM registration token: \(token)")
+            } else {
+                print("FCM registration token is nil")
+            }
+        }
         
         let newToken = deviceToken.reduce("") { $0 + String(format: "%02X", $1) }
         
         let tokenManager = DIContainer.shared.resolve(TokenManager.self)
         
-        // 디바이스 토큰이 저장되있지 않은 경우 (로그인 화면), 저장
+        // 디바이스 토큰이 저장되있지 않은 경우 (로그인 화면인 경우), 새로 저장
         guard let current = tokenManager.deviceToken else {
             tokenManager.updateDeviceToken(newToken)
             return
@@ -69,6 +81,7 @@ extension AppDelegate {
         // 기존 디바이스 토큰과 새로 발급받은 디바이스 토큰이 동일한 경우, 종료
         guard current != newToken else { return }
         
+        // 디바이스 토큰 업데이트
         let networkProvider = DIContainer.shared.resolve(NetworkProvider.self)
         Task {
             do {
@@ -88,6 +101,7 @@ extension AppDelegate {
     }
     
     private func configurePushNotification() {
+        print(#function)
         Messaging.messaging().delegate = self
         let center = UNUserNotificationCenter.current()
         center.delegate = self
@@ -95,14 +109,6 @@ extension AppDelegate {
         // 알림을 표시하기 위한 승인을 요청
         center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             print("Permission granted: \(granted)")
-        }
-        
-        Messaging.messaging().token { token, error in
-            if let error = error {
-                print("Error fetching FCM registration token: \(error)")
-            } else if let token = token {
-                print("FCM registration token: \(token)")
-            }
         }
     }
 }
