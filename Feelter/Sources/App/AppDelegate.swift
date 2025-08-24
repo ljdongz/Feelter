@@ -67,8 +67,32 @@ extension AppDelegate {
                 print("FCM registration token is nil")
             }
         }
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print(error.localizedDescription)
+    }
+    
+    private func configurePushNotification() {
+        print(#function)
+        Messaging.messaging().delegate = self
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
         
-        let newToken = deviceToken.reduce("") { $0 + String(format: "%02X", $1) }
+        // 알림을 표시하기 위한 승인을 요청
+        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+            print("Permission granted: \(granted)")
+        }
+    }
+}
+
+// MARK: - FCM Delegate
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("🟢", #function, fcmToken)
+        
+        guard let newToken = fcmToken else { return }
         
         let tokenManager = DIContainer.shared.resolve(TokenManager.self)
         
@@ -94,28 +118,6 @@ extension AppDelegate {
                 print("Update Device Token Error: \(error)")
             }
         }
-    }
-
-    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print(error.localizedDescription)
-    }
-    
-    private func configurePushNotification() {
-        print(#function)
-        Messaging.messaging().delegate = self
-        let center = UNUserNotificationCenter.current()
-        center.delegate = self
-        
-        // 알림을 표시하기 위한 승인을 요청
-        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-            print("Permission granted: \(granted)")
-        }
-    }
-}
-
-extension AppDelegate: MessagingDelegate {
-    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        print("🟢", #function, fcmToken)
     }
 }
 
