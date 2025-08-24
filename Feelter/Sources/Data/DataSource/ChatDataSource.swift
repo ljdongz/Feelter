@@ -17,6 +17,8 @@ protocol ChatDataSource {
     @MainActor
     func saveChatRooms(_ rooms: [ChatRoom]) throws
     @MainActor
+    func saveChatRoom(_ room: ChatRoom) throws
+    @MainActor
     func findChatRoom(opponentID: String) -> ChatRoom?
     @MainActor
     func updateChatRoom(
@@ -27,11 +29,17 @@ protocol ChatDataSource {
     ) throws
     @MainActor
     func updateChatRoom(from apns: APNsPayload) throws
+    @MainActor
+    func updateUnReadCount(roomID: String, unReadCount: Int) throws
 
     
     // 메시지 관련
     @MainActor
-    func fetchChatMessages(roomID: String) -> [ChatMessage]
+    func fetchChatMessages(
+        roomID: String,
+        before lastMessageAt: Date,
+        limit: Int
+    ) -> [ChatMessage]
     @MainActor
     func saveChatMessages(_ messages: [ChatMessage]) throws
 }
@@ -55,6 +63,14 @@ struct ChatDataSourceImpl: ChatDataSource {
         try realm.write {
             let realmRooms = rooms.map { RealmChatRoom(from: $0) }
             realm.add(realmRooms, update: .modified)
+        }
+    }
+    
+    func saveChatRoom(_ room: ChatRoom) throws {
+        let realm = RealmStorage.shared.realm
+        try realm.write {
+            let realmRoom = RealmChatRoom(from: room)
+            realm.add(realmRoom, update: .modified)
         }
     }
     
@@ -96,15 +112,33 @@ struct ChatDataSourceImpl: ChatDataSource {
             room?.lastMessage = apns.aps.alert.body ?? "-"
             room?.isLastMessageFile = false
             room?.localUpdatedAt = Date()
+            room?.unReadCount += 1
+        }
+    }
+    
+    func updateUnReadCount(roomID: String, unReadCount: Int) throws {
+        let realm = RealmStorage.shared.realm
+        try realm.write {
+            let room = realm.object(
+                ofType: RealmChatRoom.self,
+                forPrimaryKey: roomID
+            )
+            
+            room?.unReadCount = unReadCount
         }
     }
     
     // MARK: - 메시지 관련
-    func fetchChatMessages(roomID: String) -> [ChatMessage] {
+    func fetchChatMessages(
+        roomID: String,
+        before lastMessageAt: Date,
+        limit: Int
+    ) -> [ChatMessage] {
         let realm = RealmStorage.shared.realm
         let realmMessages = realm.objects(RealmChatMessage.self)
-            .where { $0.roomID == roomID }
+            .where { $0.roomID == roomID && $0.createdAt < lastMessageAt }
             .sorted(by: \.createdAt, ascending: true)
+            .suffix(limit)
         return Array(realmMessages).map { $0.toDomain() }
     }
     

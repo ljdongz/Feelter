@@ -30,11 +30,15 @@ final class ChatViewController: RxBaseViewController {
         return view
     }()
     
-    private let dateSeparatorGenerator = DateSeparatorGenerator()
+    private let messageCellGenerator = ChatMessageCellGenerator()
     private let viewModel: ChatViewModel
     
     private var messageInputFieldBottomConstraint: Constraint?
     private var dataSource: DataSourceType!
+    
+    private var didInitDataSource = false
+    private var isLoadingMoreMessages = false
+    private var isFullLoadMessage = false
     
     init(viewModel: ChatViewModel) {
         self.viewModel = viewModel
@@ -94,6 +98,25 @@ final class ChatViewController: RxBaseViewController {
                 .do(onNext: { [weak self] _ in
                     self?.messageInputField.message = ""
                 })
+                .asObservable(),
+            loadMoreMessages: tableView.rx.contentOffset
+                .filter { [weak self] _ in
+                    guard let self else { return false }
+                    return self.didInitDataSource && !self.isLoadingMoreMessages && !self.isFullLoadMessage
+                }
+                .map { [weak self] offset in
+                    guard let self else { return false }
+                    let offsetY = offset.y
+                    let contentHeight = self.tableView.contentSize.height
+                    let frameHeight = self.tableView.frame.height
+                    return offsetY <= 50 && contentHeight > frameHeight
+                }
+                .distinctUntilChanged()
+                .filter { $0 }
+                .do(onNext: { [weak self] _ in
+                    self?.isLoadingMoreMessages = true
+                })
+                .map { _ in () }
                 .asObservable()
         )
         
@@ -103,12 +126,17 @@ final class ChatViewController: RxBaseViewController {
             .observe(on: MainScheduler.instance)
             .subscribe(with: self) { owner, updateType in
                 switch updateType {
-                case .fullReload(let messages):
-                    owner.initializeDataSource(messages)
-                case .prepend(let messages):
-                    owner.prependDataSource(messages)
-                case .append(let messages):
-                    owner.appendDataSource(messages)
+                case .initMessages(let messages):
+                    owner.initializeDataSourceItems(messages)
+                    
+                case .prependPastMessages(let messages):
+                    owner.prependDataSourceItems(messages)
+                    
+                case .appendUnReadMessages(let messages):
+                    owner.appendDataSourceItems(messages)
+                    
+                case .appendNewMessage(let message):
+                    owner.appendDataSourceItem(message)
                 }
             }
             .disposed(by: disposeBag)
@@ -126,6 +154,12 @@ final class ChatViewController: RxBaseViewController {
             .subscribe(with: self, onNext: { owner, notification in
                 owner.handleKeyboardWillHide(notification: notification)
             })
+            .disposed(by: disposeBag)
+        
+        tableView.rx.tap
+            .subscribe(with: self) { owner, _ in
+                owner.view.endEditing(true)
+            }
             .disposed(by: disposeBag)
     }
 }
@@ -156,8 +190,8 @@ extension ChatViewController {
         )
         
         tableView.register(
-            DateSeparatorTableViewCell.self,
-            forCellReuseIdentifier: DateSeparatorTableViewCell.identifier
+            MessageSeparatorTableViewCell.self,
+            forCellReuseIdentifier: MessageSeparatorTableViewCell.identifier
         )
     }
     
@@ -170,13 +204,13 @@ extension ChatViewController {
                 switch item {
                 
                 // 날짜 구분선
-                case .dateSeparator(let date):
+                case .separator(let separator):
                     guard let cell = tableView.dequeueReusableCell(
-                        withIdentifier: DateSeparatorTableViewCell.identifier,
+                        withIdentifier: MessageSeparatorTableViewCell.identifier,
                         for: indexPath
-                    ) as? DateSeparatorTableViewCell else { return .init() }
+                    ) as? MessageSeparatorTableViewCell else { return .init() }
                     
-                    cell.configureCell(date)
+                    cell.configureCell(separator.text)
                     return cell
                     
                 // 메시지
@@ -210,13 +244,14 @@ extension ChatViewController {
 
 // MARK: - Update DataSource
 extension ChatViewController {
-    private func initializeDataSource(_ messages: [ChatMessage]) {
-        let cellTypes = dateSeparatorGenerator.generateCellTypes(
+    private func initializeDataSourceItems(_ messages: [ChatMessage]) {
+        let cellTypes = messageCellGenerator.generateCellTypes(
             from: messages,
-            currentUserID: viewModel.userID
+            currentUserID: viewModel.userID,
+            insertPosition: .standard
         )
         
-        var snapShot = dataSource.snapshot()
+        var snapShot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
         snapShot.appendSections([0])
         
         snapShot.appendItems(cellTypes)
@@ -228,35 +263,93 @@ extension ChatViewController {
             at: .bottom,
             animated: false
         )
-    }
-    
-    private func prependDataSource(_ messages: [ChatMessage]) {
         
+        didInitDataSource = true
     }
     
-    private func appendDataSource(_ messages: [ChatMessage]) {
-        var cellTypes = dateSeparatorGenerator.generateCellTypes(
+    private func prependDataSourceItems(_ messages: [ChatMessage]) {
+        if messages.isEmpty {
+            isFullLoadMessage = true
+            return
+        }
+        
+        let cellTypes = messageCellGenerator.generateCellTypes(
             from: messages,
-            currentUserID: viewModel.userID
+            currentUserID: viewModel.userID,
+            insertPosition: .prepend
         )
         
-        var snapShot = dataSource.snapshot()
+        let originItemCount = dataSource.snapshot().itemIdentifiers.count
+        // 현재 첫 번째 가시 셀의 IndexPath 저장
+        let firstVisibleIndexPath = tableView.indexPathsForVisibleRows?.first
         
-        // 현재 DataSource에 반영된 마지막 채팅 데이터 날짜와 비교해서 구분선 중복 제거
-        // TODO: 마지막 채팅 메시지와 비교해서 프로필, 날짜 표시 여부 수정
-        if let items = snapShot.itemIdentifiers as? [MessageCellType],
-           let lastItem = items.last,
-           case let MessageCellType.message(prevMessage) = lastItem {
+        // 새로운 스냅샷 생성
+        var newSnapshot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
+        newSnapshot.appendSections([0])
+        newSnapshot.appendItems(cellTypes)
+        
+        // 스냅샷 적용
+        dataSource.apply(newSnapshot, animatingDifferences: false)
+        
+        // 레이아웃 강제 업데이트
+        tableView.layoutIfNeeded()
+        
+        // 스크롤 위치 복원
+        if let firstVisibleIndexPath = firstVisibleIndexPath {
+            let newIndexPath = IndexPath(
+                row: (cellTypes.count - originItemCount) + firstVisibleIndexPath.row,
+                section: firstVisibleIndexPath.section
+            )
             
-            let prevTimeStamp = prevMessage.timestamp.formatted(.fullDateWithWeekday)
-            let currentTimeStamp = messages.first?.createdAt.formatted(.fullDateWithWeekday)
-            if prevTimeStamp == currentTimeStamp {
-                cellTypes.removeFirst()
-            }
+            // 복원된 위치로 스크롤 (애니메이션 없이)
+            tableView.scrollToRow(at: newIndexPath, at: .top, animated: false)
         }
+        
+        // 로딩 상태 해제
+        isLoadingMoreMessages = false
+    }
+    
+    private func appendDataSourceItems(_ messages: [ChatMessage]) {
+        if messages.isEmpty { return }
+        
+        let cellTypes = messageCellGenerator.generateCellTypes(
+            from: messages,
+            currentUserID: viewModel.userID,
+            insertPosition: .append
+        )
+        
+        var newSnapshot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
+        newSnapshot.appendSections([0])
             
-        snapShot.appendItems(cellTypes)
-        dataSource.apply(snapShot, animatingDifferences: false)
+        newSnapshot.appendItems(cellTypes)
+        dataSource.apply(newSnapshot, animatingDifferences: false)
+    }
+    
+    private func appendDataSourceItem(_ message: ChatMessage) {
+        let cellTypes = messageCellGenerator.generateCellTypes(
+            from: [message],
+            currentUserID: viewModel.userID,
+            insertPosition: .append
+        )
+        
+        let originItemCount = dataSource.snapshot().itemIdentifiers.count
+        let lastVisibleCell = tableView.indexPathsForVisibleRows?.last
+        
+        var newSnapshot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
+        newSnapshot.appendSections([0])
+            
+        newSnapshot.appendItems(cellTypes)
+        dataSource.apply(newSnapshot, animatingDifferences: false)
+        
+        // 내가 보낸 메시지이거나, 스크롤 위치가 마지막 메시지인 경우, 새 메시지 수신 시 맨 하단으로 스크롤
+        if message.sender.userID == viewModel.userID ||
+            lastVisibleCell?.row == originItemCount - 1 {
+            tableView.scrollToRow(
+                at: .init(row: cellTypes.count - 1, section: 0),
+                at: .bottom,
+                animated: false
+            )
+        }
     }
 }
 

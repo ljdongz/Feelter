@@ -12,11 +12,13 @@ import RxSwift
 
 enum UpdateType {
     /// 초기 로드, 재연결
-    case fullReload([ChatMessage])
+    case initMessages([ChatMessage])
     /// 이전 메시지
-    case prepend([ChatMessage])
+    case prependPastMessages([ChatMessage])
+    /// 읽지 않은 새 메시지
+    case appendUnReadMessages([ChatMessage])
     /// 새 메시지
-    case append([ChatMessage])
+    case appendNewMessage(ChatMessage)
 }
 
 final class ChatViewModel: ViewModel {
@@ -24,6 +26,7 @@ final class ChatViewModel: ViewModel {
         let viewDidLoad: Observable<Void>
         let viewWillDisappear: Observable<Void>
         let sendMessageButtonTapped: Observable<String>
+        let loadMoreMessages: Observable<Void>
     }
     
     struct Output {
@@ -36,6 +39,7 @@ final class ChatViewModel: ViewModel {
     private let roomID: String
     private let updatedAt: Date
     private let calendar = Calendar.current
+    private var lastMessageAt = Date()
     
     var userID: String? {
         tokenManager.userID
@@ -62,11 +66,16 @@ final class ChatViewModel: ViewModel {
                 }
             })
             .withAsync(with: self) { owner, _ in
-
-                await owner.chatRepository.fetchLocalMessages(from: owner.roomID)
+                // TODO: 읽지 않은 개수 0으로 변경
+                await owner.chatRepository.fetchLocalMessages(
+                    from: owner.roomID,
+                    before: owner.lastMessageAt
+                )
             }
             .subscribe(with: self) { owner, messages in
-                output.messages.accept(.fullReload(messages))
+                owner.lastMessageAt = messages.first?.createdAt ?? .distantPast
+                
+                output.messages.accept(.initMessages(messages))
                 
                 serverFetchTrigger.accept(())
             }
@@ -90,7 +99,27 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let message):
+                    // TODO: 로컬에 메시지 저장 (전송중)
                     print("보내기 성공")
+                case .failure(let error):
+                    print(error)
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        input.loadMoreMessages
+            .withAsyncResult(with: self) { owner, _ in
+                await owner.chatRepository.fetchLocalMessages(
+                    from: owner.roomID,
+                    before: owner.lastMessageAt
+                )
+            }
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success(let messages):
+                    owner.lastMessageAt = messages.first?.createdAt ?? .distantPast
+                    
+                    output.messages.accept(.prependPastMessages(messages))
                 case .failure(let error):
                     print(error)
                 }
@@ -104,7 +133,7 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let message):
-                    output.messages.accept(.append([message]))
+                    output.messages.accept(.appendNewMessage(message))
                     
                     NotificationCenter.default.post(
                         name: .ReceiveSocketMessage,
@@ -124,7 +153,12 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let messages):
-                    output.messages.accept(.append(messages))
+                    output.messages.accept(.appendUnReadMessages(messages))
+                    
+                    NotificationCenter.default.post(
+                        name: .ReceiveSocketMessage,
+                        object: nil
+                    )
                 case .failure(let error):
                     print(error)
                 }

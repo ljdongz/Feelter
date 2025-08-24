@@ -32,6 +32,7 @@ struct ChatRoomResponseDTO: Decodable {
             participants: participants.map { $0.toDomain() },
             lastMessage: lastChat?.content,
             isLastMessageFile: isLastMessageFile,
+            unReadCount: 0,
             createdAt: UTCDateFormatter.shared.date(from: createdAt) ?? Date(),
             updatedAt: UTCDateFormatter.shared.date(from: updatedAt) ?? Date(),
             localUpdatedAt: UTCDateFormatter.shared.date(from: lastChat?.createdAt ?? "") ?? Date()

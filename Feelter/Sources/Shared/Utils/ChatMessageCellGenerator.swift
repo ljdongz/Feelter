@@ -9,7 +9,7 @@ import Foundation
 
 enum MessageCellType: Hashable {
     case message(MessageItem)
-    case dateSeparator(Date)
+    case separator(MessageSeparatorItem)
 }
 
 struct MessageItem: Hashable {
@@ -28,18 +28,56 @@ struct MessageItem: Hashable {
     }
 }
 
-struct DateSeparatorGenerator {
+struct MessageSeparatorItem: Hashable {
+    let id = UUID()
+    let text: String
+}
+
+final class ChatMessageCellGenerator {
+    
+    enum InsertPosition {
+        case standard
+        case prepend
+        case append
+        case newMessages
+    }
     
     private let calendar = Calendar.current
+    private var chatMessages: [ChatMessage] = []
     
     func generateCellTypes(
+        from messages: [ChatMessage],
+        currentUserID: String?,
+        insertPosition: InsertPosition
+    ) -> [MessageCellType] {
+        
+        switch insertPosition {
+        case .standard:
+            self.chatMessages = messages
+        case .prepend:
+            self.chatMessages = messages + self.chatMessages
+        case .append:
+            self.chatMessages = self.chatMessages + messages
+        case .newMessages:
+            self.chatMessages = self.chatMessages + messages
+        }
+        
+        let cells = generateCellTypes(from: chatMessages, currentUserID: currentUserID)
+        
+        return cells
+    }
+}
+
+extension ChatMessageCellGenerator {
+    
+    private func generateCellTypes(
         from messages: [ChatMessage],
         currentUserID: String?
     ) -> [MessageCellType] {
         var cellTypes: [MessageCellType] = []
         var lastDate: Date?
         
-        for (index, message) in messages.enumerated() {
+        messages.enumerated().forEach { index, message in
             let messageDate = message.createdAt
             
             let isDateSeparator = shouldAddDateSeparator(
@@ -49,7 +87,9 @@ struct DateSeparatorGenerator {
             
             // 새로운 날짜인 경우 구분선 추가
             if isDateSeparator {
-                cellTypes.append(.dateSeparator(messageDate))
+                cellTypes.append(.separator(.init(
+                    text: messageDate.formatted(.fullDateWithWeekday)
+                )))
                 lastDate = messageDate
             }
             

@@ -14,6 +14,8 @@ struct ChatRoom: Hashable {
     let lastMessage: String?
     let isLastMessageFile: Bool
     
+    var unReadCount: Int
+    
     let createdAt: Date
     /// 서버 기준으로 채팅방이 업데이트 된 날짜 (새 메시지를 수신한 날짜)
     let updatedAt: Date
