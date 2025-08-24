@@ -88,7 +88,7 @@ final class ChatRepositoryImpl: ChatRepository {
     
     func updateRoom(apnsPayload: APNsPayload) async throws {
         if socketProvider.isConnected(roomID: apnsPayload.roomID) { return }
-        // TODO: 읽지 않은 개수 + 1
+
         try await chatDataSource.updateChatRoom(from: apnsPayload)
     }
     
@@ -135,7 +135,9 @@ final class ChatRepositoryImpl: ChatRepository {
         from roomID: String,
         before lastMessageAt: Date
     ) async -> [ChatMessage] {
-        await chatDataSource.fetchChatMessages(
+        try? await chatDataSource.updateUnReadCount(roomID: roomID, unReadCount: 0)
+        
+        return await chatDataSource.fetchChatMessages(
             roomID: roomID,
             before: lastMessageAt,
             limit: 30
@@ -206,10 +208,6 @@ extension ChatRepositoryImpl {
                     )
                 }
             }
-            
-//            group.addTask { [weak self] in
-//                
-//            }
         }
     }
     

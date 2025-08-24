@@ -29,6 +29,8 @@ protocol ChatDataSource {
     ) throws
     @MainActor
     func updateChatRoom(from apns: APNsPayload) throws
+    @MainActor
+    func updateUnReadCount(roomID: String, unReadCount: Int) throws
 
     
     // 메시지 관련
@@ -110,6 +112,19 @@ struct ChatDataSourceImpl: ChatDataSource {
             room?.lastMessage = apns.aps.alert.body ?? "-"
             room?.isLastMessageFile = false
             room?.localUpdatedAt = Date()
+            room?.unReadCount += 1
+        }
+    }
+    
+    func updateUnReadCount(roomID: String, unReadCount: Int) throws {
+        let realm = RealmStorage.shared.realm
+        try realm.write {
+            let room = realm.object(
+                ofType: RealmChatRoom.self,
+                forPrimaryKey: roomID
+            )
+            
+            room?.unReadCount = unReadCount
         }
     }
     
