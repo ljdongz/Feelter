@@ -57,19 +57,23 @@ final class ChatRepositoryImpl: ChatRepository {
     
     func fetchRooms() async throws -> [ChatRoom] {
         // 1. 서버에서 최신 채팅방 목록 가져오기
-        let response = try await networkProvider.request(
+        async let serverResponse = networkProvider.request(
             endpoint: ChatAPI.fetchRooms,
             type: ChatRoomListResponseDTO.self
         )
+            
+        // 2. 로컬에서 채팅방 데이터 가져오기
+        async let localResponse = chatDataSource.fetchChatRooms()
         
-        // 2. 대화 내역이 있는 데이터만 Domain 모델로 변환
-        let serverRooms = response.rooms
-            .filter { $0.lastChat != nil }
-            .map { $0.toDomain() }
-        
-        // 3. 서버 데이터와 비교하기 위한 로컬 채팅방 딕셔너리 생성
-        let localRoomsDict = Dictionary(
-            uniqueKeysWithValues: chatRooms.map { ($0.roomID, $0) }
+        // 3. 대화 내역이 있는 데이터만 Domain 모델로 변환 / 서버 데이터와 비교하기 위한 로컬 채팅방 딕셔너리 생성
+        let (serverRooms, localRoomsDict) = try await (
+            serverResponse
+                .rooms
+                .filter { $0.lastChat != nil }
+                .map { $0.toDomain() },
+            Dictionary(
+                uniqueKeysWithValues: localResponse.map { ($0.roomID, $0) }
+            )
         )
         
         // 4. 서버 데이터와 비교해서 채팅방 및 메시지 동기화

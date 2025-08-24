@@ -102,7 +102,7 @@ final class ChatViewController: RxBaseViewController {
             loadMoreMessages: tableView.rx.contentOffset
                 .filter { [weak self] _ in
                     guard let self else { return false }
-                    return self.didInitDataSource && !self.isLoadingMoreMessages && !isFullLoadMessage
+                    return self.didInitDataSource && !self.isLoadingMoreMessages && !self.isFullLoadMessage
                 }
                 .map { [weak self] offset in
                     guard let self else { return false }
