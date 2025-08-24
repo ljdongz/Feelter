@@ -126,7 +126,7 @@ final class ChatRepositoryImpl: ChatRepository {
                 roomID: roomID,
                 updatedAt: lastChat.updatedAt,
                 lastMessage: lastChat.content,
-                isLastMessageFile: lastChat.fileURLs.isEmpty
+                isLastMessageFile: !lastChat.fileURLs.isEmpty
             )
             
             chatRooms = await chatDataSource.fetchChatRooms()
