@@ -140,7 +140,7 @@ extension ChatRoomViewController {
                     name: opponent.nickname,
                     message: message,
                     date: room.localUpdatedAt,
-                    unreadCount: 0
+                    unreadCount: room.unReadCount
                 ))
                 return cell
             }

@@ -66,7 +66,7 @@ final class ChatViewModel: ViewModel {
                 }
             })
             .withAsync(with: self) { owner, _ in
-
+                // TODO: 읽지 않은 개수 0으로 변경
                 await owner.chatRepository.fetchLocalMessages(
                     from: owner.roomID,
                     before: owner.lastMessageAt

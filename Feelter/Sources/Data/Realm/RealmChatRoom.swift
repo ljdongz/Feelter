@@ -52,6 +52,7 @@ final class RealmChatRoom: Object {
         
         self.lastMessage = chatRoom.lastMessage
         self.isLastMessageFile = chatRoom.isLastMessageFile
+        self.unReadCount = chatRoom.unReadCount
         self.createdAt = chatRoom.createdAt
         self.updatedAt = chatRoom.updatedAt
         self.localUpdatedAt = chatRoom.localUpdatedAt
@@ -63,6 +64,7 @@ final class RealmChatRoom: Object {
             participants: Array(participants).map { $0.toDomain() },
             lastMessage: lastMessage,
             isLastMessageFile: isLastMessageFile,
+            unReadCount: unReadCount,
             createdAt: createdAt,
             updatedAt: updatedAt,
             localUpdatedAt: localUpdatedAt
