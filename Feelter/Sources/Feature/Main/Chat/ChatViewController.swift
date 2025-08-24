@@ -190,8 +190,8 @@ extension ChatViewController {
         )
         
         tableView.register(
-            DateSeparatorTableViewCell.self,
-            forCellReuseIdentifier: DateSeparatorTableViewCell.identifier
+            MessageSeparatorTableViewCell.self,
+            forCellReuseIdentifier: MessageSeparatorTableViewCell.identifier
         )
     }
     
@@ -204,13 +204,13 @@ extension ChatViewController {
                 switch item {
                 
                 // 날짜 구분선
-                case .dateSeparator(let date):
+                case .separator(let separator):
                     guard let cell = tableView.dequeueReusableCell(
-                        withIdentifier: DateSeparatorTableViewCell.identifier,
+                        withIdentifier: MessageSeparatorTableViewCell.identifier,
                         for: indexPath
-                    ) as? DateSeparatorTableViewCell else { return .init() }
+                    ) as? MessageSeparatorTableViewCell else { return .init() }
                     
-                    cell.configureCell(date.date)
+                    cell.configureCell(separator.text)
                     return cell
                     
                 // 메시지

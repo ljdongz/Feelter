@@ -9,9 +9,9 @@ import UIKit
 
 import SnapKit
 
-final class DateSeparatorTableViewCell: BaseTableViewCell {
+final class MessageSeparatorTableViewCell: BaseTableViewCell {
     
-    static let identifier = "DateSeparatorTableViewCell"
+    static let identifier = "MessageSeparatorTableViewCell"
 
     private let containerView: UIView = {
         let view = UIView()
@@ -20,7 +20,7 @@ final class DateSeparatorTableViewCell: BaseTableViewCell {
         return view
     }()
 
-    private let dateLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let view = UILabel()
         view.textColor = .gray45
         view.font = .pretendard(size: 11, weight: .medium)
@@ -33,7 +33,7 @@ final class DateSeparatorTableViewCell: BaseTableViewCell {
 
     override func setupSubviews() {
         contentView.addSubview(containerView)
-        containerView.addSubview(dateLabel)
+        containerView.addSubview(titleLabel)
     }
     
     override func setupConstraints() {
@@ -43,13 +43,13 @@ final class DateSeparatorTableViewCell: BaseTableViewCell {
             make.centerX.equalToSuperview()
         }
         
-        dateLabel.snp.makeConstraints { make in
+        titleLabel.snp.makeConstraints { make in
             make.horizontalEdges.equalToSuperview().inset(20)
             make.verticalEdges.equalToSuperview().inset(6)
         }
     }
     
-    func configureCell(_ date: Date) {
-        dateLabel.text = date.formatted(.fullDateWithWeekday)
+    func configureCell(_ text: String) {
+        titleLabel.text = text
     }
 }

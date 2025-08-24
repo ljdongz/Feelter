@@ -213,6 +213,7 @@ extension ChatRepositoryImpl {
             // -> 현재는 로컬에 저장되지 않은 채팅방인 경우, 해당 채팅방에 존재하는 모든 메시지를 가져옴
             //
             // 로컬 채팅방 업데이트된 날짜 기준으로 after 파라미터 설정
+            // TODO: 로컬에 저장된 데이터가 없는 경우, 로그인 한 시간 이후 데이터 가져와보기
             let lastMessageTime = localRoom?.updatedAt
             let afterParameter = lastMessageTime.map {
                 UTCDateFormatter.shared.string(from: $0)
