@@ -99,6 +99,7 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let message):
+                    // TODO: 로컬에 메시지 저장 (전송중)
                     print("보내기 성공")
                 case .failure(let error):
                     print(error)
@@ -153,6 +154,11 @@ final class ChatViewModel: ViewModel {
                 switch result {
                 case .success(let messages):
                     output.messages.accept(.appendUnReadMessages(messages))
+                    
+                    NotificationCenter.default.post(
+                        name: .ReceiveSocketMessage,
+                        object: nil
+                    )
                 case .failure(let error):
                     print(error)
                 }

@@ -332,11 +332,24 @@ extension ChatViewController {
             insertPosition: .append
         )
         
+        let originItemCount = dataSource.snapshot().itemIdentifiers.count
+        let lastVisibleCell = tableView.indexPathsForVisibleRows?.last
+        
         var newSnapshot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
         newSnapshot.appendSections([0])
             
         newSnapshot.appendItems(cellTypes)
         dataSource.apply(newSnapshot, animatingDifferences: false)
+        
+        // 내가 보낸 메시지이거나, 스크롤 위치가 마지막 메시지인 경우, 새 메시지 수신 시 맨 하단으로 스크롤
+        if message.sender.userID == viewModel.userID ||
+            lastVisibleCell?.row == originItemCount - 1 {
+            tableView.scrollToRow(
+                at: .init(row: cellTypes.count - 1, section: 0),
+                at: .bottom,
+                animated: false
+            )
+        }
     }
 }
 
