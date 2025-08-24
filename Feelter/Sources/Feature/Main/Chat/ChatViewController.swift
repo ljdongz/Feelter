@@ -30,7 +30,7 @@ final class ChatViewController: RxBaseViewController {
         return view
     }()
     
-    private let dateSeparatorGenerator = DateSeparatorGenerator()
+    private let messageCellGenerator = ChatMessageCellGenerator()
     private let viewModel: ChatViewModel
     
     private var messageInputFieldBottomConstraint: Constraint?
@@ -126,12 +126,17 @@ final class ChatViewController: RxBaseViewController {
             .observe(on: MainScheduler.instance)
             .subscribe(with: self) { owner, updateType in
                 switch updateType {
-                case .fullReload(let messages):
-                    owner.initializeDataSource(messages)
-                case .prepend(let messages):
-                    owner.prependDataSource(messages)
-                case .append(let messages):
-                    owner.appendDataSource(messages)
+                case .initMessages(let messages):
+                    owner.initializeDataSourceItems(messages)
+                    
+                case .prependPastMessages(let messages):
+                    owner.prependDataSourceItems(messages)
+                    
+                case .appendUnReadMessages(let messages):
+                    owner.appendDataSourceItems(messages)
+                    
+                case .appendNewMessage(let message):
+                    owner.appendDataSourceItem(message)
                 }
             }
             .disposed(by: disposeBag)
@@ -239,13 +244,14 @@ extension ChatViewController {
 
 // MARK: - Update DataSource
 extension ChatViewController {
-    private func initializeDataSource(_ messages: [ChatMessage]) {
-        let cellTypes = dateSeparatorGenerator.generateCellTypes(
+    private func initializeDataSourceItems(_ messages: [ChatMessage]) {
+        let cellTypes = messageCellGenerator.generateCellTypes(
             from: messages,
-            currentUserID: viewModel.userID
+            currentUserID: viewModel.userID,
+            insertPosition: .standard
         )
         
-        var snapShot = dataSource.snapshot()
+        var snapShot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
         snapShot.appendSections([0])
         
         snapShot.appendItems(cellTypes)
@@ -261,30 +267,26 @@ extension ChatViewController {
         didInitDataSource = true
     }
     
-    private func prependDataSource(_ messages: [ChatMessage]) {
+    private func prependDataSourceItems(_ messages: [ChatMessage]) {
         if messages.isEmpty {
             isFullLoadMessage = true
             return
         }
         
-        let cellTypes = dateSeparatorGenerator.generateCellTypes(
+        let cellTypes = messageCellGenerator.generateCellTypes(
             from: messages,
-            currentUserID: viewModel.userID
+            currentUserID: viewModel.userID,
+            insertPosition: .prepend
         )
         
+        let originItemCount = dataSource.snapshot().itemIdentifiers.count
         // 현재 첫 번째 가시 셀의 IndexPath 저장
         let firstVisibleIndexPath = tableView.indexPathsForVisibleRows?.first
-        
-        // 기존 아이템들 가져오기
-        let currentItems = dataSource.snapshot().itemIdentifiers
         
         // 새로운 스냅샷 생성
         var newSnapshot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
         newSnapshot.appendSections([0])
-        
-        // 새 메시지 + 기존 메시지 순서로 추가
-        let newItems = cellTypes.map { $0 as AnyHashable }
-        newSnapshot.appendItems(newItems + currentItems)
+        newSnapshot.appendItems(cellTypes)
         
         // 스냅샷 적용
         dataSource.apply(newSnapshot, animatingDifferences: false)
@@ -295,7 +297,7 @@ extension ChatViewController {
         // 스크롤 위치 복원
         if let firstVisibleIndexPath = firstVisibleIndexPath {
             let newIndexPath = IndexPath(
-                row: firstVisibleIndexPath.row + cellTypes.count,
+                row: (cellTypes.count - originItemCount) + firstVisibleIndexPath.row,
                 section: firstVisibleIndexPath.section
             )
             
@@ -307,29 +309,34 @@ extension ChatViewController {
         isLoadingMoreMessages = false
     }
     
-    private func appendDataSource(_ messages: [ChatMessage]) {
-        var cellTypes = dateSeparatorGenerator.generateCellTypes(
+    private func appendDataSourceItems(_ messages: [ChatMessage]) {
+        if messages.isEmpty { return }
+        
+        let cellTypes = messageCellGenerator.generateCellTypes(
             from: messages,
-            currentUserID: viewModel.userID
+            currentUserID: viewModel.userID,
+            insertPosition: .append
         )
         
-        var snapShot = dataSource.snapshot()
+        var newSnapshot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
+        newSnapshot.appendSections([0])
+            
+        newSnapshot.appendItems(cellTypes)
+        dataSource.apply(newSnapshot, animatingDifferences: false)
+    }
+    
+    private func appendDataSourceItem(_ message: ChatMessage) {
+        let cellTypes = messageCellGenerator.generateCellTypes(
+            from: [message],
+            currentUserID: viewModel.userID,
+            insertPosition: .append
+        )
         
-        // 현재 DataSource에 반영된 마지막 채팅 데이터 날짜와 비교해서 구분선 중복 제거
-        // TODO: 마지막 채팅 메시지와 비교해서 프로필, 날짜 표시 여부 수정
-        if let items = snapShot.itemIdentifiers as? [MessageCellType],
-           let lastItem = items.last,
-           case let MessageCellType.message(prevMessage) = lastItem {
+        var newSnapshot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
+        newSnapshot.appendSections([0])
             
-            let prevTimeStamp = prevMessage.timestamp.formatted(.fullDateWithWeekday)
-            let currentTimeStamp = messages.first?.createdAt.formatted(.fullDateWithWeekday)
-            if prevTimeStamp == currentTimeStamp {
-                cellTypes.removeFirst()
-            }
-        }
-            
-        snapShot.appendItems(cellTypes)
-        dataSource.apply(snapShot, animatingDifferences: false)
+        newSnapshot.appendItems(cellTypes)
+        dataSource.apply(newSnapshot, animatingDifferences: false)
     }
 }
 

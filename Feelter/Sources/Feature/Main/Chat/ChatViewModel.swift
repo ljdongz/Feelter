@@ -12,11 +12,13 @@ import RxSwift
 
 enum UpdateType {
     /// 초기 로드, 재연결
-    case fullReload([ChatMessage])
+    case initMessages([ChatMessage])
     /// 이전 메시지
-    case prepend([ChatMessage])
+    case prependPastMessages([ChatMessage])
+    /// 읽지 않은 새 메시지
+    case appendUnReadMessages([ChatMessage])
     /// 새 메시지
-    case append([ChatMessage])
+    case appendNewMessage(ChatMessage)
 }
 
 final class ChatViewModel: ViewModel {
@@ -73,7 +75,7 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, messages in
                 owner.lastMessageAt = messages.first?.createdAt ?? .distantPast
                 
-                output.messages.accept(.fullReload(messages))
+                output.messages.accept(.initMessages(messages))
                 
                 serverFetchTrigger.accept(())
             }
@@ -116,7 +118,7 @@ final class ChatViewModel: ViewModel {
                 case .success(let messages):
                     owner.lastMessageAt = messages.first?.createdAt ?? .distantPast
                     
-                    output.messages.accept(.prepend(messages))
+                    output.messages.accept(.prependPastMessages(messages))
                 case .failure(let error):
                     print(error)
                 }
@@ -130,7 +132,7 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let message):
-                    output.messages.accept(.append([message]))
+                    output.messages.accept(.appendNewMessage(message))
                     
                     NotificationCenter.default.post(
                         name: .ReceiveSocketMessage,
@@ -150,7 +152,7 @@ final class ChatViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let messages):
-                    output.messages.accept(.append(messages))
+                    output.messages.accept(.appendUnReadMessages(messages))
                 case .failure(let error):
                     print(error)
                 }
