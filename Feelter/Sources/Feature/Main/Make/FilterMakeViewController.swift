@@ -20,6 +20,7 @@ final class FilterMakeViewController: RxBaseViewController {
         case category
         case uploadPhoto
         case introduction
+        case price
         case createButton
     }
     
@@ -53,11 +54,13 @@ final class FilterMakeViewController: RxBaseViewController {
     
     private let viewModel = FilterMakeViewModel()
     
-    private weak var createButton: BaseButtonCollectionViewCell?
+    private weak var activeTextField: UITextField?
     
     private let titleTextFieldRelay = BehaviorRelay<String>(value: "")
-    private let categorySelectionRelay = BehaviorRelay<FilterCategory>(value: .food)
     private let introductionTextFieldRelay = BehaviorRelay<String>(value: "")
+    private let priceTextFieldRelay = BehaviorRelay<String>(value: "")
+    
+    private var collectionViewBottomConstraint: Constraint?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -94,7 +97,8 @@ final class FilterMakeViewController: RxBaseViewController {
     override func setupConstraints() {
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-            make.horizontalEdges.bottom.equalToSuperview()
+            make.horizontalEdges.equalToSuperview()
+            collectionViewBottomConstraint = make.bottom.equalToSuperview().constraint
         }
     }
     
@@ -106,6 +110,8 @@ final class FilterMakeViewController: RxBaseViewController {
         collectionView.rx.itemSelected
             .subscribe(with: self) { owner, indexPath in
                 switch Section(rawValue: indexPath.section) {
+                case .category:
+                    owner.updateCategorySelection(index: indexPath.item)
                 case .uploadPhoto:
                     let imagePicker = UIImagePickerController()
                     imagePicker.delegate = owner
@@ -116,17 +122,6 @@ final class FilterMakeViewController: RxBaseViewController {
                 }
             }
             .disposed(by: disposeBag)
-        
-        Observable.combineLatest(
-            titleTextFieldRelay.distinctUntilChanged(),
-            introductionTextFieldRelay.distinctUntilChanged()
-        )
-        .map { !$0.isEmpty && !$1.isEmpty }
-        .subscribe(with: self) { owner, isActive in
-            owner.createButton?.isUserInteractionEnabled = isActive
-            owner.createButton?.updateActiveState(isActive)
-        }
-        .disposed(by: disposeBag)
         
         navigationLeftBarButton.rx.tap
             .subscribe(with: self) { owner, _ in
@@ -147,6 +142,20 @@ final class FilterMakeViewController: RxBaseViewController {
                 owner.present(alertVC, animated: true)
             }
             .disposed(by: disposeBag)
+        
+        NotificationCenter.default.rx
+            .notification(.KeyboardWillShow)
+            .subscribe(with: self, onNext: { owner, notification in
+                owner.handleKeyboardWillShow(notification: notification)
+            })
+            .disposed(by: disposeBag)
+        
+        NotificationCenter.default.rx
+            .notification(.KeyboardWillHide)
+            .subscribe(with: self, onNext: { owner, notification in
+                owner.handleKeyboardWillHide(notification: notification)
+            })
+            .disposed(by: disposeBag)
     }
 }
 
@@ -161,13 +170,25 @@ extension FilterMakeViewController {
             .category,
             .uploadPhoto,
             .introduction,
+            .price,
             .createButton
         ])
         
-        snapShot.appendItems([UUID().uuidString], toSection: .title)
+        snapShot.appendItems([BaseTextFieldCellItem(
+            placeholder: "필터 이름을 입력해주세요",
+            inputType: .text
+        )], toSection: .title)
         snapShot.appendItems(categories, toSection: .category)
         snapShot.appendItems([UploadPhotoItem(image: nil)], toSection: .uploadPhoto)
-        snapShot.appendItems([UUID().uuidString], toSection: .introduction)
+        snapShot.appendItems([BaseTextFieldCellItem(
+            placeholder: "이 필터에 대해 간단하게 소개해주세요",
+            inputType: .text
+        )], toSection: .introduction)
+        snapShot.appendItems([BaseTextFieldCellItem(
+            placeholder: "1000",
+            suffix: "원",
+            inputType: .number
+        )], toSection: .price)
         snapShot.appendItems([UUID().uuidString], toSection: .createButton)
         dataSource.apply(snapShot)
     }
@@ -180,8 +201,15 @@ extension FilterMakeViewController {
         dataSource.apply(snapShot, to: .uploadPhoto)
     }
     
-    @objc private func closeButtonTapped() {
+    private func updateCategorySelection(index: Int) {
+        for i in 0..<categories.count {
+            categories[i].isSelected = i == index
+        }
         
+        var snapShot = dataSource.snapshot(for: .category)
+        snapShot.deleteAll()
+        snapShot.append(categories)
+        dataSource.apply(snapShot, to: .category, animatingDifferences: false)
     }
 }
 
@@ -210,6 +238,8 @@ extension FilterMakeViewController {
             case .uploadPhoto:
                 return UploadPhotoCollectionViewCell.layoutSection()
             case .introduction:
+                return BaseTextFieldCollectionViewCell.layoutSection()
+            case .price:
                 return BaseTextFieldCollectionViewCell.layoutSection()
             case .createButton:
                 return BaseButtonCollectionViewCell.layoutSection()
@@ -263,7 +293,7 @@ extension FilterMakeViewController {
                 
                 switch Section(rawValue: indexPath.section) {
                 case .title:
-                    guard let _ = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? BaseTextFieldCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: BaseTextFieldCollectionViewCell.identifier,
                             for: indexPath
@@ -271,10 +301,15 @@ extension FilterMakeViewController {
                         return .init()
                     }
                     
-                    cell.configureCell(placeholder: "필터 이름을 입력해주세요.")
+                    cell.configureCell(item: item)
                     cell.textField.rx.text.orEmpty
                         .bind(to: self.titleTextFieldRelay)
                         .disposed(by: cell.disposeBag)
+                    cell.textFieldDidBeginEditingTrigger
+                        .subscribe(with: self) { owner, textField in
+                            owner.activeTextField = textField
+                        }
+                        .disposed(by: disposeBag)
                     
                     return cell
                     
@@ -303,7 +338,7 @@ extension FilterMakeViewController {
                     return cell
                     
                 case .introduction:
-                    guard let _ = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? BaseTextFieldCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: BaseTextFieldCollectionViewCell.identifier,
                             for: indexPath
@@ -311,10 +346,36 @@ extension FilterMakeViewController {
                         return .init()
                     }
                     
-                    cell.configureCell(placeholder: "이 필터에 대해 간단하게 소개해주세요.")
+                    cell.configureCell(item: item)
                     cell.textField.rx.text.orEmpty
                         .bind(to: introductionTextFieldRelay)
                         .disposed(by: cell.disposeBag)
+                    cell.textFieldDidBeginEditingTrigger
+                        .subscribe(with: self) { owner, textField in
+                            owner.activeTextField = textField
+                        }
+                        .disposed(by: disposeBag)
+                    
+                    return cell
+                    
+                case .price:
+                    guard let item = itemIdentifier as? BaseTextFieldCellItem,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: BaseTextFieldCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? BaseTextFieldCollectionViewCell else {
+                        return .init()
+                    }
+                    
+                    cell.configureCell(item: item)
+                    cell.textField.rx.text.orEmpty
+                        .bind(to: priceTextFieldRelay)
+                        .disposed(by: cell.disposeBag)
+                    cell.textFieldDidBeginEditingTrigger
+                        .subscribe(with: self) { owner, textField in
+                            owner.activeTextField = textField
+                        }
+                        .disposed(by: disposeBag)
                     
                     return cell
                     
@@ -327,7 +388,17 @@ extension FilterMakeViewController {
                         return .init()
                     }
                     
-                    self.createButton = cell
+                    Observable.combineLatest(
+                        titleTextFieldRelay.distinctUntilChanged(),
+                        introductionTextFieldRelay.distinctUntilChanged(),
+                        priceTextFieldRelay.distinctUntilChanged()
+                    )
+                    .map { !$0.isEmpty && !$1.isEmpty && !$2.isEmpty }
+                    .subscribe(with: self) { owner, isActive in
+                        cell.isUserInteractionEnabled = isActive
+                        cell.updateActiveState(isActive)
+                    }
+                    .disposed(by: disposeBag)
                     
                     cell.configureCell(title: "생성하기")
                     return cell
@@ -357,6 +428,8 @@ extension FilterMakeViewController {
                     headerView.configure(leading: "대표 사진 등록")
                 case .introduction:
                     headerView.configure(leading: "필터 소개")
+                case .price:
+                    headerView.configure(leading: "판매 가격")
                 default:
                     break
                 }
@@ -367,6 +440,51 @@ extension FilterMakeViewController {
             } else {
                 return nil
             }
+        }
+    }
+}
+
+// MARK: - Keyboard Configuration
+
+extension FilterMakeViewController {
+    private func handleKeyboardWillShow(notification: Notification) {
+        guard let activeTextField,
+              let keyboardFrame = notification.keyboardFrameEndUserInfoKey,
+              let animationDuration = notification.keyboardAnimationDurationUserInfoKey else {
+            return
+        }
+        
+        let keyboardHeight = keyboardFrame.cgRectValue.height
+        let safeAreaBottom = view.safeAreaInsets.bottom
+        let adjustedHeight = keyboardHeight + safeAreaBottom
+        
+        let textFieldFrame = activeTextField.convert(activeTextField.bounds, to: nil)
+        let textFieldBottomY = textFieldFrame.maxY
+        
+        let keyboardTopY = view.frame.height - keyboardHeight
+        
+        if textFieldBottomY > keyboardTopY {
+            var newContentOffset = collectionView.contentOffset
+            newContentOffset.y = max(0, newContentOffset.y + adjustedHeight)
+            collectionView.contentOffset = newContentOffset
+        }
+        
+        collectionViewBottomConstraint?.update(offset: -adjustedHeight)
+        
+        UIView.animate(withDuration: animationDuration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func handleKeyboardWillHide(notification: Notification) {
+        guard let animationDuration = notification.keyboardAnimationDurationUserInfoKey else {
+            return
+        }
+        
+        collectionViewBottomConstraint?.update(offset: 0)
+        
+        UIView.animate(withDuration: animationDuration) {
+            self.view.layoutIfNeeded()
         }
     }
 }
