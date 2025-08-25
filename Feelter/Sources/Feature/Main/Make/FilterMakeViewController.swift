@@ -34,6 +34,14 @@ final class FilterMakeViewController: RxBaseViewController {
         return view
     }()
     
+    private lazy var navigationLeftBarButton: UIButton = {
+        let view = UIButton()
+        view.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
+        view.setImage(.xmark, for: .normal)
+        view.tintColor = .gray15
+        return view
+    }()
+    
     private var dataSource: DataSourceType!
     private var categories = [
         CategorySectionItem(category: .food, isSelected: true),
@@ -50,6 +58,26 @@ final class FilterMakeViewController: RxBaseViewController {
     private let titleTextFieldRelay = BehaviorRelay<String>(value: "")
     private let categorySelectionRelay = BehaviorRelay<FilterCategory>(value: .food)
     private let introductionTextFieldRelay = BehaviorRelay<String>(value: "")
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        
+        navigationItem.leftBarButtonItem = .init(customView: navigationLeftBarButton)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        hideTabBar()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        showTabBar()
+    }
     
     override func setupView() {
         title = "Make"
@@ -99,6 +127,26 @@ final class FilterMakeViewController: RxBaseViewController {
             owner.createButton?.updateActiveState(isActive)
         }
         .disposed(by: disposeBag)
+        
+        navigationLeftBarButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let alertVC = UIAlertController(
+                    title: "필터 생성을 그만두시겠습니까?",
+                    message: "현재까지 작성된 내용이 사라집니다.",
+                    preferredStyle: .alert
+                )
+                let okAction = UIAlertAction(
+                    title: "나가기",
+                    style: .destructive
+                ) { _ in
+                    owner.navigationController?.popViewController(animated: true)
+                }
+                let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+                alertVC.addAction(okAction)
+                alertVC.addAction(cancelAction)
+                owner.present(alertVC, animated: true)
+            }
+            .disposed(by: disposeBag)
     }
 }
 
@@ -130,6 +178,10 @@ extension FilterMakeViewController {
         snapShot.append([UploadPhotoItem(image: image)])
         
         dataSource.apply(snapShot, to: .uploadPhoto)
+    }
+    
+    @objc private func closeButtonTapped() {
+        
     }
 }
 
