@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-enum FilterAttributeType: Hashable {
+enum FilterAttributeType: Hashable, CaseIterable {
     /// 밝기 (-1.0 ~ 1.0)
     case brightness
     /// 노출 (-1.0 ~ 1.0)
@@ -36,6 +36,24 @@ enum FilterAttributeType: Hashable {
 }
 
 extension FilterAttributeType {
+    
+    var title: String {
+        switch self {
+        case .brightness: "밝기"
+        case .exposure: "노출"
+        case .contrast: "대비"
+        case .saturation: "채도"
+        case .sharpness: "선명도"
+        case .blur: "블러"
+        case .vignette: "비네트"
+        case .noiseReduction: "노이즈 감소"
+        case .highlights: "하이라이트"
+        case .shadows: "그림자"
+        case .temperature: "온도"
+        case .blackPoint: "블랙 포인트"
+        }
+    }
+    
     var image: UIImage {
         switch self {
         case .brightness: .brightness
