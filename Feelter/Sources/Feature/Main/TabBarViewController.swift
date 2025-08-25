@@ -36,7 +36,7 @@ final class TabBarViewController: RxBaseViewController {
         
         let vc1 = UINavigationController(rootViewController: HomeViewController())
         let vc2 = UINavigationController(rootViewController: FilterFeedViewController())
-        let vc3 = UINavigationController(rootViewController: FilterMakeViewController())
+        let vc3 = UINavigationController(rootViewController: FilterMakeOnboardingViewController())
         let vc4 = UIViewController()
         let vc5 = UINavigationController(rootViewController: MyPageViewController())
         
