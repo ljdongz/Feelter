@@ -97,7 +97,14 @@ final class FilterEditViewController: RxBaseViewController {
         view.showsHorizontalScrollIndicator = false
         view.backgroundColor = .clear
         view.bounces = false
+        view.addGestureRecognizer(self.collectionViewPanGesture)
         return view
+    }()
+    
+    private lazy var collectionViewPanGesture: UIPanGestureRecognizer = {
+        let gesture = UIPanGestureRecognizer()
+        gesture.delegate = self
+        return gesture
     }()
     
     private let coreImageManager = CoreImageManager()
@@ -202,11 +209,24 @@ final class FilterEditViewController: RxBaseViewController {
         
         attributesCollectionView.rx.itemSelected
             .subscribe(with: self) { owner, indexPath in
-                owner.attributesCollectionView.scrollToItem(
-                    at: indexPath,
-                    at: .centeredHorizontally,
-                    animated: true
-                )
+                owner.selectItem(at: indexPath)
+            }
+            .disposed(by: disposeBag)
+        
+        collectionViewPanGesture.rx.event
+            .subscribe(with: self) { owner, gesture in
+                owner.handleScrollGesture(gesture.state)
+                
+                switch gesture.state {
+                case .began:
+                    owner.slider.isEnabled = false
+                case .ended, .cancelled, .failed:
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        owner.slider.isEnabled = true
+                    }
+                default:
+                    break
+                }
             }
             .disposed(by: disposeBag)
         
@@ -273,9 +293,7 @@ extension FilterEditViewController {
             let section = Section(rawValue: sectionIndex)!
             switch section {
             case .filterAttributes:
-                return FilterAttributeCollectionViewCell.layoutSection { [weak self] _, _, _ in
-                    self?.selectCenterItem()
-                }
+                return FilterAttributeCollectionViewCell.layoutSection()
             }
         }
         
@@ -337,7 +355,7 @@ extension FilterEditViewController {
         )
     }
     
-    private func selectCenterItem() {
+    private func handleScrollGesture(_ state: UIGestureRecognizer.State) {
         let centerPoint = CGPoint(
             x: attributesCollectionView.contentOffset.x + attributesCollectionView.bounds.width / 2,
             y: attributesCollectionView.bounds.height / 2
@@ -350,7 +368,13 @@ extension FilterEditViewController {
         // 이미 선택된 아이템과 같다면 리턴
         if selectedFilterAttribute == selectedItem { return }
         
-        updateFilterAttribute(selectedItem)
+        let coreImageFilter = selectedItem.filter
+        
+        slider.minimumValue = coreImageFilter.parameter.range.lowerBound
+        slider.maximumValue = coreImageFilter.parameter.range.upperBound
+        slider.value = coreImageFilter.parameter.defaultValue
+        
+        selectedFilterAttribute = selectedItem
         
         attributesCollectionView.selectItem(
             at: centerIndexPath,
@@ -359,14 +383,39 @@ extension FilterEditViewController {
         )
     }
     
-    private func updateFilterAttribute(_ filter: FilterAttributeType) {
-        let coreImageFilter = filter.filter
+    private func selectItem(at indexPath: IndexPath) {
+        let selectedItem = filterAttributes[indexPath.item]
+        
+        if selectedFilterAttribute == selectedItem { return }
+        
+        let coreImageFilter = selectedItem.filter
         
         slider.minimumValue = coreImageFilter.parameter.range.lowerBound
         slider.maximumValue = coreImageFilter.parameter.range.upperBound
         slider.value = coreImageFilter.parameter.defaultValue
         
-        selectedFilterAttribute = filter
+        selectedFilterAttribute = selectedItem
+        
+        slider.isEnabled = false
+        
+        attributesCollectionView.scrollToItem(
+            at: indexPath,
+            at: .centeredHorizontally,
+            animated: true
+        )
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            self?.slider.isEnabled = true
+        }
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension FilterEditViewController: UIGestureRecognizerDelegate {
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
     }
 }
 

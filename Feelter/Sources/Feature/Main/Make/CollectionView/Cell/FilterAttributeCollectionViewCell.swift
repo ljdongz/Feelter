@@ -65,13 +65,7 @@ final class FilterAttributeCollectionViewCell: BaseCollectionViewCell {
 
 extension FilterAttributeCollectionViewCell {
     
-    static func layoutSection(
-        visibleHandler: @escaping (
-            [any NSCollectionLayoutVisibleItem],
-            CGPoint,
-            any NSCollectionLayoutEnvironment
-        ) -> Void
-    ) -> NSCollectionLayoutSection {
+    static func layoutSection() -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(layoutSize: .init(
             widthDimension: .fractionalWidth(1),
             heightDimension: .fractionalHeight(1)
@@ -79,7 +73,7 @@ extension FilterAttributeCollectionViewCell {
         
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: .init(
-                widthDimension: .absolute(52),
+                widthDimension: .absolute(72),
                 heightDimension: .absolute(52)
             ),
             subitems: [item]
@@ -87,13 +81,12 @@ extension FilterAttributeCollectionViewCell {
         
         let section = NSCollectionLayoutSection(group: group)
         
-        let sideInset = (UIScreen.main.bounds.width - 52) / 2
+        let sideInset = (UIScreen.main.bounds.width - 72) / 2
         
         section.contentInsets = .init(top: 14, leading: sideInset, bottom: 14, trailing: sideInset)
         section.orthogonalScrollingBehavior = .groupPagingCentered
-        section.interGroupSpacing = 20
         
-        section.visibleItemsInvalidationHandler = visibleHandler
+        
         return section
     }
 }
