@@ -41,6 +41,11 @@ final class FilterEditViewController: RxBaseViewController {
         view.image = .sample
         return view
     }()
+    
+    private let optionButtonContainerView: UIView = {
+        let view = UIView()
+        return view
+    }()
 
     private let undoButton: UIButton = {
         let view = UIButton(type: .system)
@@ -74,6 +79,15 @@ final class FilterEditViewController: RxBaseViewController {
         view.layer.borderColor = UIColor.gray75.cgColor
         return view
     }()
+    
+    private let slider: UISlider = {
+        let view = UISlider()
+        view.minimumValue = -1.0
+        view.maximumValue = 1.0
+        view.maximumTrackTintColor = .blackTurquoise
+        view.minimumTrackTintColor = .brightTurquoise
+        return view
+    }()
 
     private lazy var attributesCollectionView: UICollectionView = {
         let view = UICollectionView(
@@ -87,7 +101,7 @@ final class FilterEditViewController: RxBaseViewController {
     }()
     
     private var dataSource: DataSourceType!
-    private var selectedFilterAttribute: FilterAttributeType = FilterAttributeType.allCases.first ?? .brightness
+    private var selectedFilterAttribute: FilterAttributeType = .brightness
     
     override func setupView() {
         setupCollectionView()
@@ -104,43 +118,51 @@ final class FilterEditViewController: RxBaseViewController {
     override func setupSubviews() {
         view.addSubviews([
             filterImageView,
+            optionButtonContainerView,
+            slider,
             attributesCollectionView
         ])
         
-        filterImageView.addSubviews([
-            undoButton,
-            redoButton,
-            compareButton
+        optionButtonContainerView.addSubviews([
+            undoButton, redoButton, compareButton,
         ])
     }
     
     override func setupConstraints() {
         
         filterImageView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
             make.horizontalEdges.equalToSuperview()
-            make.bottom.equalTo(attributesCollectionView.snp.top)
+            make.bottom.equalTo(optionButtonContainerView.snp.top).offset(-16)
+        }
+        
+        optionButtonContainerView.snp.makeConstraints { make in
+            make.horizontalEdges.equalToSuperview().inset(20)
+            make.bottom.equalTo(slider.snp.top).offset(-16)
         }
         
         undoButton.snp.makeConstraints { make in
-            make.leading.equalToSuperview().inset(20)
-            make.bottom.equalToSuperview().inset(16)
+            make.leading.verticalEdges.equalToSuperview()
             make.width.equalTo(40)
             make.height.equalTo(32)
         }
         
         redoButton.snp.makeConstraints { make in
-            make.top.equalTo(undoButton.snp.top)
             make.leading.equalTo(undoButton.snp.trailing).offset(8)
             make.width.equalTo(40)
             make.height.equalTo(32)
         }
         
         compareButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(20)
-            make.bottom.equalToSuperview().inset(16)
+            make.trailing.equalToSuperview()
             make.width.equalTo(40)
             make.height.equalTo(32)
+        }
+        
+        slider.snp.makeConstraints { make in
+            make.bottom.equalTo(attributesCollectionView.snp.top).offset(-16)
+            make.horizontalEdges.equalToSuperview().inset(20)
+            make.height.equalTo(50)
         }
 
         attributesCollectionView.snp.makeConstraints { make in
@@ -225,7 +247,7 @@ extension FilterEditViewController {
             let section = Section(rawValue: sectionIndex)!
             switch section {
             case .filterAttributes:
-                return FilterAttributeCollectionViewCell.layoutSection { [weak self] items, point, environment in
+                return FilterAttributeCollectionViewCell.layoutSection { [weak self] _, _, _ in
                     self?.selectCenterItem()
                 }
             }
