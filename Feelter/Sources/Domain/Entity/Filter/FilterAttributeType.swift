@@ -71,3 +71,24 @@ extension FilterAttributeType {
         }
     }
 }
+
+// MARK: - CoreImageFilter Mapping
+
+extension FilterAttributeType {
+    var filter: CoreImageFilter {
+        switch self {
+        case .brightness: CoreImageFilter.brightness
+        case .exposure: CoreImageFilter.exposure
+        case .contrast: CoreImageFilter.contrast
+        case .saturation: CoreImageFilter.saturation
+        case .sharpness: CoreImageFilter.sharpness
+        case .blur: CoreImageFilter.blur
+        case .vignette: CoreImageFilter.vignette
+        case .noiseReduction: CoreImageFilter.noiseReduction
+        case .highlights: CoreImageFilter.highlight
+        case .shadows: CoreImageFilter.shadow
+        case .temperature: CoreImageFilter.temperature
+        case .blackPoint: CoreImageFilter.brightness
+        }
+    }
+}

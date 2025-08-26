@@ -38,7 +38,6 @@ final class FilterEditViewController: RxBaseViewController {
     private let filterImageView: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleAspectFit
-        view.image = .sample
         return view
     }()
     
@@ -97,11 +96,27 @@ final class FilterEditViewController: RxBaseViewController {
         view.contentInsetAdjustmentBehavior = .never
         view.showsHorizontalScrollIndicator = false
         view.backgroundColor = .clear
+        view.bounces = false
         return view
     }()
     
+    private let coreImageManager = CoreImageManager()
     private var dataSource: DataSourceType!
     private var selectedFilterAttribute: FilterAttributeType = .brightness
+    
+    private let filterAttributes = FilterAttributeType.allCases
+    private let originalImage: UIImage
+    
+    init(image: UIImage) {
+        self.originalImage = image
+        
+        self.filterImageView.image = image
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func setupView() {
         setupCollectionView()
@@ -173,6 +188,17 @@ final class FilterEditViewController: RxBaseViewController {
     }
     
     override func bind() {
+        
+        slider.rx.value
+            .subscribe(with: self) { owner, value in
+                let image = owner.coreImageManager.applyFilter(
+                    owner.originalImage,
+                    filter: owner.selectedFilterAttribute.filter,
+                    value: value
+                )
+                owner.filterImageView.image = image
+            }
+            .disposed(by: disposeBag)
         
         attributesCollectionView.rx.itemSelected
             .subscribe(with: self) { owner, indexPath in
@@ -299,12 +325,12 @@ extension FilterEditViewController {
     private func initializeSnapShot() {
         var snapShot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
         snapShot.appendSections([.filterAttributes])
-        snapShot.appendItems(FilterAttributeType.allCases, toSection: .filterAttributes)
+        snapShot.appendItems(filterAttributes, toSection: .filterAttributes)
         dataSource.apply(snapShot, animatingDifferences: false)
         
         // 첫 번째 아이템 선택
         let firstIndexPath = IndexPath(item: 0, section: 0)
-        self.attributesCollectionView.selectItem(
+        attributesCollectionView.selectItem(
             at: firstIndexPath,
             animated: false,
             scrollPosition: []
@@ -319,26 +345,36 @@ extension FilterEditViewController {
         
         guard let centerIndexPath = attributesCollectionView.indexPathForItem(at: centerPoint) else { return }
         
-        let selectedItem = FilterAttributeType.allCases[centerIndexPath.item]
+        let selectedItem = filterAttributes[centerIndexPath.item]
         
         // 이미 선택된 아이템과 같다면 리턴
         if selectedFilterAttribute == selectedItem { return }
         
-        selectedFilterAttribute = selectedItem
-        self.attributesCollectionView.selectItem(
+        updateFilterAttribute(selectedItem)
+        
+        attributesCollectionView.selectItem(
             at: centerIndexPath,
             animated: false,
             scrollPosition: []
         )
     }
+    
+    private func updateFilterAttribute(_ filter: FilterAttributeType) {
+        let coreImageFilter = filter.filter
+        
+        slider.minimumValue = coreImageFilter.parameter.range.lowerBound
+        slider.maximumValue = coreImageFilter.parameter.range.upperBound
+        slider.value = coreImageFilter.parameter.defaultValue
+        
+        selectedFilterAttribute = filter
+    }
 }
-
 
 
 #if DEBUG
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    UINavigationController(rootViewController: FilterEditViewController())
+    UINavigationController(rootViewController: FilterEditViewController(image: .sample))
 }
 #endif
