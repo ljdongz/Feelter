@@ -5,6 +5,7 @@
 //  Created by 이정동 on 8/11/25.
 //
 
+import PhotosUI
 import UIKit
 
 import RxCocoa
@@ -62,6 +63,9 @@ final class FilterMakeViewController: RxBaseViewController {
     
     private var collectionViewBottomConstraint: Constraint?
     
+    private var originImage: UIImage?
+    private var filteredImage: UIImage?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -113,10 +117,7 @@ final class FilterMakeViewController: RxBaseViewController {
                 case .category:
                     owner.updateCategorySelection(index: indexPath.item)
                 case .uploadPhoto:
-                    let imagePicker = UIImagePickerController()
-                    imagePicker.delegate = owner
-                    imagePicker.sourceType = .photoLibrary
-                    owner.present(imagePicker, animated: true)
+                    owner.presentImagePicker()
                 default:
                     break
                 }
@@ -210,6 +211,17 @@ extension FilterMakeViewController {
         snapShot.deleteAll()
         snapShot.append(categories)
         dataSource.apply(snapShot, to: .category, animatingDifferences: false)
+    }
+    
+    private func presentImagePicker() {
+        var configuration = PHPickerConfiguration()
+        configuration.selectionLimit = 1
+        configuration.filter = .images
+        
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+        picker.modalPresentationStyle = .fullScreen
+        present(picker, animated: true)
     }
 }
 
@@ -489,14 +501,32 @@ extension FilterMakeViewController {
     }
 }
 
-// MARK: - UIImagePickerControllerDelegate
+// MARK: - PHPickerViewControllerDelegate
 
-extension FilterMakeViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            self.updateUploadImageSnapShot(image)
+extension FilterMakeViewController: PHPickerViewControllerDelegate {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        
+        guard let result = results.first else {
+            picker.dismiss(animated: true)
+            return
         }
-        dismiss(animated: true, completion: nil)
+        
+        if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
+            result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
+                Task { @MainActor in
+                    guard let image = image as? UIImage else { return }
+                    
+                    let vc = FilterEditViewController(image: image) { filteredImage in
+                        guard let filteredImage else { return }
+                        
+                        self?.updateUploadImageSnapShot(filteredImage)
+                    }
+                    
+                    self?.navigationController?.pushViewController(vc, animated: true)
+                    picker.dismiss(animated: true)
+                }
+            }
+        }
     }
 }
 

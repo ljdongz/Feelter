@@ -115,10 +115,14 @@ final class FilterEditViewController: RxBaseViewController {
     private var selectedFilterAttribute: FilterAttributeType = .brightness
     
     private let filterAttributes = FilterAttributeType.allCases
+    private let completionHandler: (UIImage?) -> Void
     
-    init(image: UIImage) {
+    init(image: UIImage, completionHandler: @escaping (UIImage?) -> Void) {
         self.coreImageManager = .init(originalImage: image)
+        self.completionHandler = completionHandler
+        
         self.filterImageView.image = image
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -126,9 +130,8 @@ final class FilterEditViewController: RxBaseViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func setupView() {
-        setupCollectionView()
-        initializeSnapShot()
+    override func viewDidLoad() {
+        super.viewDidLoad()
         
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         navigationItem.leftBarButtonItem = .init(customView: navigationLeftBarButton)
@@ -136,6 +139,11 @@ final class FilterEditViewController: RxBaseViewController {
         title = "Edit"
         
         view.backgroundColor = .black
+    }
+    
+    override func setupView() {
+        setupCollectionView()
+        initializeSnapShot()
     }
     
     override func setupSubviews() {
@@ -211,6 +219,17 @@ final class FilterEditViewController: RxBaseViewController {
         .disposed(by: disposeBag)
         
         slider.rx.value
+            .skip(1)
+            .map { [weak self] value in
+                guard let self = self else { return value }
+                let range = self.selectedFilterAttribute.filter.parameter.range
+                let rangeWidth = range.upperBound - range.lowerBound
+                let step = rangeWidth / 200.0 // 201개 구간 (0~200)
+                let normalizedValue = (value - range.lowerBound) / rangeWidth
+                let stepIndex = round(normalizedValue * 200.0)
+                return range.lowerBound + (stepIndex * step)
+            }
+            .distinctUntilChanged()
             .subscribe(with: self) { owner, value in
                 let image = owner.coreImageManager.applyFilter(
                     type: owner.selectedFilterAttribute,
@@ -233,6 +252,22 @@ final class FilterEditViewController: RxBaseViewController {
                 owner.filterImageView.image = owner.coreImageManager.redo()
                 owner.slider.value = owner.coreImageManager.filterStateValue(for: owner.selectedFilterAttribute)
                 owner.updateOptionButtonActivityState()
+            }
+            .disposed(by: disposeBag)
+        
+        Observable.merge(
+            compareButton.rx.controlEvent(.touchUpOutside).asObservable(),
+            compareButton.rx.controlEvent(.touchUpInside).asObservable()
+        )
+        .subscribe(with: self) { owner, _ in
+            owner.filterImageView.image = owner.coreImageManager.filteredImage
+        }
+        .disposed(by: disposeBag)
+        
+        compareButton.rx.controlEvent(.touchDown)
+            .asObservable()
+            .subscribe(with: self) { owner, _ in
+                owner.filterImageView.image = owner.coreImageManager.originalImage
             }
             .disposed(by: disposeBag)
         
@@ -290,6 +325,8 @@ final class FilterEditViewController: RxBaseViewController {
                     title: "확인",
                     style: .default
                 ) { _ in
+                    let filteredImage = owner.coreImageManager.filteredImage
+                    owner.completionHandler(filteredImage)
                     owner.navigationController?.popViewController(animated: true)
                 }
                 let cancelAction = UIAlertAction(title: "취소", style: .cancel)
@@ -453,7 +490,10 @@ extension FilterEditViewController {
 
 extension FilterEditViewController: UIGestureRecognizerDelegate {
     
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
         return true
     }
 }
@@ -463,6 +503,6 @@ extension FilterEditViewController: UIGestureRecognizerDelegate {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    UINavigationController(rootViewController: FilterEditViewController(image: .sample))
+    UINavigationController(rootViewController: FilterEditViewController(image: .sample) { _ in })
 }
 #endif
