@@ -6,6 +6,7 @@
 //
 
 import CoreImage
+import Metal
 import UIKit
 
 struct FilterChange {
@@ -15,17 +16,39 @@ struct FilterChange {
 }
 
 final class CoreImageManager {
-    static let context = CIContext()
+    static let context: CIContext = {
+        // GPU를 우선적으로 사용하는 CIContext 생성
+        if let metalDevice = MTLCreateSystemDefaultDevice() {
+            return CIContext(mtlDevice: metalDevice)
+        } else {
+            // Metal이 지원되지 않는 경우 기본 CIContext 사용
+            return CIContext()
+        }
+    }()
+    
+    private let orientation: UIImage.Orientation
     
     private var originCIImage: CIImage?
+    private var filteredCIImage: CIImage?
+    private var currentState: [FilterAttributeType: Float] = [:]
     
     private(set) var undoStack: [FilterChange] = []
     private(set) var redoStack: [FilterChange] = []
-    private var currentState: [FilterAttributeType: Float] = [:]
+    
+    // TODO: CIContext를 거치지 않고 UIImage 자체를 저장하기
+    var originalImage: UIImage? {
+        createUIImage(from: originCIImage)
+    }
+    
+    // TODO: CIContext를 거치지 않고 UIImage 자체를 저장하기
+    var filteredImage: UIImage? {
+        createUIImage(from: filteredCIImage)
+    }
     
     init(originalImage: UIImage) {
         let ciImage = CIImage(image: originalImage)
         self.originCIImage = ciImage
+        self.orientation = originalImage.imageOrientation
     }
     
     func filterStateValue(for type: FilterAttributeType) -> Float {
@@ -112,14 +135,15 @@ extension CoreImageManager {
             result = ciImage
         }
         
+        // 필터가 새로 적용된 CIImage를 저장
+        filteredCIImage = result
+        
         // 최종 UIImage로 변환
-        guard let cgImage = Self.context.createCGImage(result, from: result.extent) else { return nil }
-        return UIImage(cgImage: cgImage)
+        return createUIImage(from: result)
     }
     
     private func applyFilter(_ ciImage: CIImage?, filter: CoreImageFilter, value: Float) -> UIImage? {
-        guard let ciImage,
-              let ciFilter = CIFilter(name: filter.name) else { return nil }
+        guard let ciFilter = CIFilter(name: filter.name) else { return nil }
         
         ciFilter.setValue(ciImage, forKey: kCIInputImageKey)
         
@@ -132,17 +156,17 @@ extension CoreImageManager {
             ciFilter.setValue(vector, forKey: filter.parameter.key)
         }
         
-        return createUIImage(from: ciFilter, originalExtent: ciImage.extent)
+        return createUIImage(from: ciFilter.outputImage)
     }
     
-    private func createUIImage(from filter: CIFilter, originalExtent: CGRect) -> UIImage? {
-        guard let outputImage = filter.outputImage,
+    private func createUIImage(from ciImage: CIImage?) -> UIImage? {
+        guard let ciImage,
               let cgImage = Self.context.createCGImage(
-                outputImage,
-                from: originalExtent
+                ciImage,
+                from: ciImage.extent
               ) else { return nil }
         
-        return UIImage(cgImage: cgImage)
+        return UIImage(cgImage: cgImage, scale: 1, orientation: orientation)
     }
 }
 
