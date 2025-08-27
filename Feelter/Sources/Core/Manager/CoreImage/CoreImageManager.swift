@@ -122,7 +122,15 @@ extension CoreImageManager {
               let ciFilter = CIFilter(name: filter.name) else { return nil }
         
         ciFilter.setValue(ciImage, forKey: kCIInputImageKey)
-        ciFilter.setValue(value, forKey: filter.parameter.key)
+        
+        // TODO: 수정 필요
+        switch filter.parameter.valueType {
+        case .number:
+            ciFilter.setValue(value, forKey: filter.parameter.key)
+        case .vector:
+            let vector = CIVector(x: CGFloat(value), y: 0)
+            ciFilter.setValue(vector, forKey: filter.parameter.key)
+        }
         
         return createUIImage(from: ciFilter, originalExtent: ciImage.extent)
     }

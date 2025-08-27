@@ -13,10 +13,16 @@ struct CoreImageFilter {
     let parameter: FilterParameter
     
     struct FilterParameter {
+        enum ValueType {
+            case number
+            case vector
+        }
+        
         let key: String
         let range: ClosedRange<Float>
         let defaultValue: Float
         let noEffectValue: Float
+        let valueType: ValueType
     }
 }
 
@@ -28,7 +34,8 @@ extension CoreImageFilter {
             key: kCIInputBrightnessKey,
             range: -1.0...1.0,
             defaultValue: 0.0,
-            noEffectValue: 0.0
+            noEffectValue: 0.0,
+            valueType: .number
         )
     )
     static let contrast = CoreImageFilter(
@@ -36,9 +43,10 @@ extension CoreImageFilter {
         displayName: "대비",
         parameter: FilterParameter(
             key: kCIInputContrastKey,
-            range: 0.25...4.0,
+            range: 0.75...1.25, // default: 0.25...4.0
             defaultValue: 1.0,
-            noEffectValue: 1.0
+            noEffectValue: 1.0,
+            valueType: .number
         )
     )
     static let saturation = CoreImageFilter(
@@ -48,7 +56,8 @@ extension CoreImageFilter {
             key: kCIInputSaturationKey,
             range: 0.0...2.0,
             defaultValue: 1.0,
-            noEffectValue: 1.0
+            noEffectValue: 1.0,
+            valueType: .number
         )
     )
     
@@ -57,9 +66,10 @@ extension CoreImageFilter {
         displayName: "노출",
         parameter: FilterParameter(
             key: kCIInputEVKey,
-            range: -10.0...10.0,
+            range: -1.0...1.0, // default: -10.0...10.0
             defaultValue: 0.0,
-            noEffectValue: 0.0
+            noEffectValue: 0.0,
+            valueType: .number
         )
     )
     
@@ -68,9 +78,10 @@ extension CoreImageFilter {
         displayName: "블러",
         parameter: FilterParameter(
             key: kCIInputRadiusKey,
-            range: 0.0...50.0,
-            defaultValue: 10.0,
-            noEffectValue: 0.0
+            range: 0.0...10.0, // default: 0.0...50.0
+            defaultValue: 0.0, // default: 10.0
+            noEffectValue: 0.0,
+            valueType: .number
         )
     )
     
@@ -80,8 +91,9 @@ extension CoreImageFilter {
         parameter: FilterParameter(
             key: kCIInputSharpnessKey,
             range: 0.0...2.0,
-            defaultValue: 0.4,
-            noEffectValue: 0.0
+            defaultValue: 0.0, // default: 0.4
+            noEffectValue: 0.0,
+            valueType: .number
         )
     )
     
@@ -92,7 +104,8 @@ extension CoreImageFilter {
             key: kCIInputIntensityKey,
             range: -1.0...1.0,
             defaultValue: 0.0,
-            noEffectValue: 0.0
+            noEffectValue: 0.0,
+            valueType: .number
         )
     )
     
@@ -103,7 +116,8 @@ extension CoreImageFilter {
             key: "inputShadowAmount",
             range: -1.0...1.0,
             defaultValue: 0.0,
-            noEffectValue: 0.0
+            noEffectValue: 0.0,
+            valueType: .number
         )
     )
     
@@ -114,7 +128,8 @@ extension CoreImageFilter {
             key: "inputHighlightAmount",
             range: 0.3...1.0,
             defaultValue: 1.0,
-            noEffectValue: 1.0
+            noEffectValue: 1.0,
+            valueType: .number
         )
     )
     
@@ -124,19 +139,21 @@ extension CoreImageFilter {
         parameter: FilterParameter(
             key: "inputNoiseLevel",
             range: 0.0...0.1,
-            defaultValue: 0.02,
-            noEffectValue: 0.0
+            defaultValue: 0.0, // default: 0.02
+            noEffectValue: 0.0,
+            valueType: .number
         )
     )
     
     static let temperature = CoreImageFilter(
-        name: "CIWhitePointAdjust",
+        name: "CITemperatureAndTint",
         displayName: "온도",
         parameter: FilterParameter(
-            key: "inputColor",
-            range: 2000...10000,
+            key: "inputNeutral",
+            range: 3000...10000, // default: 2000...10000
             defaultValue: 6500,
-            noEffectValue: 6500
+            noEffectValue: 6500,
+            valueType: .vector
         )
     )
     
