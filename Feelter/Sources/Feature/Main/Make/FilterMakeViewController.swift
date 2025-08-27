@@ -516,7 +516,7 @@ extension FilterMakeViewController: PHPickerViewControllerDelegate {
                 Task { @MainActor in
                     guard let image = image as? UIImage else { return }
                     
-                    let vc = FilterEditViewController(image: image) { comparison in
+                    let vc = FilterEditViewController(image: image) { comparison, filterAttribute in
                         self?.updateUploadImageSnapShot(comparison.filtered)
                     }
                     

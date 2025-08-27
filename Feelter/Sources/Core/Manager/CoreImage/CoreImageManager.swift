@@ -30,6 +30,22 @@ final class CoreImageManager {
     private let originCIImage: CIImage?
     
     private var currentState: [FilterAttributeType: Double] = [:]
+    var currentFilterAttributeState: FilterAttribute {
+        FilterAttribute(
+            brightness: filterStateValue(for: .brightness),
+            exposure: filterStateValue(for: .exposure),
+            contrast: filterStateValue(for: .contrast),
+            saturation: filterStateValue(for: .saturation),
+            sharpness: filterStateValue(for: .sharpness),
+            blur: filterStateValue(for: .blur),
+            vignette: filterStateValue(for: .vignette),
+            noiseReduction: filterStateValue(for: .noiseReduction),
+            highlights: filterStateValue(for: .highlights),
+            shadows: filterStateValue(for: .shadows),
+            temperature: filterStateValue(for: .temperature),
+            blackPoint: filterStateValue(for: .blackPoint)
+        )
+    }
     
     private(set) var undoStack: [FilterChange] = []
     private(set) var redoStack: [FilterChange] = []

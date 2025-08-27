@@ -115,9 +115,9 @@ final class FilterEditViewController: RxBaseViewController {
     private var selectedFilterAttribute: FilterAttributeType = .brightness
     
     private let filterAttributes = FilterAttributeType.allCases
-    private let completionHandler: (ImageComparison) -> Void
+    private let completionHandler: (ImageComparison, FilterAttribute) -> Void
     
-    init(image: UIImage, completionHandler: @escaping (ImageComparison) -> Void) {
+    init(image: UIImage, completionHandler: @escaping (ImageComparison, FilterAttribute) -> Void) {
         self.coreImageManager = .init(originalImage: image)
         self.completionHandler = completionHandler
         
@@ -220,15 +220,9 @@ final class FilterEditViewController: RxBaseViewController {
         
         slider.rx.value
             .skip(1)
-            .map { [weak self] value in
-                let value = Double(value)
-                guard let self = self else { return value }
-                let range = self.selectedFilterAttribute.filter.parameter.range
-                let rangeWidth = range.upperBound - range.lowerBound
-                let step = rangeWidth / 200.0 // 201개 구간 (0~200)
-                let normalizedValue = (value - range.lowerBound) / rangeWidth
-                let stepIndex = round(normalizedValue * 200.0)
-                return range.lowerBound + (stepIndex * step)
+            .map {
+                // TODO: 소수점 아래 n자리 잘라내기
+                Double($0)
             }
             .distinctUntilChanged()
             .subscribe(with: self) { owner, value in
@@ -327,7 +321,8 @@ final class FilterEditViewController: RxBaseViewController {
                     style: .default
                 ) { _ in
                     let filteredImage = owner.coreImageManager.imageComparison
-                    owner.completionHandler(filteredImage)
+                    let filterAttribute = owner.coreImageManager.currentFilterAttributeState
+                    owner.completionHandler(filteredImage, filterAttribute)
                     owner.navigationController?.popViewController(animated: true)
                 }
                 let cancelAction = UIAlertAction(title: "취소", style: .cancel)
@@ -504,6 +499,6 @@ extension FilterEditViewController: UIGestureRecognizerDelegate {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    UINavigationController(rootViewController: FilterEditViewController(image: .sample) { _ in })
+    UINavigationController(rootViewController: FilterEditViewController(image: .sample) { _, _ in })
 }
 #endif
