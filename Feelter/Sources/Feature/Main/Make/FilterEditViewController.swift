@@ -115,9 +115,9 @@ final class FilterEditViewController: RxBaseViewController {
     private var selectedFilterAttribute: FilterAttributeType = .brightness
     
     private let filterAttributes = FilterAttributeType.allCases
-    private let completionHandler: (UIImage?) -> Void
+    private let completionHandler: (ImageComparison) -> Void
     
-    init(image: UIImage, completionHandler: @escaping (UIImage?) -> Void) {
+    init(image: UIImage, completionHandler: @escaping (ImageComparison) -> Void) {
         self.coreImageManager = .init(originalImage: image)
         self.completionHandler = completionHandler
         
@@ -212,7 +212,7 @@ final class FilterEditViewController: RxBaseViewController {
         .subscribe(with: self) { owner, _ in
             owner.coreImageManager.appendHistory(
                 type: owner.selectedFilterAttribute,
-                value: owner.slider.value
+                value: Double(owner.slider.value)
             )
             owner.updateOptionButtonActivityState()
         }
@@ -221,6 +221,7 @@ final class FilterEditViewController: RxBaseViewController {
         slider.rx.value
             .skip(1)
             .map { [weak self] value in
+                let value = Double(value)
                 guard let self = self else { return value }
                 let range = self.selectedFilterAttribute.filter.parameter.range
                 let rangeWidth = range.upperBound - range.lowerBound
@@ -242,7 +243,7 @@ final class FilterEditViewController: RxBaseViewController {
         undoButton.rx.tap
             .subscribe(with: self) { owner, _ in
                 owner.filterImageView.image = owner.coreImageManager.undo()
-                owner.slider.value = owner.coreImageManager.filterStateValue(for: owner.selectedFilterAttribute)
+                owner.slider.value = Float(owner.coreImageManager.filterStateValue(for: owner.selectedFilterAttribute))
                 owner.updateOptionButtonActivityState()
             }
             .disposed(by: disposeBag)
@@ -250,7 +251,7 @@ final class FilterEditViewController: RxBaseViewController {
         redoButton.rx.tap
             .subscribe(with: self) { owner, _ in
                 owner.filterImageView.image = owner.coreImageManager.redo()
-                owner.slider.value = owner.coreImageManager.filterStateValue(for: owner.selectedFilterAttribute)
+                owner.slider.value = Float(owner.coreImageManager.filterStateValue(for: owner.selectedFilterAttribute))
                 owner.updateOptionButtonActivityState()
             }
             .disposed(by: disposeBag)
@@ -260,14 +261,14 @@ final class FilterEditViewController: RxBaseViewController {
             compareButton.rx.controlEvent(.touchUpInside).asObservable()
         )
         .subscribe(with: self) { owner, _ in
-            owner.filterImageView.image = owner.coreImageManager.filteredImage
+            owner.filterImageView.image = owner.coreImageManager.imageComparison.filtered
         }
         .disposed(by: disposeBag)
         
         compareButton.rx.controlEvent(.touchDown)
             .asObservable()
             .subscribe(with: self) { owner, _ in
-                owner.filterImageView.image = owner.coreImageManager.originalImage
+                owner.filterImageView.image = owner.coreImageManager.imageComparison.origin
             }
             .disposed(by: disposeBag)
         
@@ -325,7 +326,7 @@ final class FilterEditViewController: RxBaseViewController {
                     title: "확인",
                     style: .default
                 ) { _ in
-                    let filteredImage = owner.coreImageManager.filteredImage
+                    let filteredImage = owner.coreImageManager.imageComparison
                     owner.completionHandler(filteredImage)
                     owner.navigationController?.popViewController(animated: true)
                 }
@@ -436,9 +437,9 @@ extension FilterEditViewController {
         
         let coreImageFilter = selectedItem.filter
         
-        slider.minimumValue = coreImageFilter.parameter.range.lowerBound
-        slider.maximumValue = coreImageFilter.parameter.range.upperBound
-        slider.value = coreImageManager.filterStateValue(for: selectedItem)
+        slider.minimumValue = Float(coreImageFilter.parameter.range.lowerBound)
+        slider.maximumValue = Float(coreImageFilter.parameter.range.upperBound)
+        slider.value = Float(coreImageManager.filterStateValue(for: selectedItem))
         
         selectedFilterAttribute = selectedItem
         
@@ -456,9 +457,9 @@ extension FilterEditViewController {
         
         let coreImageFilter = selectedItem.filter
         
-        slider.minimumValue = coreImageFilter.parameter.range.lowerBound
-        slider.maximumValue = coreImageFilter.parameter.range.upperBound
-        slider.value = coreImageManager.filterStateValue(for: selectedItem)
+        slider.minimumValue = Float(coreImageFilter.parameter.range.lowerBound)
+        slider.maximumValue = Float(coreImageFilter.parameter.range.upperBound)
+        slider.value = Float(coreImageManager.filterStateValue(for: selectedItem))
         
         selectedFilterAttribute = selectedItem
         

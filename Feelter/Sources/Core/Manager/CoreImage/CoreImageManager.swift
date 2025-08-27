@@ -11,8 +11,8 @@ import UIKit
 
 struct FilterChange {
     let filterType: FilterAttributeType
-    let beforeValue: Float
-    let afterValue: Float
+    let beforeValue: Double
+    let afterValue: Double
 }
 
 final class CoreImageManager {
@@ -27,35 +27,26 @@ final class CoreImageManager {
     }()
     
     private let orientation: UIImage.Orientation
+    private let originCIImage: CIImage?
     
-    private var originCIImage: CIImage?
-    private var filteredCIImage: CIImage?
-    private var currentState: [FilterAttributeType: Float] = [:]
+    private var currentState: [FilterAttributeType: Double] = [:]
     
     private(set) var undoStack: [FilterChange] = []
     private(set) var redoStack: [FilterChange] = []
-    
-    // TODO: CIContext를 거치지 않고 UIImage 자체를 저장하기
-    var originalImage: UIImage? {
-        createUIImage(from: originCIImage)
-    }
-    
-    // TODO: CIContext를 거치지 않고 UIImage 자체를 저장하기
-    var filteredImage: UIImage? {
-        createUIImage(from: filteredCIImage)
-    }
+    private(set) var imageComparison: ImageComparison
     
     init(originalImage: UIImage) {
-        let ciImage = CIImage(image: originalImage)
-        self.originCIImage = ciImage
+        self.imageComparison = .init(origin: originalImage, filtered: originalImage)
+        
+        self.originCIImage = CIImage(image: originalImage)
         self.orientation = originalImage.imageOrientation
     }
     
-    func filterStateValue(for type: FilterAttributeType) -> Float {
+    func filterStateValue(for type: FilterAttributeType) -> Double {
         currentState[type] ?? type.filter.parameter.defaultValue
     }
     
-    func applyFilter(type: FilterAttributeType, value: Float) -> UIImage? {
+    func applyFilter(type: FilterAttributeType, value: Double) -> UIImage? {
         // 현재 상태를 복사하고 임시로 새 값 추가 (실시간 미리보기용)
         var tempState = currentState
         tempState[type] = value
@@ -64,7 +55,7 @@ final class CoreImageManager {
         return applyFilters(tempState)
     }
     
-    func appendHistory(type: FilterAttributeType, value afterValue: Float) {
+    func appendHistory(type: FilterAttributeType, value afterValue: Double) {
         let beforeValue = filterStateValue(for: type)
         
         // 값이 변경된 경우에만 히스토리 추가
@@ -115,12 +106,12 @@ final class CoreImageManager {
 
 extension CoreImageManager {
     
-    private func applyFilters(_ state: [FilterAttributeType: Float]) -> UIImage? {
+    private func applyFilters(_ state: [FilterAttributeType: Double]) -> UIImage? {
         guard let originalImage = originCIImage else { return nil }
         
         // 우선순위 순서로 필터 정렬
         let sortedFilters = state
-            .compactMap { (filterType: FilterAttributeType, value: Float) -> (FilterAttributeType, Float)? in
+            .compactMap { (filterType: FilterAttributeType, value: Double) -> (FilterAttributeType, Double)? in
                 // 기본값이 아닌 것만 필터링
                 guard value != filterType.filter.parameter.defaultValue else { return nil }
                 return (filterType, value)
@@ -135,14 +126,16 @@ extension CoreImageManager {
             result = ciImage
         }
         
+        let uiImage = createUIImage(from: result)
+        
         // 필터가 새로 적용된 CIImage를 저장
-        filteredCIImage = result
+        imageComparison.filtered = uiImage
         
         // 최종 UIImage로 변환
-        return createUIImage(from: result)
+        return uiImage
     }
     
-    private func applyFilter(_ ciImage: CIImage?, filter: CoreImageFilter, value: Float) -> UIImage? {
+    private func applyFilter(_ ciImage: CIImage?, filter: CoreImageFilter, value: Double) -> UIImage? {
         guard let ciFilter = CIFilter(name: filter.name) else { return nil }
         
         ciFilter.setValue(ciImage, forKey: kCIInputImageKey)

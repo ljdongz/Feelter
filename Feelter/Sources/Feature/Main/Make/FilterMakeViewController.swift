@@ -194,7 +194,7 @@ extension FilterMakeViewController {
         dataSource.apply(snapShot)
     }
     
-    private func updateUploadImageSnapShot(_ image: UIImage) {
+    private func updateUploadImageSnapShot(_ image: UIImage?) {
         var snapShot = dataSource.snapshot(for: .uploadPhoto)
         snapShot.deleteAll()
         snapShot.append([UploadPhotoItem(image: image)])
@@ -516,10 +516,8 @@ extension FilterMakeViewController: PHPickerViewControllerDelegate {
                 Task { @MainActor in
                     guard let image = image as? UIImage else { return }
                     
-                    let vc = FilterEditViewController(image: image) { filteredImage in
-                        guard let filteredImage else { return }
-                        
-                        self?.updateUploadImageSnapShot(filteredImage)
+                    let vc = FilterEditViewController(image: image) { comparison in
+                        self?.updateUploadImageSnapShot(comparison.filtered)
                     }
                     
                     self?.navigationController?.pushViewController(vc, animated: true)

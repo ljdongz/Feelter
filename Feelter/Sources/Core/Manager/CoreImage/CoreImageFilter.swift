@@ -19,9 +19,8 @@ struct CoreImageFilter {
         }
         
         let key: String
-        let range: ClosedRange<Float>
-        let defaultValue: Float
-        let noEffectValue: Float
+        let range: ClosedRange<Double>
+        let defaultValue: Double
         let valueType: ValueType
     }
 }
@@ -34,7 +33,6 @@ extension CoreImageFilter {
             key: kCIInputBrightnessKey,
             range: -1.0...1.0,
             defaultValue: 0.0,
-            noEffectValue: 0.0,
             valueType: .number
         )
     )
@@ -45,7 +43,6 @@ extension CoreImageFilter {
             key: kCIInputContrastKey,
             range: 0.75...1.25, // default: 0.25...4.0
             defaultValue: 1.0,
-            noEffectValue: 1.0,
             valueType: .number
         )
     )
@@ -56,7 +53,6 @@ extension CoreImageFilter {
             key: kCIInputSaturationKey,
             range: 0.0...2.0,
             defaultValue: 1.0,
-            noEffectValue: 1.0,
             valueType: .number
         )
     )
@@ -68,7 +64,6 @@ extension CoreImageFilter {
             key: kCIInputEVKey,
             range: -1.0...1.0, // default: -10.0...10.0
             defaultValue: 0.0,
-            noEffectValue: 0.0,
             valueType: .number
         )
     )
@@ -80,7 +75,6 @@ extension CoreImageFilter {
             key: kCIInputRadiusKey,
             range: 0.0...10.0, // default: 0.0...50.0
             defaultValue: 0.0, // default: 10.0
-            noEffectValue: 0.0,
             valueType: .number
         )
     )
@@ -92,7 +86,6 @@ extension CoreImageFilter {
             key: kCIInputSharpnessKey,
             range: 0.0...2.0,
             defaultValue: 0.0, // default: 0.4
-            noEffectValue: 0.0,
             valueType: .number
         )
     )
@@ -104,7 +97,6 @@ extension CoreImageFilter {
             key: kCIInputIntensityKey,
             range: -1.0...1.0,
             defaultValue: 0.0,
-            noEffectValue: 0.0,
             valueType: .number
         )
     )
@@ -116,7 +108,6 @@ extension CoreImageFilter {
             key: "inputShadowAmount",
             range: -1.0...1.0,
             defaultValue: 0.0,
-            noEffectValue: 0.0,
             valueType: .number
         )
     )
@@ -128,7 +119,6 @@ extension CoreImageFilter {
             key: "inputHighlightAmount",
             range: 0.3...1.0,
             defaultValue: 1.0,
-            noEffectValue: 1.0,
             valueType: .number
         )
     )
@@ -140,7 +130,6 @@ extension CoreImageFilter {
             key: "inputNoiseLevel",
             range: 0.0...0.1,
             defaultValue: 0.0, // default: 0.02
-            noEffectValue: 0.0,
             valueType: .number
         )
     )
@@ -152,7 +141,6 @@ extension CoreImageFilter {
             key: "inputNeutral",
             range: 3000...10000, // default: 2000...10000
             defaultValue: 6500,
-            noEffectValue: 6500,
             valueType: .vector
         )
     )
