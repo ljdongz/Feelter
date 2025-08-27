@@ -107,16 +107,14 @@ final class FilterEditViewController: RxBaseViewController {
         return gesture
     }()
     
-    private let coreImageManager = CoreImageManager()
+    private let coreImageManager: CoreImageManager
     private var dataSource: DataSourceType!
     private var selectedFilterAttribute: FilterAttributeType = .brightness
     
     private let filterAttributes = FilterAttributeType.allCases
-    private let originalImage: UIImage
     
     init(image: UIImage) {
-        self.originalImage = image
-        
+        self.coreImageManager = .init(originalImage: image)
         self.filterImageView.image = image
         super.init(nibName: nil, bundle: nil)
     }
@@ -196,14 +194,37 @@ final class FilterEditViewController: RxBaseViewController {
     
     override func bind() {
         
+        Observable.merge(
+            slider.rx.controlEvent(.touchUpOutside).asObservable(),
+            slider.rx.controlEvent(.touchUpInside).asObservable()
+        )
+        .subscribe(with: self) { owner, _ in
+            owner.coreImageManager.appendHistory(
+                type: owner.selectedFilterAttribute,
+                value: owner.slider.value
+            )
+        }
+        .disposed(by: disposeBag)
+        
         slider.rx.value
             .subscribe(with: self) { owner, value in
                 let image = owner.coreImageManager.applyFilter(
-                    owner.originalImage,
-                    filter: owner.selectedFilterAttribute.filter,
+                    type: owner.selectedFilterAttribute,
                     value: value
                 )
                 owner.filterImageView.image = image
+            }
+            .disposed(by: disposeBag)
+        
+        undoButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                owner.filterImageView.image = owner.coreImageManager.undo()
+            }
+            .disposed(by: disposeBag)
+        
+        redoButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                owner.filterImageView.image = owner.coreImageManager.redo()
             }
             .disposed(by: disposeBag)
         
