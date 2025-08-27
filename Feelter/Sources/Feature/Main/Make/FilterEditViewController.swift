@@ -50,10 +50,11 @@ final class FilterEditViewController: RxBaseViewController {
         let view = UIButton(type: .system)
         view.setImage(.undo.resized(to: .init(width: 24, height: 24)), for: .normal)
         view.backgroundColor = .gray75.withAlphaComponent(0.5)
-        view.tintColor = .gray60
+        view.tintColor = .gray75
         view.layer.cornerRadius = 8
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor.gray75.cgColor
+        view.layer.borderColor = UIColor.gray75.withAlphaComponent(0.5).cgColor
+        view.isEnabled = false
         return view
     }()
     
@@ -64,7 +65,8 @@ final class FilterEditViewController: RxBaseViewController {
         view.tintColor = .gray75
         view.layer.cornerRadius = 8
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor.gray75.cgColor
+        view.layer.borderColor = UIColor.gray75.withAlphaComponent(0.5).cgColor
+        view.isEnabled = false
         return view
     }()
 
@@ -72,10 +74,11 @@ final class FilterEditViewController: RxBaseViewController {
         let view = UIButton(type: .system)
         view.setImage(.compare.resized(to: .init(width: 24, height: 24)), for: .normal)
         view.backgroundColor = .gray75.withAlphaComponent(0.5)
-        view.tintColor = .gray60
+        view.tintColor = .gray75
         view.layer.cornerRadius = 8
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor.gray75.cgColor
+        view.layer.borderColor = UIColor.gray75.withAlphaComponent(0.5).cgColor
+        view.isEnabled = false
         return view
     }()
     
@@ -203,6 +206,7 @@ final class FilterEditViewController: RxBaseViewController {
                 type: owner.selectedFilterAttribute,
                 value: owner.slider.value
             )
+            owner.updateOptionButtonActivityState()
         }
         .disposed(by: disposeBag)
         
@@ -219,12 +223,16 @@ final class FilterEditViewController: RxBaseViewController {
         undoButton.rx.tap
             .subscribe(with: self) { owner, _ in
                 owner.filterImageView.image = owner.coreImageManager.undo()
+                owner.slider.value = owner.coreImageManager.filterStateValue(for: owner.selectedFilterAttribute)
+                owner.updateOptionButtonActivityState()
             }
             .disposed(by: disposeBag)
         
         redoButton.rx.tap
             .subscribe(with: self) { owner, _ in
                 owner.filterImageView.image = owner.coreImageManager.redo()
+                owner.slider.value = owner.coreImageManager.filterStateValue(for: owner.selectedFilterAttribute)
+                owner.updateOptionButtonActivityState()
             }
             .disposed(by: disposeBag)
         
@@ -393,7 +401,7 @@ extension FilterEditViewController {
         
         slider.minimumValue = coreImageFilter.parameter.range.lowerBound
         slider.maximumValue = coreImageFilter.parameter.range.upperBound
-        slider.value = coreImageFilter.parameter.defaultValue
+        slider.value = coreImageManager.filterStateValue(for: selectedItem)
         
         selectedFilterAttribute = selectedItem
         
@@ -413,7 +421,7 @@ extension FilterEditViewController {
         
         slider.minimumValue = coreImageFilter.parameter.range.lowerBound
         slider.maximumValue = coreImageFilter.parameter.range.upperBound
-        slider.value = coreImageFilter.parameter.defaultValue
+        slider.value = coreImageManager.filterStateValue(for: selectedItem)
         
         selectedFilterAttribute = selectedItem
         
@@ -428,6 +436,16 @@ extension FilterEditViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             self?.slider.isEnabled = true
         }
+    }
+    
+    func updateOptionButtonActivityState() {
+        let isEnableUndoButton = !coreImageManager.undoStack.isEmpty
+        let isEnableRedoButton = !coreImageManager.redoStack.isEmpty
+        let isEnableCompareButton = !coreImageManager.undoStack.isEmpty
+        
+        undoButton.isEnabled = isEnableUndoButton
+        redoButton.isEnabled = isEnableRedoButton
+        compareButton.isEnabled = isEnableCompareButton
     }
 }
 

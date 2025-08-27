@@ -17,7 +17,7 @@ struct FilterChange {
 final class CoreImageManager {
     static let context = CIContext()
     
-    private var originalImage: CIImage?
+    private var originCIImage: CIImage?
     
     private(set) var undoStack: [FilterChange] = []
     private(set) var redoStack: [FilterChange] = []
@@ -25,7 +25,11 @@ final class CoreImageManager {
     
     init(originalImage: UIImage) {
         let ciImage = CIImage(image: originalImage)
-        self.originalImage = ciImage
+        self.originCIImage = ciImage
+    }
+    
+    func filterStateValue(for type: FilterAttributeType) -> Float {
+        currentState[type] ?? type.filter.parameter.defaultValue
     }
     
     func applyFilter(type: FilterAttributeType, value: Float) -> UIImage? {
@@ -38,7 +42,7 @@ final class CoreImageManager {
     }
     
     func appendHistory(type: FilterAttributeType, value afterValue: Float) {
-        let beforeValue = currentState[type] ?? type.filter.parameter.defaultValue
+        let beforeValue = filterStateValue(for: type)
         
         // 값이 변경된 경우에만 히스토리 추가
         guard beforeValue != afterValue else { return }
@@ -89,7 +93,7 @@ final class CoreImageManager {
 extension CoreImageManager {
     
     private func applyFilters(_ state: [FilterAttributeType: Float]) -> UIImage? {
-        guard let originalImage = originalImage else { return nil }
+        guard let originalImage = originCIImage else { return nil }
         
         // 우선순위 순서로 필터 정렬
         let sortedFilters = state
