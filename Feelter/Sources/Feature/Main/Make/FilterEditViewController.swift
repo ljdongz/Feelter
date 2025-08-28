@@ -141,6 +141,18 @@ final class FilterEditViewController: RxBaseViewController {
         view.backgroundColor = .black
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        hideTabBar()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        showTabBar()
+    }
+    
     override func setupView() {
         setupCollectionView()
         initializeSnapShot()
