@@ -55,16 +55,18 @@ final class FilterMakeViewController: RxBaseViewController {
     
     private let viewModel = FilterMakeViewModel()
     
-    private weak var activeTextField: UITextField?
+    private weak var currentActiveTextField: UITextField?
     
-    private let titleTextFieldRelay = BehaviorRelay<String>(value: "")
-    private let introductionTextFieldRelay = BehaviorRelay<String>(value: "")
-    private let priceTextFieldRelay = BehaviorRelay<String>(value: "")
+    // TODO: 옵저버블 정리
+    private let titleTextFieldRelay = PublishRelay<String>() // -> vm
+    private let updateCategoryRelay = PublishRelay<FilterCategory>() // -> vm
+    private let introductionTextFieldRelay = PublishRelay<String>() // -> vm
+    private let uploadImageViewRelay = PublishRelay<(ImageComparison, FilterAttribute)>() // -> vm
+    private let priceTextFieldRelay = PublishRelay<String>() // -> vm
+    private let isEnableCreateButtonRelay = BehaviorRelay<Bool>(value: false) // -> cell
+    private let requestSaveRelay = PublishRelay<Void>() // -> vm
     
     private var collectionViewBottomConstraint: Constraint?
-    
-    private var originImage: UIImage?
-    private var filteredImage: UIImage?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -107,9 +109,20 @@ final class FilterMakeViewController: RxBaseViewController {
     }
     
     override func bind() {
-        let input = FilterMakeViewModel.Input()
+        let input = FilterMakeViewModel.Input(
+            titleTextFieldValue: titleTextFieldRelay.distinctUntilChanged(),
+            categoryValue: updateCategoryRelay.distinctUntilChanged(),
+            descriptionTextFieldValue: introductionTextFieldRelay.distinctUntilChanged(),
+            priceTextFieldValue: priceTextFieldRelay.distinctUntilChanged(),
+            uploadImageValue: uploadImageViewRelay.asObservable(),
+            createFilterButtonTapped: requestSaveRelay.asObservable()
+        )
         
         let output = viewModel.transform(input: input)
+        
+        output.isEnableCreateButton
+            .bind(to: isEnableCreateButtonRelay)
+            .disposed(by: disposeBag)
         
         collectionView.rx.itemSelected
             .subscribe(with: self) { owner, indexPath in
@@ -118,6 +131,23 @@ final class FilterMakeViewController: RxBaseViewController {
                     owner.updateCategorySelection(index: indexPath.item)
                 case .uploadPhoto:
                     owner.presentImagePicker()
+                case .createButton:
+                    owner.view.endEditing(true)
+                    let alertVC = UIAlertController(
+                        title: "이대로 생성하시겠습니까?",
+                        message: nil,
+                        preferredStyle: .alert
+                    )
+                    let okAction = UIAlertAction(
+                        title: "생성",
+                        style: .default
+                    ) { _ in
+                        owner.requestSaveRelay.accept(())
+                    }
+                    let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+                    alertVC.addAction(okAction)
+                    alertVC.addAction(cancelAction)
+                    owner.present(alertVC, animated: true)
                 default:
                     break
                 }
@@ -141,6 +171,14 @@ final class FilterMakeViewController: RxBaseViewController {
                 alertVC.addAction(okAction)
                 alertVC.addAction(cancelAction)
                 owner.present(alertVC, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        uploadImageViewRelay
+            .compactMap { $0 }
+            .subscribe(with: self) { owner, result in
+                let comparison = result.0
+                owner.updateUploadImageSnapShot(comparison.filtered)
             }
             .disposed(by: disposeBag)
         
@@ -211,6 +249,8 @@ extension FilterMakeViewController {
         snapShot.deleteAll()
         snapShot.append(categories)
         dataSource.apply(snapShot, to: .category, animatingDifferences: false)
+        
+        updateCategoryRelay.accept(categories[index].category)
     }
     
     private func presentImagePicker() {
@@ -319,7 +359,7 @@ extension FilterMakeViewController {
                         .disposed(by: cell.disposeBag)
                     cell.textFieldDidBeginEditingTrigger
                         .subscribe(with: self) { owner, textField in
-                            owner.activeTextField = textField
+                            owner.currentActiveTextField = textField
                         }
                         .disposed(by: disposeBag)
                     
@@ -364,7 +404,7 @@ extension FilterMakeViewController {
                         .disposed(by: cell.disposeBag)
                     cell.textFieldDidBeginEditingTrigger
                         .subscribe(with: self) { owner, textField in
-                            owner.activeTextField = textField
+                            owner.currentActiveTextField = textField
                         }
                         .disposed(by: disposeBag)
                     
@@ -385,7 +425,7 @@ extension FilterMakeViewController {
                         .disposed(by: cell.disposeBag)
                     cell.textFieldDidBeginEditingTrigger
                         .subscribe(with: self) { owner, textField in
-                            owner.activeTextField = textField
+                            owner.currentActiveTextField = textField
                         }
                         .disposed(by: disposeBag)
                     
@@ -400,17 +440,19 @@ extension FilterMakeViewController {
                         return .init()
                     }
                     
-                    Observable.combineLatest(
-                        titleTextFieldRelay.distinctUntilChanged(),
-                        introductionTextFieldRelay.distinctUntilChanged(),
-                        priceTextFieldRelay.distinctUntilChanged()
-                    )
-                    .map { !$0.isEmpty && !$1.isEmpty && !$2.isEmpty }
-                    .subscribe(with: self) { owner, isActive in
-                        cell.isUserInteractionEnabled = isActive
-                        cell.updateActiveState(isActive)
-                    }
-                    .disposed(by: disposeBag)
+//                    Observable.combineLatest(
+//                        titleTextFieldRelay.distinctUntilChanged(),
+//                        introductionTextFieldRelay.distinctUntilChanged(),
+//                        priceTextFieldRelay.distinctUntilChanged(),
+//                        uploadImageViewRelay.asObservable()
+//                    )
+//                    .map { !$0.isEmpty && !$1.isEmpty && !$2.isEmpty && $3 != nil }
+                    isEnableCreateButtonRelay
+                        .subscribe(with: self) { owner, isActive in
+                            cell.isUserInteractionEnabled = isActive
+                            cell.updateActiveState(isActive)
+                        }
+                        .disposed(by: disposeBag)
                     
                     cell.configureCell(title: "생성하기")
                     return cell
@@ -460,7 +502,7 @@ extension FilterMakeViewController {
 
 extension FilterMakeViewController {
     private func handleKeyboardWillShow(notification: Notification) {
-        guard let activeTextField,
+        guard let currentActiveTextField,
               let keyboardFrame = notification.keyboardFrameEndUserInfoKey,
               let animationDuration = notification.keyboardAnimationDurationUserInfoKey else {
             return
@@ -470,7 +512,7 @@ extension FilterMakeViewController {
         let safeAreaBottom = view.safeAreaInsets.bottom
         let adjustedHeight = keyboardHeight + safeAreaBottom
         
-        let textFieldFrame = activeTextField.convert(activeTextField.bounds, to: nil)
+        let textFieldFrame = currentActiveTextField.convert(currentActiveTextField.bounds, to: nil)
         let textFieldBottomY = textFieldFrame.maxY
         
         let keyboardTopY = view.frame.height - keyboardHeight
@@ -517,7 +559,7 @@ extension FilterMakeViewController: PHPickerViewControllerDelegate {
                     guard let image = image as? UIImage else { return }
                     
                     let vc = FilterEditViewController(image: image) { comparison, filterAttribute in
-                        self?.updateUploadImageSnapShot(comparison.filtered)
+                        self?.uploadImageViewRelay.accept((comparison, filterAttribute))
                     }
                     
                     self?.navigationController?.pushViewController(vc, animated: true)
