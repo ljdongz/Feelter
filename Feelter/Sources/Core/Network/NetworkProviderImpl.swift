@@ -67,6 +67,30 @@ struct NetworkProviderImpl: NetworkProvider {
             return try await performRequest(request: retryRequest)
         }
     }
+    
+    func upload<T: Decodable>(endpoint: APIEndpoint, type: T.Type) async throws -> T {
+        // URLRequest 객체 생성
+        guard var request = endpoint.asURLRequest() else {
+            throw NetworkError.notCreatedURLRequest
+        }
+        
+        // 토큰 인터셉터를 설정한 경우, adapt 호출
+        if let tokenInterceptor {
+            request = tokenInterceptor.adapt(request)
+        }
+        
+        do {
+            // API 요청
+            return try await performUpload(request: request, type: type)
+        } catch  {
+            // 에러 응답인 경우, 액세스 토큰 만료 에러인지 확인 후 재요청
+            let retryRequest = try await handleTokenInterceptor(
+                request: request,
+                error: error
+            )
+            return try await performRequest(request: retryRequest, type: type)
+        }
+    }
 }
 
 private extension NetworkProviderImpl {
@@ -113,6 +137,34 @@ private extension NetworkProviderImpl {
         }
         
         return
+    }
+    
+    func performUpload<T: Decodable>(request: URLRequest, type: T.Type) async throws -> T {
+        let body = request.httpBody
+        var request = request
+        request.httpBody = nil
+        
+        // URLSession 통신
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await session.upload(for: request, from: body!)
+        } catch {
+            throw NetworkError.urlSessionError(error)
+        }
+        
+        // HTTP Response 코드 확인
+        if let httpResponse = response as? HTTPURLResponse {
+            guard 200...299 ~= httpResponse.statusCode else {
+                throw mapStatusCodeToError(httpResponse.statusCode)
+            }
+        }
+        
+        // JSON 디코딩
+        do {
+            return try JSONDecoder().decode(T.self, from: data)
+        } catch {
+            throw NetworkError.decodingError(error)
+        }
     }
     
     func handleTokenInterceptor(request: URLRequest, error: Error) async throws -> URLRequest {
