@@ -15,6 +15,15 @@ struct FilterRepositoryImpl: FilterRepository {
         self.networkProvider = networkProvider
     }
     
+    func createFilter(filter: CreateFilter) async throws {
+        let request = CreateFilterRequestDTO.create(from: filter)
+        
+        let _ = try await networkProvider.request(
+            endpoint: FilterAPI.create(request),
+            type: FilterDetailResponseDTO.self
+        )
+    }
+    
     func fetchHotTrendFilters() async throws -> [Filter] {
         let response = try await networkProvider.request(
             endpoint: FilterAPI.hotTrend,
@@ -70,5 +79,17 @@ struct FilterRepositoryImpl: FilterRepository {
             endpoint: FilterAPI.like(filterID: filterID, body: requestDTO),
             type: LikeStatusDTO.self
         )
+    }
+    
+    func uploadFilterImage(original: Data, filtered: Data) async throws -> [String] {
+        let response = try await networkProvider.upload(
+            endpoint: FilterAPI.uploadFiles(
+                originalImage: original,
+                filteredImage: filtered
+            ),
+            type: UploadFilterImageResponseDTO.self
+        )
+        
+        return response.files
     }
 }

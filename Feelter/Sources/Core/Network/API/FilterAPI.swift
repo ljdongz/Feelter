@@ -8,6 +8,7 @@
 import Foundation
 
 enum FilterAPI {
+    case create(Encodable)
     case hotTrend
     case todayFilter
     case queryFilters(
@@ -31,6 +32,8 @@ extension FilterAPI: APIEndpoint {
     
     var path: String {
         switch self {
+        case .create:
+            "/v1/filters"
         case .hotTrend:
             "/v1/filters/hot-trend"
         case .todayFilter:
@@ -48,6 +51,7 @@ extension FilterAPI: APIEndpoint {
     
     var method: HTTPMethod {
         switch self {
+        case .create: .post
         case .hotTrend: .get
         case .todayFilter: .get
         case .queryFilters: .get
@@ -59,6 +63,8 @@ extension FilterAPI: APIEndpoint {
     
     var task: HTTPTask {
         switch self {
+        case let .create(data):
+            return .requestJSONEncodable(data)
         case .hotTrend:
             return .requestPlain
         case .todayFilter:

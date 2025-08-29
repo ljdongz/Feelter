@@ -15,4 +15,5 @@ struct CreateFilter {
     var imageComparison: ImageComparison?
     var fileURLs: [String] = []
     var filterAttribute: FilterAttribute = .zero
+    var photoMetadata: PhotoMetadata? = nil
 }
