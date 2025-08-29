@@ -124,6 +124,42 @@ final class FilterMakeViewController: RxBaseViewController {
             .bind(to: isEnableCreateButtonRelay)
             .disposed(by: disposeBag)
         
+        output.responseSuccess
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, _ in
+                let alertVC = UIAlertController(
+                    title: "필터를 생성하였습니다.",
+                    message: nil,
+                    preferredStyle: .alert
+                )
+                let okAction = UIAlertAction(
+                    title: "확인",
+                    style: .default
+                ) { _ in
+                    owner.navigationController?.popViewController(animated: true)
+                }
+                alertVC.addAction(okAction)
+                owner.present(alertVC, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        output.responseError
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, _ in
+                let alertVC = UIAlertController(
+                    title: "필터 생성에 실패하였습니다.",
+                    message: nil,
+                    preferredStyle: .alert
+                )
+                let okAction = UIAlertAction(
+                    title: "확인",
+                    style: .default
+                )
+                alertVC.addAction(okAction)
+                owner.present(alertVC, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
         collectionView.rx.itemSelected
             .subscribe(with: self) { owner, indexPath in
                 switch Section(rawValue: indexPath.section) {

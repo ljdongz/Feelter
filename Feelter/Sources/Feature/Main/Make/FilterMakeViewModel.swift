@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 import RxCocoa
 import RxSwift
@@ -43,6 +44,12 @@ final class FilterMakeViewModel: ViewModel {
             }
             .disposed(by: disposeBag)
         
+        input.categoryValue
+            .subscribe(with: self) { owner, category in
+                owner.createFilter.category = category.rawValue
+            }
+            .disposed(by: disposeBag)
+        
         input.descriptionTextFieldValue
             .subscribe(with: self) { owner, description in
                 owner.createFilter.description = description
@@ -70,11 +77,33 @@ final class FilterMakeViewModel: ViewModel {
             .disposed(by: disposeBag)
         
         input.createFilterButtonTapped
-            .subscribe(with: self) { owner, _ in
-                print(owner.createFilter)
+            .compactMap { [weak self] _ -> (Data, Data)? in
+                guard let self = self,
+                      let originalImage = self.createFilter.imageComparison?.origin,
+                      let filteredImage = self.createFilter.imageComparison?.filtered,
+                      let originalData = self.compressionImage(image: originalImage),
+                      let filteredData = self.compressionImage(image: filteredImage) else {
+                    return nil
+                }
+                
+                return (originalData, filteredData)
+            }
+            .withAsyncResult(with: self) { owner, datas in
+                let fileURLs = try await owner.filterRepository.uploadFilterImage(original: datas.0, filtered: datas.1)
+                owner.createFilter.fileURLs = fileURLs
+                return try await owner.filterRepository.createFilter(filter: owner.createFilter)
+            }
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success:
+                    output.responseSuccess.accept(())
+                case .failure(let error):
+                    print(error)
+                    output.responseError.accept("필터 생성에 실패하였습니다.")
+                }
             }
             .disposed(by: disposeBag)
-        
+            
         return output
     }
 }
@@ -85,5 +114,32 @@ extension FilterMakeViewModel {
         !createFilter.description.isEmpty &&
         (createFilter.price != -1) &&
         (createFilter.imageComparison != nil)
+    }
+    
+    func compressionImage(image: UIImage) -> Data? {
+        let maxSizeInBytes = 1024 * 1024 // 1MB
+        
+        // 초기 압축 품질을 1.0에서 시작
+        var compressionQuality: CGFloat = 1.0
+        var imageData = image.jpegData(compressionQuality: compressionQuality)
+        
+        // 이미지 데이터가 1MB보다 작거나 같으면 바로 반환
+        if let data = imageData,
+            data.count <= maxSizeInBytes {
+            return data
+        }
+        
+        // 1MB를 초과하는 경우 압축 품질을 0.1씩 줄여가며 압축
+        while compressionQuality >= 0.1 {
+            compressionQuality -= 0.1
+            imageData = image.jpegData(compressionQuality: compressionQuality)
+            
+            if let data = imageData,
+                data.count <= maxSizeInBytes {
+                return data
+            }
+        }
+        
+        return imageData
     }
 }
