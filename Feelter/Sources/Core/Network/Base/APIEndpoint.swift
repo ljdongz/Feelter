@@ -44,8 +44,39 @@ extension APIEndpoint {
         
         case let .requestJSONEncodable(parameters):
             urlRequest.httpBody = try? JSONEncoder().encode(parameters)
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+        case let .requestMultipartData(formData):
+            let boundary = "Boundary-\(UUID().uuidString)"
+            urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            urlRequest.httpBody = createMultipartBody(formData: formData, boundary: boundary)
         }
         
         return urlRequest
+    }
+    
+    func createMultipartBody(formData: [MultipartFormData], boundary: String) -> Data {
+        var body = Data()
+        
+        for data in formData {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            
+            if let fileName = data.fileName {
+                body.append("Content-Disposition: form-data; name=\"\(data.name)\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+            } else {
+                body.append("Content-Disposition: form-data; name=\"\(data.name)\"\r\n".data(using: .utf8)!)
+            }
+            
+            if let mimeType = data.mimeType {
+                body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+            }
+            
+//            body.append("\r\n".data(using: .utf8)!)
+            body.append(data.data)
+            body.append("\r\n".data(using: .utf8)!)
+        }
+        
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        return body
     }
 }
