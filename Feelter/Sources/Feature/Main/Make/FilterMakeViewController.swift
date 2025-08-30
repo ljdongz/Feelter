@@ -211,7 +211,6 @@ final class FilterMakeViewController: RxBaseViewController {
             .disposed(by: disposeBag)
         
         uploadImageViewRelay
-            .compactMap { $0 }
             .subscribe(with: self) { owner, result in
                 let comparison = result.0
                 owner.updateUploadImageSnapShot(comparison.filtered)

@@ -137,9 +137,13 @@ extension CoreImageManager {
         // 원본 이미지부터 순차적으로 필터 적용
         var result = originalImage
         for (filterType, value) in sortedFilters {
-            guard let filteredCIImage = applyFilter(result, filter: filterType.filter, value: value),
-                  let ciImage = CIImage(image: filteredCIImage) else { continue }
-            result = ciImage
+            guard let filteredCIImage = applyFilter(
+                result,
+                filter: filterType.filter,
+                value: value
+            ) else { continue }
+            
+            result = filteredCIImage
         }
         
         let uiImage = createUIImage(from: result)
@@ -151,7 +155,7 @@ extension CoreImageManager {
         return uiImage
     }
     
-    private func applyFilter(_ ciImage: CIImage?, filter: CoreImageFilter, value: Double) -> UIImage? {
+    private func applyFilter(_ ciImage: CIImage, filter: CoreImageFilter, value: Double) -> CIImage? {
         guard let ciFilter = CIFilter(name: filter.name) else { return nil }
         
         ciFilter.setValue(ciImage, forKey: kCIInputImageKey)
@@ -165,7 +169,7 @@ extension CoreImageManager {
             ciFilter.setValue(vector, forKey: filter.parameter.key)
         }
         
-        return createUIImage(from: ciFilter.outputImage)
+        return ciFilter.outputImage
     }
     
     private func createUIImage(from ciImage: CIImage?) -> UIImage? {

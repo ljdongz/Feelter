@@ -45,7 +45,7 @@ extension FilterAttributeType {
         case .saturation: "채도"
         case .sharpness: "선명도"
         case .blur: "블러"
-        case .vignette: "비네트"
+        case .vignette: "비네팅"
         case .noiseReduction: "노이즈 감소"
         case .highlights: "하이라이트"
         case .shadows: "그림자"
@@ -105,6 +105,7 @@ extension FilterAttributeType {
         case .highlights: CoreImageFilter.highlight
         case .shadows: CoreImageFilter.shadow
         case .temperature: CoreImageFilter.temperature
+        // TODO: 블랙포인트 수정
         case .blackPoint: CoreImageFilter.brightness
         }
     }

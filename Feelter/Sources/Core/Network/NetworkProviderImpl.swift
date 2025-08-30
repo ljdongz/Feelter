@@ -88,7 +88,7 @@ struct NetworkProviderImpl: NetworkProvider {
                 request: request,
                 error: error
             )
-            return try await performRequest(request: retryRequest, type: type)
+            return try await performUpload(request: retryRequest, type: type)
         }
     }
 }
@@ -140,14 +140,16 @@ private extension NetworkProviderImpl {
     }
     
     func performUpload<T: Decodable>(request: URLRequest, type: T.Type) async throws -> T {
-        let body = request.httpBody
+        guard let body = request.httpBody else {
+            throw NetworkError.notCreatedURLRequest
+        }
         var request = request
         request.httpBody = nil
         
         // URLSession 통신
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await session.upload(for: request, from: body!)
+            (data, response) = try await session.upload(for: request, from: body)
         } catch {
             throw NetworkError.urlSessionError(error)
         }

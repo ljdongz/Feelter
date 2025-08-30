@@ -92,6 +92,8 @@ final class ChatRepositoryImpl: ChatRepository {
     
     func updateRoom(apnsPayload: APNsPayload) async throws {
         if socketProvider.isConnected(roomID: apnsPayload.roomID) { return }
+        
+        
 
         try await chatDataSource.updateChatRoom(from: apnsPayload)
     }

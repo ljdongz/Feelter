@@ -194,12 +194,14 @@ final class FilterEditViewController: RxBaseViewController {
             make.leading.equalTo(undoButton.snp.trailing).offset(8)
             make.width.equalTo(40)
             make.height.equalTo(32)
+            make.centerY.equalTo(undoButton.snp.centerY)
         }
         
         compareButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview()
             make.width.equalTo(40)
             make.height.equalTo(32)
+            make.centerY.equalTo(undoButton.snp.centerY)
         }
         
         slider.snp.makeConstraints { make in
