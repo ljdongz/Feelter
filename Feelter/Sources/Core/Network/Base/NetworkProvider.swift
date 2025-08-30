@@ -14,4 +14,9 @@ protocol NetworkProvider {
     ) async throws -> T
     
     func request(endpoint: APIEndpoint) async throws
+    
+    func upload<T: Decodable>(
+        endpoint: APIEndpoint,
+        type: T.Type
+    ) async throws -> T
 }

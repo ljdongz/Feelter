@@ -146,8 +146,28 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         }
     }
     
-    // 푸시 알림 배너 클릭했을 시 실행
+    // 앱 실행 중(foreground & background) 푸시 알림 배너 클릭했을 시 실행
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         print(#function)
+        let userInfo = response.notification.request.content.userInfo
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: userInfo)
+            let apnsPayload = try JSONDecoder().decode(APNsPayload.self, from: jsonData)
+            
+            print("🔔 Push notification payload decoded successfully:")
+            print("Room ID: \(apnsPayload.roomID)")
+            
+            // 메인 큐에서 네비게이션 처리
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .PushToChatViewController, object: apnsPayload)
+            }
+            
+        } catch {
+            print("❌ Failed to decode push notification payload: \(error)")
+            print("UserInfo: \(userInfo)")
+        }
+        
+        completionHandler()
     }
 }

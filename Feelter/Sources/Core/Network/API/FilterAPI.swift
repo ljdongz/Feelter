@@ -8,6 +8,7 @@
 import Foundation
 
 enum FilterAPI {
+    case create(Encodable)
     case hotTrend
     case todayFilter
     case queryFilters(
@@ -18,6 +19,10 @@ enum FilterAPI {
     )
     case detail(filterID: String)
     case like(filterID: String, body: Encodable)
+    case uploadFiles(
+        originalImage: Data,
+        filteredImage: Data
+    )
 }
 
 extension FilterAPI: APIEndpoint {
@@ -27,6 +32,8 @@ extension FilterAPI: APIEndpoint {
     
     var path: String {
         switch self {
+        case .create:
+            "/v1/filters"
         case .hotTrend:
             "/v1/filters/hot-trend"
         case .todayFilter:
@@ -37,21 +44,27 @@ extension FilterAPI: APIEndpoint {
             "/v1/filters/\(id)"
         case let .like(id, _):
             "/v1/filters/\(id)/like"
+        case .uploadFiles:
+            "/v1/filters/files"
         }
     }
     
     var method: HTTPMethod {
         switch self {
+        case .create: .post
         case .hotTrend: .get
         case .todayFilter: .get
         case .queryFilters: .get
         case .detail: .get
         case .like: .post
+        case .uploadFiles: .post
         }
     }
     
     var task: HTTPTask {
         switch self {
+        case let .create(data):
+            return .requestJSONEncodable(data)
         case .hotTrend:
             return .requestPlain
         case .todayFilter:
@@ -67,13 +80,26 @@ extension FilterAPI: APIEndpoint {
             return .requestPlain
         case let .like(_, body):
             return .requestJSONEncodable(body)
+        case let .uploadFiles(original, filtered):
+            return .requestMultipartData(formData: [
+                .init(data: original, name: "files", fileName: "original.jpg", mimeType: "image/jpg"),
+                .init(data: filtered, name: "files", fileName: "filtered.jpg", mimeType: "image/jpg")
+            ])
         }
     }
     
     var headers: [String : String]? {
-        [
-            "Content-Type": "application/json",
-            "SeSACKey": AppConfiguration.apiKey
-        ]
+        switch self {
+        case .uploadFiles:
+            [
+                "SeSACKey": AppConfiguration.apiKey
+            ]
+        default:
+            [
+                "Content-Type": "application/json",
+                "SeSACKey": AppConfiguration.apiKey
+            ]
+        }
+        
     } 
 }

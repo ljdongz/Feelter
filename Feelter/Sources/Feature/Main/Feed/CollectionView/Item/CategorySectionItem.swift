@@ -10,7 +10,7 @@ import Foundation
 struct CategorySectionItem: Hashable {
     let id = UUID()
     let category: FilterCategory
-    let isSelected: Bool
+    var isSelected: Bool
     
     init(category: FilterCategory, isSelected: Bool = false) {
         self.category = category

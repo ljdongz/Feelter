@@ -73,7 +73,7 @@ final class UploadPhotoCollectionViewCell: BaseCollectionViewCell {
         let containerWidth = UIScreen.main.bounds.width - 40
         let newHeight = containerWidth * aspectRatio
         
-        let finalHeight = max(150, newHeight)
+        let finalHeight = min(400, max(150, newHeight))
 
         // 애니메이션과 함께 높이 변경
         photoHeightConstraint?.update(offset: finalHeight)
@@ -84,13 +84,13 @@ extension UploadPhotoCollectionViewCell {
     static func layoutSection() -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(layoutSize: .init(
             widthDimension: .fractionalWidth(1),
-            heightDimension: .estimated(150)
+            heightDimension: .estimated(300)
         ))
         
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: .init(
                 widthDimension: .fractionalWidth(1),
-                heightDimension: .estimated(150)
+                heightDimension: .estimated(300)
             ),
             subitems: [item]
         )

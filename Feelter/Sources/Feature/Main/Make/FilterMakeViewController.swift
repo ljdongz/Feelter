@@ -5,6 +5,7 @@
 //  Created by 이정동 on 8/11/25.
 //
 
+import PhotosUI
 import UIKit
 
 import RxCocoa
@@ -20,6 +21,7 @@ final class FilterMakeViewController: RxBaseViewController {
         case category
         case uploadPhoto
         case introduction
+        case price
         case createButton
     }
     
@@ -34,6 +36,14 @@ final class FilterMakeViewController: RxBaseViewController {
         return view
     }()
     
+    private lazy var navigationLeftBarButton: UIButton = {
+        let view = UIButton()
+        view.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
+        view.setImage(.xmark, for: .normal)
+        view.tintColor = .gray15
+        return view
+    }()
+    
     private var dataSource: DataSourceType!
     private var categories = [
         CategorySectionItem(category: .food, isSelected: true),
@@ -45,11 +55,38 @@ final class FilterMakeViewController: RxBaseViewController {
     
     private let viewModel = FilterMakeViewModel()
     
-    private weak var createButton: BaseButtonCollectionViewCell?
+    private weak var currentActiveTextField: UITextField?
     
-    private let titleTextFieldRelay = BehaviorRelay<String>(value: "")
-    private let categorySelectionRelay = BehaviorRelay<FilterCategory>(value: .food)
-    private let introductionTextFieldRelay = BehaviorRelay<String>(value: "")
+    // TODO: 옵저버블 정리
+    private let titleTextFieldRelay = PublishRelay<String>() // -> vm
+    private let updateCategoryRelay = PublishRelay<FilterCategory>() // -> vm
+    private let introductionTextFieldRelay = PublishRelay<String>() // -> vm
+    private let uploadImageViewRelay = PublishRelay<(ImageComparison, FilterAttribute)>() // -> vm
+    private let priceTextFieldRelay = PublishRelay<String>() // -> vm
+    private let isEnableCreateButtonRelay = BehaviorRelay<Bool>(value: false) // -> cell
+    private let requestSaveRelay = PublishRelay<Void>() // -> vm
+    
+    private var collectionViewBottomConstraint: Constraint?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        
+        navigationItem.leftBarButtonItem = .init(customView: navigationLeftBarButton)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        hideTabBar()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        showTabBar()
+    }
     
     override func setupView() {
         title = "Make"
@@ -66,39 +103,133 @@ final class FilterMakeViewController: RxBaseViewController {
     override func setupConstraints() {
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-            make.horizontalEdges.bottom.equalToSuperview()
+            make.horizontalEdges.equalToSuperview()
+            collectionViewBottomConstraint = make.bottom.equalToSuperview().constraint
         }
     }
     
     override func bind() {
-        let input = FilterMakeViewModel.Input()
+        let input = FilterMakeViewModel.Input(
+            titleTextFieldValue: titleTextFieldRelay.distinctUntilChanged(),
+            categoryValue: updateCategoryRelay.distinctUntilChanged(),
+            descriptionTextFieldValue: introductionTextFieldRelay.distinctUntilChanged(),
+            priceTextFieldValue: priceTextFieldRelay.distinctUntilChanged(),
+            uploadImageValue: uploadImageViewRelay.asObservable(),
+            createFilterButtonTapped: requestSaveRelay.asObservable()
+        )
         
         let output = viewModel.transform(input: input)
+        
+        output.isEnableCreateButton
+            .bind(to: isEnableCreateButtonRelay)
+            .disposed(by: disposeBag)
+        
+        output.responseSuccess
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, _ in
+                let alertVC = UIAlertController(
+                    title: "필터를 생성하였습니다.",
+                    message: nil,
+                    preferredStyle: .alert
+                )
+                let okAction = UIAlertAction(
+                    title: "확인",
+                    style: .default
+                ) { _ in
+                    owner.navigationController?.popViewController(animated: true)
+                }
+                alertVC.addAction(okAction)
+                owner.present(alertVC, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        output.responseError
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, _ in
+                let alertVC = UIAlertController(
+                    title: "필터 생성에 실패하였습니다.",
+                    message: nil,
+                    preferredStyle: .alert
+                )
+                let okAction = UIAlertAction(
+                    title: "확인",
+                    style: .default
+                )
+                alertVC.addAction(okAction)
+                owner.present(alertVC, animated: true)
+            }
+            .disposed(by: disposeBag)
         
         collectionView.rx.itemSelected
             .subscribe(with: self) { owner, indexPath in
                 switch Section(rawValue: indexPath.section) {
+                case .category:
+                    owner.updateCategorySelection(index: indexPath.item)
                 case .uploadPhoto:
-                    let imagePicker = UIImagePickerController()
-                    imagePicker.delegate = owner
-                    imagePicker.sourceType = .photoLibrary
-                    owner.present(imagePicker, animated: true)
+                    owner.presentImagePicker()
+                case .createButton:
+                    owner.view.endEditing(true)
+                    let alertVC = UIAlertController(
+                        title: "이대로 생성하시겠습니까?",
+                        message: nil,
+                        preferredStyle: .alert
+                    )
+                    let okAction = UIAlertAction(
+                        title: "생성",
+                        style: .default
+                    ) { _ in
+                        owner.requestSaveRelay.accept(())
+                    }
+                    let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+                    alertVC.addAction(okAction)
+                    alertVC.addAction(cancelAction)
+                    owner.present(alertVC, animated: true)
                 default:
                     break
                 }
             }
             .disposed(by: disposeBag)
         
-        Observable.combineLatest(
-            titleTextFieldRelay.distinctUntilChanged(),
-            introductionTextFieldRelay.distinctUntilChanged()
-        )
-        .map { !$0.isEmpty && !$1.isEmpty }
-        .subscribe(with: self) { owner, isActive in
-            owner.createButton?.isUserInteractionEnabled = isActive
-            owner.createButton?.updateActiveState(isActive)
-        }
-        .disposed(by: disposeBag)
+        navigationLeftBarButton.rx.tap
+            .subscribe(with: self) { owner, _ in
+                let alertVC = UIAlertController(
+                    title: "필터 생성을 그만두시겠습니까?",
+                    message: "현재까지 작성된 내용이 사라집니다.",
+                    preferredStyle: .alert
+                )
+                let okAction = UIAlertAction(
+                    title: "나가기",
+                    style: .destructive
+                ) { _ in
+                    owner.navigationController?.popViewController(animated: true)
+                }
+                let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+                alertVC.addAction(okAction)
+                alertVC.addAction(cancelAction)
+                owner.present(alertVC, animated: true)
+            }
+            .disposed(by: disposeBag)
+        
+        uploadImageViewRelay
+            .subscribe(with: self) { owner, result in
+                let comparison = result.0
+                owner.updateUploadImageSnapShot(comparison.filtered)
+            }
+            .disposed(by: disposeBag)
+        
+        NotificationCenter.default.rx
+            .notification(.KeyboardWillShow)
+            .subscribe(with: self, onNext: { owner, notification in
+                owner.handleKeyboardWillShow(notification: notification)
+            })
+            .disposed(by: disposeBag)
+        
+        NotificationCenter.default.rx
+            .notification(.KeyboardWillHide)
+            .subscribe(with: self, onNext: { owner, notification in
+                owner.handleKeyboardWillHide(notification: notification)
+            })
+            .disposed(by: disposeBag)
     }
 }
 
@@ -113,23 +244,59 @@ extension FilterMakeViewController {
             .category,
             .uploadPhoto,
             .introduction,
+            .price,
             .createButton
         ])
         
-        snapShot.appendItems([UUID().uuidString], toSection: .title)
+        snapShot.appendItems([BaseTextFieldCellItem(
+            placeholder: "필터 이름을 입력해주세요",
+            inputType: .text
+        )], toSection: .title)
         snapShot.appendItems(categories, toSection: .category)
         snapShot.appendItems([UploadPhotoItem(image: nil)], toSection: .uploadPhoto)
-        snapShot.appendItems([UUID().uuidString], toSection: .introduction)
+        snapShot.appendItems([BaseTextFieldCellItem(
+            placeholder: "이 필터에 대해 간단하게 소개해주세요",
+            inputType: .text
+        )], toSection: .introduction)
+        snapShot.appendItems([BaseTextFieldCellItem(
+            placeholder: "1000",
+            suffix: "원",
+            inputType: .number
+        )], toSection: .price)
         snapShot.appendItems([UUID().uuidString], toSection: .createButton)
         dataSource.apply(snapShot)
     }
     
-    private func updateUploadImageSnapShot(_ image: UIImage) {
+    private func updateUploadImageSnapShot(_ image: UIImage?) {
         var snapShot = dataSource.snapshot(for: .uploadPhoto)
         snapShot.deleteAll()
         snapShot.append([UploadPhotoItem(image: image)])
         
         dataSource.apply(snapShot, to: .uploadPhoto)
+    }
+    
+    private func updateCategorySelection(index: Int) {
+        for i in 0..<categories.count {
+            categories[i].isSelected = i == index
+        }
+        
+        var snapShot = dataSource.snapshot(for: .category)
+        snapShot.deleteAll()
+        snapShot.append(categories)
+        dataSource.apply(snapShot, to: .category, animatingDifferences: false)
+        
+        updateCategoryRelay.accept(categories[index].category)
+    }
+    
+    private func presentImagePicker() {
+        var configuration = PHPickerConfiguration()
+        configuration.selectionLimit = 1
+        configuration.filter = .images
+        
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+        picker.modalPresentationStyle = .fullScreen
+        present(picker, animated: true)
     }
 }
 
@@ -158,6 +325,8 @@ extension FilterMakeViewController {
             case .uploadPhoto:
                 return UploadPhotoCollectionViewCell.layoutSection()
             case .introduction:
+                return BaseTextFieldCollectionViewCell.layoutSection()
+            case .price:
                 return BaseTextFieldCollectionViewCell.layoutSection()
             case .createButton:
                 return BaseButtonCollectionViewCell.layoutSection()
@@ -211,7 +380,7 @@ extension FilterMakeViewController {
                 
                 switch Section(rawValue: indexPath.section) {
                 case .title:
-                    guard let _ = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? BaseTextFieldCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: BaseTextFieldCollectionViewCell.identifier,
                             for: indexPath
@@ -219,10 +388,15 @@ extension FilterMakeViewController {
                         return .init()
                     }
                     
-                    cell.configureCell(placeholder: "필터 이름을 입력해주세요.")
+                    cell.configureCell(item: item)
                     cell.textField.rx.text.orEmpty
                         .bind(to: self.titleTextFieldRelay)
                         .disposed(by: cell.disposeBag)
+                    cell.textFieldDidBeginEditingTrigger
+                        .subscribe(with: self) { owner, textField in
+                            owner.currentActiveTextField = textField
+                        }
+                        .disposed(by: disposeBag)
                     
                     return cell
                     
@@ -251,7 +425,7 @@ extension FilterMakeViewController {
                     return cell
                     
                 case .introduction:
-                    guard let _ = itemIdentifier as? String,
+                    guard let item = itemIdentifier as? BaseTextFieldCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: BaseTextFieldCollectionViewCell.identifier,
                             for: indexPath
@@ -259,10 +433,36 @@ extension FilterMakeViewController {
                         return .init()
                     }
                     
-                    cell.configureCell(placeholder: "이 필터에 대해 간단하게 소개해주세요.")
+                    cell.configureCell(item: item)
                     cell.textField.rx.text.orEmpty
                         .bind(to: introductionTextFieldRelay)
                         .disposed(by: cell.disposeBag)
+                    cell.textFieldDidBeginEditingTrigger
+                        .subscribe(with: self) { owner, textField in
+                            owner.currentActiveTextField = textField
+                        }
+                        .disposed(by: disposeBag)
+                    
+                    return cell
+                    
+                case .price:
+                    guard let item = itemIdentifier as? BaseTextFieldCellItem,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: BaseTextFieldCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? BaseTextFieldCollectionViewCell else {
+                        return .init()
+                    }
+                    
+                    cell.configureCell(item: item)
+                    cell.textField.rx.text.orEmpty
+                        .bind(to: priceTextFieldRelay)
+                        .disposed(by: cell.disposeBag)
+                    cell.textFieldDidBeginEditingTrigger
+                        .subscribe(with: self) { owner, textField in
+                            owner.currentActiveTextField = textField
+                        }
+                        .disposed(by: disposeBag)
                     
                     return cell
                     
@@ -275,7 +475,19 @@ extension FilterMakeViewController {
                         return .init()
                     }
                     
-                    self.createButton = cell
+//                    Observable.combineLatest(
+//                        titleTextFieldRelay.distinctUntilChanged(),
+//                        introductionTextFieldRelay.distinctUntilChanged(),
+//                        priceTextFieldRelay.distinctUntilChanged(),
+//                        uploadImageViewRelay.asObservable()
+//                    )
+//                    .map { !$0.isEmpty && !$1.isEmpty && !$2.isEmpty && $3 != nil }
+                    isEnableCreateButtonRelay
+                        .subscribe(with: self) { owner, isActive in
+                            cell.isUserInteractionEnabled = isActive
+                            cell.updateActiveState(isActive)
+                        }
+                        .disposed(by: disposeBag)
                     
                     cell.configureCell(title: "생성하기")
                     return cell
@@ -305,6 +517,8 @@ extension FilterMakeViewController {
                     headerView.configure(leading: "대표 사진 등록")
                 case .introduction:
                     headerView.configure(leading: "필터 소개")
+                case .price:
+                    headerView.configure(leading: "판매 가격")
                 default:
                     break
                 }
@@ -319,14 +533,75 @@ extension FilterMakeViewController {
     }
 }
 
-// MARK: - UIImagePickerControllerDelegate
+// MARK: - Keyboard Configuration
 
-extension FilterMakeViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
-            self.updateUploadImageSnapShot(image)
+extension FilterMakeViewController {
+    private func handleKeyboardWillShow(notification: Notification) {
+        guard let currentActiveTextField,
+              let keyboardFrame = notification.keyboardFrameEndUserInfoKey,
+              let animationDuration = notification.keyboardAnimationDurationUserInfoKey else {
+            return
         }
-        dismiss(animated: true, completion: nil)
+        
+        let keyboardHeight = keyboardFrame.cgRectValue.height
+        let safeAreaBottom = view.safeAreaInsets.bottom
+        let adjustedHeight = keyboardHeight + safeAreaBottom
+        
+        let textFieldFrame = currentActiveTextField.convert(currentActiveTextField.bounds, to: nil)
+        let textFieldBottomY = textFieldFrame.maxY
+        
+        let keyboardTopY = view.frame.height - keyboardHeight
+        
+        if textFieldBottomY > keyboardTopY {
+            var newContentOffset = collectionView.contentOffset
+            newContentOffset.y = max(0, newContentOffset.y + adjustedHeight)
+            collectionView.contentOffset = newContentOffset
+        }
+        
+        collectionViewBottomConstraint?.update(offset: -adjustedHeight)
+        
+        UIView.animate(withDuration: animationDuration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    private func handleKeyboardWillHide(notification: Notification) {
+        guard let animationDuration = notification.keyboardAnimationDurationUserInfoKey else {
+            return
+        }
+        
+        collectionViewBottomConstraint?.update(offset: 0)
+        
+        UIView.animate(withDuration: animationDuration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+}
+
+// MARK: - PHPickerViewControllerDelegate
+
+extension FilterMakeViewController: PHPickerViewControllerDelegate {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        
+        guard let result = results.first else {
+            picker.dismiss(animated: true)
+            return
+        }
+        
+        if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
+            result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
+                Task { @MainActor in
+                    guard let image = image as? UIImage else { return }
+                    
+                    let vc = FilterEditViewController(image: image) { comparison, filterAttribute in
+                        self?.uploadImageViewRelay.accept((comparison, filterAttribute))
+                    }
+                    
+                    self?.navigationController?.pushViewController(vc, animated: true)
+                    picker.dismiss(animated: true)
+                }
+            }
+        }
     }
 }
 

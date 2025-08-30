@@ -37,9 +37,8 @@ final class ChatViewModel: ViewModel {
     @Dependency private var tokenManager: TokenManager
     
     private let roomID: String
-    private let updatedAt: Date
     private let calendar = Calendar.current
-    private var lastMessageAt = Date()
+    private var lastMessageAt = Date() // 과거 메시지 데이터를 불러오기 위한 기준 날짜
     
     var userID: String? {
         tokenManager.userID
@@ -47,15 +46,14 @@ final class ChatViewModel: ViewModel {
     
     var disposeBag: DisposeBag = .init()
     
-    init(roomID: String, updatedAt: Date) {
+    init(roomID: String) {
         self.roomID = roomID
-        self.updatedAt = updatedAt
     }
     
     func transform(input: Input) -> Output {
         let output = Output()
         
-        let serverFetchTrigger = PublishRelay<Void>()
+        let serverFetchTrigger = PublishRelay<Date>()
         let receiveMessageTrigger = PublishRelay<ChatMessage>()
         
         input.viewDidLoad
@@ -66,7 +64,6 @@ final class ChatViewModel: ViewModel {
                 }
             })
             .withAsync(with: self) { owner, _ in
-                // TODO: 읽지 않은 개수 0으로 변경
                 await owner.chatRepository.fetchLocalMessages(
                     from: owner.roomID,
                     before: owner.lastMessageAt
@@ -77,7 +74,7 @@ final class ChatViewModel: ViewModel {
                 
                 output.messages.accept(.initMessages(messages))
                 
-                serverFetchTrigger.accept(())
+                serverFetchTrigger.accept(messages.last?.createdAt ?? Date())
             }
             .disposed(by: disposeBag)
         
@@ -146,8 +143,8 @@ final class ChatViewModel: ViewModel {
             .disposed(by: disposeBag)
         
         serverFetchTrigger.asObservable()
-            .withAsyncResult(with: self) { owner, _ in
-                let utcDate = UTCDateFormatter.shared.string(from: owner.updatedAt)
+            .withAsyncResult(with: self) { owner, date in
+                let utcDate = UTCDateFormatter.shared.string(from: date)
                 return try await owner.chatRepository.fetchMessages(from: owner.roomID, after: utcDate)
             }
             .subscribe(with: self) { owner, result in

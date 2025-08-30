@@ -33,34 +33,7 @@ final class FilterAttributeItemView: BaseView {
     
     var attributeType: FilterAttributeType? {
         didSet {
-            switch attributeType {
-            case .brightness:
-                iconImageView.image = .brightness
-            case .exposure:
-                iconImageView.image = .exposure
-            case .contrast:
-                iconImageView.image = .contrast
-            case .saturation:
-                iconImageView.image = .saturation
-            case .sharpness:
-                iconImageView.image = .sharpness
-            case .blur:
-                iconImageView.image = .blur
-            case .vignette:
-                iconImageView.image = .vignette
-            case .noiseReduction:
-                iconImageView.image = .noise
-            case .highlights:
-                iconImageView.image = .highlights
-            case .shadows:
-                iconImageView.image = .shadows
-            case .temperature:
-                iconImageView.image = .temperature
-            case .blackPoint:
-                iconImageView.image = .blackPoint
-            case nil:
-                break
-            }
+            iconImageView.image = attributeType?.image
         }
     }
     

@@ -62,7 +62,7 @@ extension BaseButtonCollectionViewCell {
         )
         
         let section = NSCollectionLayoutSection(group: group)
-        section.contentInsets = .init(top: 30, leading: 20, bottom: 0, trailing: 20)
+        section.contentInsets = .init(top: 30, leading: 20, bottom: 80, trailing: 20)
         return section
     }
 }

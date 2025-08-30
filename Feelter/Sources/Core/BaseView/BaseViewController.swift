@@ -20,13 +20,13 @@ class BaseViewController: UIViewController {
         setupSubviews()
         setupConstraints()
         setupActions()
+        setupNavigationBarStyle()
+        setupNavigationBarBackButton()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        setupNavigationBarStyle()
-        setupNavigationBarBackButton()
+
         setupKeyboardAdjustmentIfNeeded()
     }
     
