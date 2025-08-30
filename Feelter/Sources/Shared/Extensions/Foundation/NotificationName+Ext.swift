@@ -14,4 +14,5 @@ extension Notification.Name {
     static let ReceiveSocketMessage = Notification.Name("ReceiveSocketMessage")
     static let ShowTabBar = Notification.Name("showTabBar")
     static let HideTabBar = Notification.Name("hideTabBar")
+    static let PushToChatViewController = Notification.Name("PushToChatViewController")
 }

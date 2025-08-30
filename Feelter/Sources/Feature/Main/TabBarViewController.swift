@@ -41,7 +41,6 @@ final class TabBarViewController: RxBaseViewController {
         let vc5 = UINavigationController(rootViewController: MyPageViewController())
         
         vc4.view.backgroundColor = .brightTurquoise
-        vc5.view.backgroundColor = .deepTurquoise
         
         setViewControllers([vc1, vc2, vc3, vc4, vc5])
     }
@@ -95,6 +94,14 @@ final class TabBarViewController: RxBaseViewController {
                 }
             }
             .disposed(by: disposeBag)
+        
+        NotificationCenter.default.rx
+            .notification(.PushToChatViewController)
+            .compactMap { $0.object as? APNsPayload }
+            .subscribe(with: self) { owner, payload in
+                owner.navigateToChatRoom(roomID: payload.roomID)
+            }
+            .disposed(by: disposeBag)
     }
 }
 
@@ -135,6 +142,23 @@ extension TabBarViewController {
         newViewController.didMove(toParent: self)
         currentViewController = newViewController
         selectedIndex = index
+    }
+    
+    /// 푸시 알림을 통해 특정 채팅방으로 이동
+    private func navigateToChatRoom(roomID: String) {
+        
+        // 현재 선택된 탭의 네비게이션 컨트롤러 가져오기
+        guard let currentNavigationController = currentViewController as? UINavigationController else {
+            print("❌ Current view controller is not a navigation controller")
+            return
+        }
+        
+        // ChatViewController 생성 및 push
+        let chatViewModel = ChatViewModel(roomID: roomID)
+        let chatViewController = ChatViewController(viewModel: chatViewModel)
+        
+        currentNavigationController.pushViewController(chatViewController, animated: true)
+        print("✅ Navigated to chat room with ID: \(roomID)")
     }
 }
 
