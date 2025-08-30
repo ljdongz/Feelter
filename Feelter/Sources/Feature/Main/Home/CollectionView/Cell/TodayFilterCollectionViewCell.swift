@@ -149,7 +149,8 @@ final class TodayFilterCollectionViewCell: BaseCollectionViewCell {
     func configureCell(filter: Filter) {
         ImageLoader.shared.applyAuthenticatedImage(
             for: todayFilterImageView,
-            path: filter.files?[1] ?? ""
+            path: filter.files?[1] ?? "",
+            cachePolicy: .diskCache(expiration: .todayFilter)
         )
         
         todayFilterIntroductionLabel.text = filter.introduction

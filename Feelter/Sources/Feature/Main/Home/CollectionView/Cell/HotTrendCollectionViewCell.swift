@@ -45,7 +45,8 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
         
         ImageLoader.shared.applyAuthenticatedImage(
             for: filterFeedView.imageView,
-            path: filter.files?[1] ?? ""
+            path: filter.files?[1] ?? "",
+            cachePolicy: .diskCache(expiration: .hotTrendsFilter)
         )
     }
 }

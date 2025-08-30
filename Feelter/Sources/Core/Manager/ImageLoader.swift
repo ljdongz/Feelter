@@ -11,7 +11,7 @@ import Kingfisher
 
 enum ImageCachePolicy {
     case memoryOnly
-    case diskCache(expiration: TimeInterval)
+    case diskCache(expiration: ExpirationConfig)
     
     enum ExpirationConfig {
         case todayFilter
@@ -19,7 +19,7 @@ enum ImageCachePolicy {
         case hotTrendsFilter
         case todayAuthor
         
-        var value: Int {
+        var value: Double {
             switch self {
             case .todayFilter: 86400
             case .banners: 86400 * 7
@@ -34,7 +34,7 @@ enum ImageCachePolicy {
         case .memoryOnly:
             return .cacheMemoryOnly
         case .diskCache(let expiration):
-            return .diskCacheExpiration(.seconds(expiration))
+            return .diskCacheExpiration(.seconds(expiration.value))
         }
     }
 }
@@ -44,9 +44,14 @@ final class ImageLoader {
     
     static let shared = ImageLoader()
     
-    private init() {}
-
     @Dependency private var tokenManager: TokenManager
+
+    private init() {
+        // 100MB (8GB 기준으로 약 10%)
+        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 100
+        // 500MB
+        ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 500
+    }
     
     func applyAuthenticatedImage(
         for imageView: UIImageView,
@@ -78,7 +83,7 @@ final class ImageLoader {
         let processor = DownsamplingImageProcessor(size: imageView.bounds.size)
         imageView.kf.indicatorType = .activity
         
-        var kingfisherOptions: KingfisherOptionsInfo = [
+        let kingfisherOptions: KingfisherOptionsInfo = [
             .processor(processor),
             .requestModifier(modifier),
             .backgroundDecode,
@@ -90,7 +95,7 @@ final class ImageLoader {
         imageView.kf.setImage(
             with: URL(string: url),
             options: kingfisherOptions
-        )
+        ) 
     }
     
     func cancelDownloadTask(for imageView: UIImageView) {

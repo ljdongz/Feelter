@@ -41,7 +41,8 @@ final class TodayAuthorPhotosCollectionViewCell: BaseCollectionViewCell {
     func configureCell(imageFiles: [String]) {
         ImageLoader.shared.applyAuthenticatedImage(
             for: photoImageView,
-            path: imageFiles[1]
+            path: imageFiles[1],
+            cachePolicy: .diskCache(expiration: .todayAuthor)
         )
     }
 }
