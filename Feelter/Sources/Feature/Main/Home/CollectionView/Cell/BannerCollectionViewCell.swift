@@ -38,7 +38,7 @@ final class BannerCollectionViewCell: BaseCollectionViewCell {
     }
     
     func configureCell(_ banner: Banner) {
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: bannerImageView,
             path: banner.imageURL
         )

@@ -50,7 +50,7 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
-        ImageLoader.cancelDownloadTask(for: filterImageView.imageView)
+        ImageLoader.shared.cancelDownloadTask(for: filterImageView.imageView)
         filterImageView.imageView.image = nil
         filterImageView.likeImageView.image = nil
     }
@@ -90,7 +90,7 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
         descriptionLabel.text = filter.creator?.introduction
         filterImageView.isLiked = filter.isLiked ?? false
         
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: filterImageView.imageView,
             path: filter.files?.first ?? ""
         )

@@ -70,7 +70,7 @@ final class TodayAuthorProfileCollectionViewCell: BaseCollectionViewCell {
     
     func configureCell(profile: Profile) {
         
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: profileImageView,
             path: profile.profileImageURL ?? ""
         )

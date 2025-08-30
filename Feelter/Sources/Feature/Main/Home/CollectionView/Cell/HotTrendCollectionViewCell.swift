@@ -23,7 +23,7 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
      
-        ImageLoader.cancelDownloadTask(for: filterFeedView.imageView)
+        ImageLoader.shared.cancelDownloadTask(for: filterFeedView.imageView)
         filterFeedView.imageView.image = nil
     }
     
@@ -43,10 +43,9 @@ final class HotTrendCollectionViewCell: BaseCollectionViewCell {
         filterFeedView.likeImageView.image = filter.isLiked == true ? .likeFill : .likeEmpty
         filterFeedView.likeCountLabel.text = "\(filter.likeCount ?? 0)"
         
-        // TODO: 원본, 필터 이미지 중 어느것을 보여줄지 고민
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: filterFeedView.imageView,
-            path: filter.files?[0] ?? ""
+            path: filter.files?[1] ?? ""
         )
     }
 }
