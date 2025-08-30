@@ -77,7 +77,6 @@ extension AuthAPI: APIEndpoint {
     
     var headers: [String : String]? {
         [
-            "Content-Type": "application/json",
             "SeSACKey": AppConfiguration.apiKey
         ]
     }

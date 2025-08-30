@@ -89,17 +89,8 @@ extension FilterAPI: APIEndpoint {
     }
     
     var headers: [String : String]? {
-        switch self {
-        case .uploadFiles:
-            [
-                "SeSACKey": AppConfiguration.apiKey
-            ]
-        default:
-            [
-                "Content-Type": "application/json",
-                "SeSACKey": AppConfiguration.apiKey
-            ]
-        }
-        
+        [
+            "SeSACKey": AppConfiguration.apiKey
+        ]
     } 
 }
