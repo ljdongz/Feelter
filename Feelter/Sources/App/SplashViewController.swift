@@ -14,6 +14,8 @@ final class SplashViewController: UIViewController {
     @Dependency private var networkProvider: NetworkProvider
     @Dependency private var tokenManager: TokenManager
     
+    var apnsPayload: APNsPayload?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -28,8 +30,8 @@ final class SplashViewController: UIViewController {
     }
 }
 
-private extension SplashViewController {
-    func setupView() {
+extension SplashViewController {
+    private func setupView() {
         gradientLayer.colors = [
             UIColor.brightTurquoise.cgColor,
             UIColor.gray100.cgColor
@@ -38,7 +40,7 @@ private extension SplashViewController {
         self.view.layer.addSublayer(gradientLayer)
     }
     
-    func setupRootView() {
+    private func setupRootView() {
         
         Task {
             if let _ = tokenManager.accessToken {
@@ -59,6 +61,9 @@ private extension SplashViewController {
                     
                     await MainActor.run {
                         RootViewSwitcher.shared.changeRootView(to: .main)
+                        
+                        guard let apnsPayload else { return }
+                        NotificationCenter.default.post(name: .PushToChatViewController, object: apnsPayload)
                     }
                     
                 } catch {
