@@ -18,6 +18,8 @@ enum AuthAPI {
     case kakaoLogin(Encodable)
     
     case updateDeviceToken(Encodable)
+    
+    case signOut
 }
 
 extension AuthAPI: APIEndpoint {
@@ -41,6 +43,8 @@ extension AuthAPI: APIEndpoint {
             "/v1/users/login/kakao"
         case .updateDeviceToken:
             "/v1/users/deviceToken"
+        case .signOut:
+            "/v1/users/logout"
         }
     }
     
@@ -53,6 +57,7 @@ extension AuthAPI: APIEndpoint {
         case .appleLogin: .post
         case .kakaoLogin: .post
         case .updateDeviceToken: .put
+        case .signOut: .post
         }
     }
     
@@ -72,6 +77,8 @@ extension AuthAPI: APIEndpoint {
                 .requestJSONEncodable(data)
         case .updateDeviceToken(let data):
                 .requestJSONEncodable(data)
+        case .signOut:
+                .requestPlain
         }
     }
     
