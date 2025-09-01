@@ -25,8 +25,13 @@ final class ChatViewController: RxBaseViewController {
         return view
     }()
     
-    private let messageInputField: ChatMessageInputField = {
+    private var messageInputField: ChatMessageInputField = {
         let view = ChatMessageInputField()
+        return view
+    }()
+    
+    private lazy var photoPickerInputView: PhotoPickerInputView = {
+        let view = PhotoPickerInputView()
         return view
     }()
     
@@ -39,6 +44,9 @@ final class ChatViewController: RxBaseViewController {
     private var didInitDataSource = false
     private var isLoadingMoreMessages = false
     private var isFullLoadMessage = false
+    
+    private(set) var keyboardFrame: CGRect = .zero
+    private(set) var isKeyboardShown: Bool = false
     
     init(viewModel: ChatViewModel) {
         self.viewModel = viewModel
@@ -96,7 +104,7 @@ final class ChatViewController: RxBaseViewController {
                     self?.messageInputField.message
                 }
                 .do(onNext: { [weak self] _ in
-                    self?.messageInputField.message = ""
+                    self?.messageInputField.sendButtonDidTapped()
                 })
                 .asObservable(),
             loadMoreMessages: tableView.rx.contentOffset
@@ -141,6 +149,17 @@ final class ChatViewController: RxBaseViewController {
             }
             .disposed(by: disposeBag)
         
+        messageInputField.plusButton.rx
+            .tap
+            .subscribe(with: self) { owner, _ in
+                if owner.messageInputField.isVisibleInputView {
+                    owner.messageInputField.keyboardInputView = nil
+                } else {
+                    let inputView = PhotoPickerInputView(frame: owner.keyboardFrame)
+                    owner.messageInputField.keyboardInputView = inputView
+                }
+            }
+            .disposed(by: disposeBag)
         
         NotificationCenter.default.rx
             .notification(.KeyboardWillShow)
@@ -364,8 +383,12 @@ extension ChatViewController {
             return
         }
         
+        if isKeyboardShown { return }
+        isKeyboardShown = true
+        
         // 키보드 전체 높이
         let keyboardHeight = keyboardFrame.cgRectValue.height
+        self.keyboardFrame = keyboardFrame.cgRectValue
         
         // Safe Area 하단 영역 높이
         let safeAreaBottom = view.safeAreaInsets.bottom
@@ -392,6 +415,9 @@ extension ChatViewController {
               let keyboardFrame = notification.keyboardFrameEndUserInfoKey else {
             return
         }
+        
+        isKeyboardShown = false
+        messageInputField.keyboardInputView = nil
         
         let keyboardHeight = keyboardFrame.cgRectValue.height
         let safeAreaBottom = view.safeAreaInsets.bottom
