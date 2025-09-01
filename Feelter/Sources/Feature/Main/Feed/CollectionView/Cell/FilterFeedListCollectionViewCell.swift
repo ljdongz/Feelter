@@ -92,7 +92,7 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
         
         ImageLoader.shared.applyAuthenticatedImage(
             for: filterImageView.imageView,
-            path: filter.files?.first ?? ""
+            path: filter.files?.last ?? ""
         )
     }
 }

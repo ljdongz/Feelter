@@ -24,6 +24,7 @@ final class BannerCollectionViewCell: BaseCollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
+        ImageLoader.shared.cancelDownloadTask(for: bannerImageView)
         bannerImageView.image = nil
     }
     

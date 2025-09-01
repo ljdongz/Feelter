@@ -128,8 +128,8 @@ struct AuthRepositoryImpl: AuthRepository {
     }
     
     func signOut() async throws {
+        defer { tokenManager.clearToken() }
         try await networkProvider.request(endpoint: AuthAPI.signOut)
-        tokenManager.clearToken()
     }
 }
 
