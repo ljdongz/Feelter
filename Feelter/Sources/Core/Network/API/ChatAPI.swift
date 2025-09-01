@@ -12,6 +12,7 @@ enum ChatAPI {
     case fetchRooms
     case sendMessage(roomID: String, Encodable)
     case fetchMessages(roomID: String, after: String?)
+    case uploadFiles(roomID: String, files: [UploadFileData])
 }
 
 extension ChatAPI: APIEndpoint {
@@ -29,6 +30,8 @@ extension ChatAPI: APIEndpoint {
             "/v1/chats/\(id)"
         case let .fetchMessages(id, _):
             "/v1/chats/\(id)"
+        case let .uploadFiles(roomID, _):
+            "/v1/chats/\(roomID)/files"
         }
     }
     
@@ -38,6 +41,7 @@ extension ChatAPI: APIEndpoint {
         case .fetchRooms: .get
         case .sendMessage: .post
         case .fetchMessages: .get
+        case .uploadFiles: .post
         }
     }
     
@@ -53,6 +57,16 @@ extension ChatAPI: APIEndpoint {
             var queryParameters: [String: Any] = [:]
             if let after { queryParameters["next"] = after }
             return .requestQueryParameters(parameters: queryParameters)
+        case let .uploadFiles(_, files):
+            let multiparts = files.map {
+                MultipartFormData(
+                    data: $0.data,
+                    name: "files",
+                    fileName: "file.\($0.extension.rawValue)",
+                    mimeType: $0.extension.mimeType
+                )
+            }
+            return .requestMultipartData(formData: multiparts)
         }
     }
     
