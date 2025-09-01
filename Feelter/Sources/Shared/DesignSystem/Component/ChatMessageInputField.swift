@@ -71,23 +71,6 @@ final class ChatMessageInputField: BaseView {
     private let minHeight: CGFloat = 36
     private let maxHeight: CGFloat = 120
     
-    private(set) var isVisibleInputView: Bool = false
-    
-    var keyboardInputView: UIView? {
-        didSet {
-            Task { @MainActor in
-                messageInputTextView.inputView = keyboardInputView
-                messageInputTextView.reloadInputViews()
-                isVisibleInputView = !(keyboardInputView == nil)
-                
-                let transform = keyboardInputView != nil ? CGAffineTransform(rotationAngle: -.pi / 4) : .identity
-                UIView.animate(withDuration: 0.25) {
-                    self.plusImageView.transform = transform
-                }
-            }
-        }
-    }
-    
     var message: String {
         get {
             messageInputTextView.text
@@ -164,11 +147,6 @@ final class ChatMessageInputField: BaseView {
             make.centerY.equalToSuperview().offset(1)
             make.size.equalTo(16)
         }
-    }
-    
-    func sendButtonDidTapped() {
-        message = ""
-        keyboardInputView = nil
     }
 }
 

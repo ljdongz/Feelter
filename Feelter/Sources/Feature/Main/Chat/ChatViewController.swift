@@ -5,6 +5,7 @@
 //  Created by 이정동 on 8/13/25.
 //
 
+import PhotosUI
 import UIKit
 
 import RxCocoa
@@ -30,11 +31,6 @@ final class ChatViewController: RxBaseViewController {
         return view
     }()
     
-    private lazy var photoPickerInputView: PhotoPickerInputView = {
-        let view = PhotoPickerInputView()
-        return view
-    }()
-    
     private let messageCellGenerator = ChatMessageCellGenerator()
     private let viewModel: ChatViewModel
     
@@ -45,7 +41,6 @@ final class ChatViewController: RxBaseViewController {
     private var isLoadingMoreMessages = false
     private var isFullLoadMessage = false
     
-    private(set) var keyboardFrame: CGRect = .zero
     private(set) var isKeyboardShown: Bool = false
     
     init(viewModel: ChatViewModel) {
@@ -104,7 +99,7 @@ final class ChatViewController: RxBaseViewController {
                     self?.messageInputField.message
                 }
                 .do(onNext: { [weak self] _ in
-                    self?.messageInputField.sendButtonDidTapped()
+                    self?.messageInputField.message = ""
                 })
                 .asObservable(),
             loadMoreMessages: tableView.rx.contentOffset
@@ -152,13 +147,14 @@ final class ChatViewController: RxBaseViewController {
         messageInputField.plusButton.rx
             .tap
             .subscribe(with: self) { owner, _ in
-                if owner.messageInputField.isVisibleInputView {
-                    owner.messageInputField.keyboardInputView = nil
-                } else {
-                    owner.messageInputField.messageInputTextView.becomeFirstResponder()
-                    let inputView = PhotoPickerInputView(frame: owner.keyboardFrame)
-                    owner.messageInputField.keyboardInputView = inputView
-                }
+                var configuration = PHPickerConfiguration()
+                configuration.selectionLimit = 5
+                configuration.filter = .images
+                
+                let picker = PHPickerViewController(configuration: configuration)
+                picker.delegate = self
+                owner.view.endEditing(true)
+                owner.present(picker, animated: true)
             }
             .disposed(by: disposeBag)
         
@@ -263,6 +259,7 @@ extension ChatViewController {
 }
 
 // MARK: - Update DataSource
+
 extension ChatViewController {
     private func initializeDataSourceItems(_ messages: [ChatMessage]) {
         let cellTypes = messageCellGenerator.generateCellTypes(
@@ -389,7 +386,6 @@ extension ChatViewController {
         
         // 키보드 전체 높이
         let keyboardHeight = keyboardFrame.cgRectValue.height
-        self.keyboardFrame = keyboardFrame.cgRectValue
         
         // Safe Area 하단 영역 높이
         let safeAreaBottom = view.safeAreaInsets.bottom
@@ -418,7 +414,6 @@ extension ChatViewController {
         }
         
         isKeyboardShown = false
-        messageInputField.keyboardInputView = nil
         
         let keyboardHeight = keyboardFrame.cgRectValue.height
         let safeAreaBottom = view.safeAreaInsets.bottom
@@ -426,7 +421,6 @@ extension ChatViewController {
         
         messageInputFieldBottomConstraint?.update(offset: 0)
         
-        // TODO: 수정 필요
         var newContentOffset = self.tableView.contentOffset
         newContentOffset.y = max(0, newContentOffset.y - adjustedHeight)
         tableView.contentOffset = newContentOffset
@@ -437,7 +431,35 @@ extension ChatViewController {
     }
 }
 
+extension ChatViewController: PHPickerViewControllerDelegate {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        
+        Task { @MainActor in
+            do {
+                let images = try await withThrowingTaskGroup(of: UIImage?.self) { group in
+                    for result in results {
+                        group.addTask {
+                            return try await result.itemProvider.loadUIImage()
+                        }
+                    }
+                    
+                    var loadedImages: [UIImage] = []
+                    for try await image in group {
+                        if let image = image {
+                            loadedImages.append(image)
+                        }
+                    }
+                    return loadedImages
+                }
+                
+                print(images.count)
+                
+                picker.dismiss(animated: true)
+            } catch {
+                print("Image loading error: \(error)")
+            }
+        }
+    }
+}
+
 extension ChatViewController: UITableViewDelegate { }
-
-
-
