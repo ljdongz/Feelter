@@ -9,14 +9,54 @@ import UIKit
 
 import Kingfisher
 
-@MainActor
-struct ImageLoader {
-
-    @Dependency static private var tokenManager: TokenManager
+enum ImageCachePolicy {
+    case memoryOnly
+    case diskCache(expiration: ExpirationConfig)
     
-    static func applyAuthenticatedImage(
+    enum ExpirationConfig {
+        case todayFilter
+        case banners
+        case hotTrendsFilter
+        case todayAuthor
+        
+        var value: Double {
+            switch self {
+            case .todayFilter: 86400
+            case .banners: 86400 * 7
+            case .hotTrendsFilter: 86400
+            case .todayAuthor: 86400
+            }
+        }
+    }
+    
+    var kingfisherOptions: KingfisherOptionsInfoItem {
+        switch self {
+        case .memoryOnly:
+            return .cacheMemoryOnly
+        case .diskCache(let expiration):
+            return .diskCacheExpiration(.seconds(expiration.value))
+        }
+    }
+}
+
+@MainActor
+final class ImageLoader {
+    
+    static let shared = ImageLoader()
+    
+    @Dependency private var tokenManager: TokenManager
+
+    private init() {
+        // 100MB (8GB 기준으로 약 10%)
+        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 100
+        // 500MB
+        ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 500
+    }
+    
+    func applyAuthenticatedImage(
         for imageView: UIImageView,
-        path: String
+        path: String,
+        cachePolicy: ImageCachePolicy = .memoryOnly
     ) {
         if path.isEmpty {
             imageView.image = .sample
@@ -40,19 +80,25 @@ struct ImageLoader {
         }
         
         let url = "\(AppConfiguration.baseURL)/v1\(path)"
+        let processor = DownsamplingImageProcessor(size: imageView.bounds.size)
         imageView.kf.indicatorType = .activity
+        
+        let kingfisherOptions: KingfisherOptionsInfo = [
+            .processor(processor),
+            .requestModifier(modifier),
+            .backgroundDecode,
+            .scaleFactor(UIScreen.main.scale),
+            .onFailureImage(.sample),
+            cachePolicy.kingfisherOptions,
+        ]
+                
         imageView.kf.setImage(
             with: URL(string: url),
-            options: [
-                .requestModifier(modifier),
-                .backgroundDecode,
-                .cacheMemoryOnly,
-                .onFailureImage(.sample),
-            ]
-        )
+            options: kingfisherOptions
+        ) 
     }
     
-    static func cancelDownloadTask(for imageView: UIImageView) {
+    func cancelDownloadTask(for imageView: UIImageView) {
         imageView.kf.cancelDownloadTask()
     }
 }

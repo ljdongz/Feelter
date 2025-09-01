@@ -24,7 +24,7 @@ final class TodayAuthorPhotosCollectionViewCell: BaseCollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
-        ImageLoader.cancelDownloadTask(for: photoImageView)
+        ImageLoader.shared.cancelDownloadTask(for: photoImageView)
         photoImageView.image = nil
     }
     
@@ -39,10 +39,10 @@ final class TodayAuthorPhotosCollectionViewCell: BaseCollectionViewCell {
     }
     
     func configureCell(imageFiles: [String]) {
-        // TODO: 원본, 필터 이미지 중 어느것을 보여줄지 고민
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: photoImageView,
-            path: imageFiles[0]
+            path: imageFiles[1],
+            cachePolicy: .diskCache(expiration: .todayAuthor)
         )
     }
 }

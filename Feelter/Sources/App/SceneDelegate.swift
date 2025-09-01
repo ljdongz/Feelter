@@ -25,6 +25,22 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window?.rootViewController = vc
         window?.makeKeyAndVisible()
         window?.windowScene = windowScene
+        
+        guard let notificationResponse = connectionOptions.notificationResponse else { return }
+        let userInfo = notificationResponse.notification.request.content.userInfo
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: userInfo)
+            let apnsPayload = try JSONDecoder().decode(APNsPayload.self, from: jsonData)
+            
+            print("🔔 Push notification payload decoded successfully:")
+            print("Room ID: \(apnsPayload.roomID)")
+            
+            vc.apnsPayload = apnsPayload
+            
+        } catch {
+            print("❌ Failed to decode push notification payload: \(error)")
+            print("UserInfo: \(userInfo)")
+        }
     }
     
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {

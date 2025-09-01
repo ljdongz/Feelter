@@ -24,6 +24,7 @@ final class BannerCollectionViewCell: BaseCollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
+        ImageLoader.shared.cancelDownloadTask(for: bannerImageView)
         bannerImageView.image = nil
     }
     
@@ -38,9 +39,10 @@ final class BannerCollectionViewCell: BaseCollectionViewCell {
     }
     
     func configureCell(_ banner: Banner) {
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: bannerImageView,
-            path: banner.imageURL
+            path: banner.imageURL,
+            cachePolicy: .diskCache(expiration: .banners)
         )
     }
 }

@@ -70,9 +70,10 @@ final class TodayAuthorProfileCollectionViewCell: BaseCollectionViewCell {
     
     func configureCell(profile: Profile) {
         
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: profileImageView,
-            path: profile.profileImageURL ?? ""
+            path: profile.profileImageURL ?? "",
+            cachePolicy: .diskCache(expiration: .todayAuthor)
         )
         authorName.text = profile.name
         authorNickname.text = profile.nickname

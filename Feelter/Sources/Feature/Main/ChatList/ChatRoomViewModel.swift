@@ -48,7 +48,6 @@ final class ChatRoomViewModel: ViewModel {
         
         input.receivedAPNs
             .withAsyncResult(with: self) { owner, payload in
-                // TODO: 로컬에 저장되지 않은 채팅방ID인 경우(새로운 상대방한테 받은 경우), 전체 채팅방 목록 서버로 가져오는 로직 필요
                 try await owner.chatRepository.updateRoom(apnsPayload: payload)
                 
                 let rooms = await owner.chatRepository.fetchLocalRooms()

@@ -17,6 +17,8 @@ final class MyPageView: RxBaseView {
     
     enum Section: Int {
         case mainProfile
+        case signOut
+        case withdrawal
     }
     
     lazy var collectionView: UICollectionView = {
@@ -56,7 +58,7 @@ extension MyPageView {
     func applyDataSource(profile: Profile) {
         var snapShot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
         
-        snapShot.appendSections([.mainProfile])
+        snapShot.appendSections([.mainProfile, .signOut, .withdrawal])
         
         let mainProfile = MainProfileCellItem(
             profileImageURL: profile.profileImageURL ?? "",
@@ -65,6 +67,8 @@ extension MyPageView {
             email: profile.email ?? ""
         )
         snapShot.appendItems([mainProfile], toSection: .mainProfile)
+        snapShot.appendItems([UUID().uuidString], toSection: .signOut)
+        snapShot.appendItems([UUID().uuidString], toSection: .withdrawal)
         
         dataSource.apply(snapShot, animatingDifferences: false)
     }
@@ -87,11 +91,13 @@ extension MyPageView {
     private func configureCompositionalLayout() {
         
         let layout = UICollectionViewCompositionalLayout { sectionIndex, environment in
-            switch Section(rawValue: sectionIndex) {
+            switch Section(rawValue: sectionIndex)! {
             case .mainProfile:
                 return MainProfileCollectionViewCell.layoutSection()
-            default:
-                return MainProfileCollectionViewCell.layoutSection()
+            case .signOut:
+                return SignOutCollectionViewCell.layoutSection()
+            case .withdrawal:
+                return WithdrawalCollectionViewCell.layoutSection()
             }
         }
         
@@ -104,6 +110,15 @@ extension MyPageView {
             forCellWithReuseIdentifier: MainProfileCollectionViewCell.identifier
         )
         
+        collectionView.register(
+            SignOutCollectionViewCell.self,
+            forCellWithReuseIdentifier: SignOutCollectionViewCell.identifier
+        )
+        
+        collectionView.register(
+            WithdrawalCollectionViewCell.self,
+            forCellWithReuseIdentifier: WithdrawalCollectionViewCell.identifier
+        )
     }
     
     private func configureDiffableDataSource() {
@@ -112,7 +127,7 @@ extension MyPageView {
             cellProvider: { [weak self] collectionView, indexPath, itemIdentifier in
                 guard let self else { return .init() }
                 
-                switch Section(rawValue: indexPath.section) {
+                switch Section(rawValue: indexPath.section)! {
                 case .mainProfile:
                     guard let item = itemIdentifier as? MainProfileCellItem,
                           let cell = collectionView.dequeueReusableCell(
@@ -129,8 +144,24 @@ extension MyPageView {
                         .disposed(by: cell.disposeBag)
                     
                     return cell
-                default:
-                    return .init()
+                    
+                case .signOut:
+                    guard let cell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: SignOutCollectionViewCell.identifier,
+                        for: indexPath
+                    ) as? SignOutCollectionViewCell else {
+                        return .init()
+                    }
+                    return cell
+                
+                case .withdrawal:
+                    guard let cell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: WithdrawalCollectionViewCell.identifier,
+                        for: indexPath
+                    ) as? WithdrawalCollectionViewCell else {
+                        return .init()
+                    }
+                    return cell
                 }
             }
         )

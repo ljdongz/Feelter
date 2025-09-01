@@ -38,8 +38,8 @@ final class ImageSliderCollectionViewCell: BaseCollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
-        ImageLoader.cancelDownloadTask(for: beforeImageView)
-        ImageLoader.cancelDownloadTask(for: afterImageView)
+        ImageLoader.shared.cancelDownloadTask(for: beforeImageView)
+        ImageLoader.shared.cancelDownloadTask(for: afterImageView)
     }
     
     override func setupView() {
@@ -72,11 +72,11 @@ final class ImageSliderCollectionViewCell: BaseCollectionViewCell {
     }
     
     func configureCell(item: FilterDetailView.ImageSliderSectionItem) {
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: beforeImageView,
             path: item.originalImageUrl
         )
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: afterImageView,
             path: item.filteredImageUrl
         )

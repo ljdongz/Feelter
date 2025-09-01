@@ -93,9 +93,14 @@ final class ChatRepositoryImpl: ChatRepository {
     func updateRoom(apnsPayload: APNsPayload) async throws {
         if socketProvider.isConnected(roomID: apnsPayload.roomID) { return }
         
-        
-
-        try await chatDataSource.updateChatRoom(from: apnsPayload)
+        // 로컬에 저장된 채팅방인지 확인
+        if let _ = await chatDataSource.findChatRoom(roomID: apnsPayload.roomID) {
+            // 저장된 채팅방인 경우, 로컬 데이터 업데이트
+            try await chatDataSource.updateChatRoom(from: apnsPayload)
+        } else {
+            // 저장되지 않은 채팅방인 경우, 서버로부터 전체 채팅방 데이터 가져와서 업데이트
+            _ = try await fetchRooms()
+        }
     }
     
     // MARK: - 메시지 관련

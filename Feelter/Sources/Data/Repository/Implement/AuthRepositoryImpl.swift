@@ -126,6 +126,11 @@ struct AuthRepositoryImpl: AuthRepository {
             try handleAuthError(error)
         }
     }
+    
+    func signOut() async throws {
+        defer { tokenManager.clearToken() }
+        try await networkProvider.request(endpoint: AuthAPI.signOut)
+    }
 }
 
 extension AuthRepositoryImpl {

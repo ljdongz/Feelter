@@ -61,7 +61,7 @@ final class TopRankingFeedCollectionViewCell: BaseCollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         
-        ImageLoader.cancelDownloadTask(for: filterImageView)
+        ImageLoader.shared.cancelDownloadTask(for: filterImageView)
         filterImageView.image = nil
     }
     
@@ -117,7 +117,7 @@ final class TopRankingFeedCollectionViewCell: BaseCollectionViewCell {
         filterTitleLabel.text = filter.title
         rankLabel.text = "\(index + 1)"
         
-        ImageLoader.applyAuthenticatedImage(for: filterImageView, path: filter.files?.first ?? "")
+        ImageLoader.shared.applyAuthenticatedImage(for: filterImageView, path: filter.files?.last ?? "")
         
         Task { @MainActor in
             self.containerView.layer.cornerRadius = self.containerView.bounds.width / 2

@@ -113,11 +113,6 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
             make.verticalEdges.equalToSuperview().inset(12)
             make.horizontalEdges.equalToSuperview().inset(14)
         }
-        
-//        dateLabel.snp.makeConstraints { make in
-//            make.leading.equalTo(contentVerticalStackView.snp.trailing).offset(5)
-//            make.bottom.equalTo(contentVerticalStackView.snp.bottom).offset(-2)
-//        }
     }
     
     func configureCell(message: MessageItem) {
@@ -139,7 +134,7 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         nameLabel.isHidden = false
         
         nameLabel.text = message.sender.name
-        ImageLoader.applyAuthenticatedImage(
+        ImageLoader.shared.applyAuthenticatedImage(
             for: profileImageView,
             path: message.sender.profileImageURL ?? ""
         )

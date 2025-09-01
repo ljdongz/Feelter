@@ -31,6 +31,8 @@ final class TabBarViewController: RxBaseViewController {
     private var currentViewController: UIViewController?
     private var selectedIndex: Int = 0
     
+    @Dependency private var chatRepository: ChatRepository
+    
     override func setupView() {
         view.backgroundColor = .black
         
@@ -98,8 +100,18 @@ final class TabBarViewController: RxBaseViewController {
         NotificationCenter.default.rx
             .notification(.PushToChatViewController)
             .compactMap { $0.object as? APNsPayload }
-            .subscribe(with: self) { owner, payload in
-                owner.navigateToChatRoom(roomID: payload.roomID)
+            .withAsyncResult(with: self, { owner, payload in
+                try await owner.chatRepository.updateRoom(apnsPayload: payload)
+                return payload
+            })
+            .observe(on: MainScheduler.instance)
+            .subscribe(with: self) { owner, result in
+                switch result {
+                case .success(let payload):
+                    owner.navigateToChatRoom(payload: payload)
+                case .failure(let error):
+                    print("Update Room Error: \(error)")
+                }
             }
             .disposed(by: disposeBag)
     }
@@ -145,7 +157,7 @@ extension TabBarViewController {
     }
     
     /// 푸시 알림을 통해 특정 채팅방으로 이동
-    private func navigateToChatRoom(roomID: String) {
+    private func navigateToChatRoom(payload: APNsPayload) {
         
         // 현재 선택된 탭의 네비게이션 컨트롤러 가져오기
         guard let currentNavigationController = currentViewController as? UINavigationController else {
@@ -154,11 +166,12 @@ extension TabBarViewController {
         }
         
         // ChatViewController 생성 및 push
-        let chatViewModel = ChatViewModel(roomID: roomID)
+        let chatViewModel = ChatViewModel(roomID: payload.roomID)
         let chatViewController = ChatViewController(viewModel: chatViewModel)
+        chatViewController.title = payload.aps.alert.subtitle
         
         currentNavigationController.pushViewController(chatViewController, animated: true)
-        print("✅ Navigated to chat room with ID: \(roomID)")
+        print("✅ Navigated to chat room with ID: \(payload.roomID)")
     }
 }
 

@@ -21,6 +21,8 @@ protocol ChatDataSource {
     @MainActor
     func findChatRoom(opponentID: String) -> ChatRoom?
     @MainActor
+    func findChatRoom(roomID: String) -> ChatRoom?
+    @MainActor
     func updateChatRoom(
         roomID: String,
         updatedAt: Date,
@@ -79,6 +81,12 @@ struct ChatDataSourceImpl: ChatDataSource {
         let localRoom = realm.objects(RealmChatRoom.self)
             .where { $0.participants.userID == opponentID }
             .first
+        return localRoom?.toDomain()
+    }
+    
+    func findChatRoom(roomID: String) -> ChatRoom? {
+        let realm = RealmStorage.shared.realm
+        let localRoom = realm.object(ofType: RealmChatRoom.self, forPrimaryKey: roomID)
         return localRoom?.toDomain()
     }
     
