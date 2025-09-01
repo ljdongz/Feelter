@@ -79,6 +79,11 @@ final class ChatMessageInputField: BaseView {
                 messageInputTextView.inputView = keyboardInputView
                 messageInputTextView.reloadInputViews()
                 isVisibleInputView = !(keyboardInputView == nil)
+                
+                let transform = keyboardInputView != nil ? CGAffineTransform(rotationAngle: -.pi / 4) : .identity
+                UIView.animate(withDuration: 0.25) {
+                    self.plusImageView.transform = transform
+                }
             }
         }
     }

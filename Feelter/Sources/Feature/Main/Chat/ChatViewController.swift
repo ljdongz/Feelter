@@ -155,6 +155,7 @@ final class ChatViewController: RxBaseViewController {
                 if owner.messageInputField.isVisibleInputView {
                     owner.messageInputField.keyboardInputView = nil
                 } else {
+                    owner.messageInputField.messageInputTextView.becomeFirstResponder()
                     let inputView = PhotoPickerInputView(frame: owner.keyboardFrame)
                     owner.messageInputField.keyboardInputView = inputView
                 }
