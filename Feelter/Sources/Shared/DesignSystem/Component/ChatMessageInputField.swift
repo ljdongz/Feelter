@@ -10,6 +10,12 @@ import UIKit
 import SnapKit
 
 final class ChatMessageInputField: BaseView {
+    
+    typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
+
+    enum Section: Int {
+        case files
+    }
 
     private let divider: UIView = {
         let view = UIView()
@@ -37,6 +43,14 @@ final class ChatMessageInputField: BaseView {
         return view
     }()
     
+    private let verticalStackView: UIStackView = {
+        let view = UIStackView()
+        view.axis = .vertical
+        view.spacing = 5
+        view.alignment = .fill
+        return view
+    }()
+    
     lazy var messageInputTextView: UITextView = {
         let view = UITextView()
         view.textColor = .gray45
@@ -47,6 +61,20 @@ final class ChatMessageInputField: BaseView {
         view.layer.cornerRadius = 18
         view.isScrollEnabled = false
         view.delegate = self
+        return view
+    }()
+    
+    lazy var filesCollectionView: UICollectionView = {
+        let view = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: UICollectionViewLayout()
+        )
+        view.contentInsetAdjustmentBehavior = .never
+        view.showsVerticalScrollIndicator = false
+        view.backgroundColor = .clear
+        view.bounces = false
+        view.isHidden = true
+        view.isScrollEnabled = false
         return view
     }()
 
@@ -67,6 +95,7 @@ final class ChatMessageInputField: BaseView {
         return view
     }()
     
+    private var dataSource: DataSourceType!
     private var textViewHeightConstraint: Constraint?
     private let minHeight: CGFloat = 36
     private let maxHeight: CGFloat = 120
@@ -82,6 +111,22 @@ final class ChatMessageInputField: BaseView {
         }
     }
     
+    private var _files: [UIImage] = []
+    var files: [UIImage] {
+        get {
+            _files
+        }
+        set {
+            _files = newValue
+            configureDataSource()
+            filesCollectionView.isHidden = newValue.isEmpty
+        }
+    }
+    
+    override func setupView() {
+        setupCollectionView()
+    }
+    
     override func setupSubviews() {
         addSubviews([
             divider,
@@ -90,8 +135,13 @@ final class ChatMessageInputField: BaseView {
         
         inputFieldContainerView.addSubviews([
             plusButton,
-            messageInputTextView,
+            verticalStackView,
             sendButton
+        ])
+        
+        verticalStackView.addArrangedSubviews([
+            messageInputTextView,
+            filesCollectionView
         ])
         
         plusButton.addSubview(plusImageView)
@@ -116,7 +166,7 @@ final class ChatMessageInputField: BaseView {
         plusButton.snp.makeConstraints { make in
             make.size.equalTo(30)
             make.leading.equalToSuperview().inset(10)
-            make.bottom.equalTo(messageInputTextView.snp.bottom).offset(-3)
+            make.bottom.equalTo(verticalStackView.snp.bottom).offset(-3)
         }
         
         // 추가 이미지
@@ -125,20 +175,27 @@ final class ChatMessageInputField: BaseView {
             make.size.equalTo(16)
         }
         
-        // 입력 필드
-        messageInputTextView.snp.makeConstraints { make in
+        verticalStackView.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(5)
             make.leading.equalTo(plusButton.snp.trailing).offset(10)
             make.trailing.equalTo(sendButton.snp.leading).offset(-10)
             make.bottom.equalToSuperview().inset(34)
+        }
+        
+        // 입력 필드
+        messageInputTextView.snp.makeConstraints { make in
             textViewHeightConstraint = make.height.equalTo(minHeight).constraint
+        }
+        
+        filesCollectionView.snp.makeConstraints { make in
+            make.height.equalTo(50)
         }
         
         // 입력 필드 우측 전송 버튼
         sendButton.snp.makeConstraints { make in
             make.size.equalTo(30)
             make.trailing.equalToSuperview().inset(10)
-            make.bottom.equalTo(messageInputTextView.snp.bottom).offset(-3)
+            make.bottom.equalTo(verticalStackView.snp.bottom).offset(-3)
         }
         
         // 전송 이미지
@@ -147,6 +204,72 @@ final class ChatMessageInputField: BaseView {
             make.centerY.equalToSuperview().offset(1)
             make.size.equalTo(16)
         }
+    }
+    
+    func sendButtonTapped() {
+        messageInputTextView.text = ""
+        updateSendButtonEnabled()
+        updateTextViewHeightConstraint()
+    }
+    
+    func configureDataSource() {
+        var snapShot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
+        snapShot.appendSections([.files])
+        snapShot.appendItems(files)
+        dataSource.apply(snapShot, animatingDifferences: true)
+    }
+}
+
+extension ChatMessageInputField {
+    private func setupCollectionView() {
+        // 1) Compositional Layout 설정
+        configureCompositionalLayout()
+        
+        // 2) 셀 등록
+        registerCollectionViewCells()
+        
+        // 3) DiffableDataSource 설정
+        configureDiffableDataSource()
+    }
+    
+    func configureCompositionalLayout() {
+        
+        let layout = UICollectionViewCompositionalLayout { sectionIndex, environment in
+            switch Section(rawValue: sectionIndex)! {
+            case .files:
+                return MessageInputFileCollectionViewCell.layoutSection()
+            }
+        }
+        
+        filesCollectionView.collectionViewLayout = layout
+    }
+    
+    func registerCollectionViewCells() {
+        filesCollectionView.register(
+            MessageInputFileCollectionViewCell.self,
+            forCellWithReuseIdentifier: MessageInputFileCollectionViewCell.identifier
+        )
+    }
+    
+    func configureDiffableDataSource() {
+        dataSource = UICollectionViewDiffableDataSource(
+            collectionView: filesCollectionView,
+            cellProvider: { collectionView, indexPath, itemIdentifier in
+                switch Section(rawValue: indexPath.section)! {
+                case .files:
+                    guard let item = itemIdentifier as? UIImage,
+                          let cell = collectionView.dequeueReusableCell(
+                            withReuseIdentifier: MessageInputFileCollectionViewCell.identifier,
+                            for: indexPath
+                          ) as? MessageInputFileCollectionViewCell else {
+                        return .init()
+                    }
+                    
+                    cell.configureCell(image: item)
+                    return cell
+                }
+            }
+        )
     }
 }
 
@@ -183,6 +306,87 @@ extension ChatMessageInputField: UITextViewDelegate {
         
         // 부모 뷰의 레이아웃 업데이트
         self.superview?.layoutIfNeeded()
+    }
+}
+
+
+// MARK: - CollectionViewCell
+
+fileprivate final class MessageInputFileCollectionViewCell: BaseCollectionViewCell {
+    
+    static let identifier = "MessageInputFileCollectionViewCell"
+    
+    private lazy var contentImageView: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFill
+        view.layer.cornerRadius = 8
+        view.clipsToBounds = true
+        view.image = .sample
+        view.layer.borderColor = UIColor.gray90.cgColor
+        view.layer.borderWidth = 1
+        return view
+    }()
+    
+    private let xmarkImageView: UIImageView = {
+        let view = UIImageView()
+        view.contentMode = .scaleAspectFit
+        view.layer.cornerRadius = 7.5
+        view.clipsToBounds = true
+        view.tintColor = .red
+        view.image = .cancel
+        view.backgroundColor = .gray30
+        return view
+    }()
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+    }
+
+    override func setupSubviews() {
+        contentView.addSubviews([
+            contentImageView,
+            xmarkImageView
+        ])
+    }
+    
+    override func setupConstraints() {
+        contentImageView.snp.makeConstraints { make in
+            make.size.equalTo(44)
+            make.center.equalToSuperview()
+        }
+        
+        xmarkImageView.snp.makeConstraints { make in
+            make.top.trailing.equalToSuperview().inset(2)
+            make.size.equalTo(15)
+        }
+    }
+    
+    func configureCell(image: UIImage) {
+        contentImageView.image = image
+    }
+}
+
+extension MessageInputFileCollectionViewCell {
+    static func layoutSection() -> NSCollectionLayoutSection {
+        
+        let item = NSCollectionLayoutItem(layoutSize: .init(
+            widthDimension: .absolute(50),
+            heightDimension: .absolute(50)
+        ))
+        
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: .init(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .absolute(50)
+            ),
+            subitems: [item]
+        )
+        group.interItemSpacing = .fixed(8)
+        
+        let section = NSCollectionLayoutSection(group: group)
+        
+        section.contentInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
+        return section
     }
 }
 

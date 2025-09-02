@@ -452,11 +452,11 @@ extension ChatViewController: PHPickerViewControllerDelegate {
                     return loadedImages
                 }
                 
-                print(images.count)
-                
+                messageInputField.files = images
                 picker.dismiss(animated: true)
             } catch {
                 print("Image loading error: \(error)")
+                picker.dismiss(animated: true)
             }
         }
     }
