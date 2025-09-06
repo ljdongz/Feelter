@@ -344,7 +344,7 @@ extension ChatImageLayoutView {
         ImageLoader.shared.applyAuthenticatedImage(
             for: imageView,
             path: urlString,
-            cachePolicy: .memoryOnly
+            cachePolicy: .diskCache(expiration: .chatMessageFile)
         )
     }
 }
