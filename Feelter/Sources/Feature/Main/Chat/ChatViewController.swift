@@ -43,10 +43,6 @@ final class ChatViewController: RxBaseViewController {
     
     private(set) var isKeyboardShown: Bool = false
     
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
     init(viewModel: ChatViewModel) {
         self.viewModel = viewModel
         

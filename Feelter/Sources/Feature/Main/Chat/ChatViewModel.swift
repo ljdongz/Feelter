@@ -36,6 +36,9 @@ final class ChatViewModel: ViewModel {
     @Dependency private var chatRepository: ChatRepository
     @Dependency private var tokenManager: TokenManager
     
+    private let serverFetchTrigger = PublishRelay<Date>()
+    private let receiveMessageTrigger = PublishRelay<ChatMessage>()
+    
     private let roomID: String
     private let calendar = Calendar.current
     private var lastMessageAt = Date() // 과거 메시지 데이터를 불러오기 위한 기준 날짜
@@ -53,13 +56,10 @@ final class ChatViewModel: ViewModel {
     func transform(input: Input) -> Output {
         let output = Output()
         
-        let serverFetchTrigger = PublishRelay<Date>()
-        let receiveMessageTrigger = PublishRelay<ChatMessage>()
-        
         input.viewDidLoad
-            .do(onNext: { [weak self] _ in
+            .do(onNext: { [weak self, weak receiveMessageTrigger] _ in
                 guard let self else { return }
-                chatRepository.connectRoom(roomID: self.roomID) { [weak receiveMessageTrigger] message in
+                chatRepository.connectRoom(roomID: self.roomID) { message in
                     receiveMessageTrigger?.accept(message)
                 }
             })
@@ -74,7 +74,7 @@ final class ChatViewModel: ViewModel {
                 
                 output.messages.accept(.initMessages(messages))
                 
-                serverFetchTrigger.accept(messages.last?.createdAt ?? Date())
+                owner.serverFetchTrigger.accept(messages.last?.createdAt ?? Date())
             }
             .disposed(by: disposeBag)
         
@@ -97,7 +97,10 @@ final class ChatViewModel: ViewModel {
                     }
                 }
 
-                let urls = try await owner.chatRepository.uploadFiles(roomID: owner.roomID, files: files)
+                var urls: [String] = []
+                if !files.isEmpty {
+                    urls = try await owner.chatRepository.uploadFiles(roomID: owner.roomID, files: files)
+                }
                 
                 return try await owner.chatRepository.sendMessage(
                     to: owner.roomID,

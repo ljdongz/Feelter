@@ -299,7 +299,9 @@ extension ChatMessageInputFieldView: UITextViewDelegate {
     }
     
     private func updateSendButtonEnabled() {
-        let isEnabled = !messageField.content.isEmpty || !messageField.files.isEmpty
+        let isContentEmpty = messageField.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        
+        let isEnabled = !isContentEmpty
         sendButton.isUserInteractionEnabled = isEnabled
         sendButton.alpha = isEnabled ? 1 : 0.5
     }
