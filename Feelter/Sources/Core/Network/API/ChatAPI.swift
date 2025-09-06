@@ -62,8 +62,8 @@ extension ChatAPI: APIEndpoint {
                 MultipartFormData(
                     data: $0.data,
                     name: "files",
-                    fileName: "file.\($0.extension.rawValue)",
-                    mimeType: $0.extension.mimeType
+                    fileName: "file.\($0.extension)",
+                    mimeType: $0.mimeType
                 )
             }
             return .requestMultipartData(formData: multiparts)

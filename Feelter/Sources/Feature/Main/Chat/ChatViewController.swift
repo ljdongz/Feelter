@@ -443,18 +443,28 @@ extension ChatViewController: PHPickerViewControllerDelegate {
         
         Task { @MainActor in
             do {
-                let images = try await withThrowingTaskGroup(of: (Int, UIImage?).self) { group in
+                let images = try await withThrowingTaskGroup(of: (Int, ImageData)?.self) { group in
                     for (index, result) in results.enumerated() {
                         group.addTask {
-                            let image = try await result.itemProvider.loadUIImage()
-                            return (index, image)
+                            var fileExtension = FileExtension.jpeg
+                            
+                            if let typeIdentifier = result.itemProvider.registeredTypeIdentifiers.first,
+                               let utType = UTType(typeIdentifier),
+                               let filenameExtension = utType.preferredFilenameExtension,
+                               let ext = FileExtension.allCases.first(where: { $0.extension == filenameExtension }) {
+                                fileExtension = ext
+                            }
+                            
+                            guard let image = try await result.itemProvider.loadUIImage() else { return nil }
+                            let imageData = ImageData(image: image, extension: fileExtension)
+                            return (index, imageData)
                         }
                     }
                     
-                    var loadedImages: [(Int, UIImage)] = []
+                    var loadedImages: [(Int, ImageData)] = []
                     for try await result in group {
-                        if let image = result.1 {
-                            loadedImages.append((result.0, image))
+                        if let result {
+                            loadedImages.append(result)
                         }
                     }
                     return loadedImages

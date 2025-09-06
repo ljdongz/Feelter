@@ -207,7 +207,7 @@ final class ChatMessageInputFieldView: RxBaseView {
             .disposed(by: disposeBag)
     }
     
-    func appendFiles(_ images: [UIImage]) {
+    func appendFiles(_ images: [ImageData]) {
         messageField.files.append(contentsOf: images)
         configureDataSource()
         updateSendButtonEnabled()
@@ -281,7 +281,7 @@ extension ChatMessageInputFieldView {
     private func configureDataSource() {
         var snapShot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
         snapShot.appendSections([.files])
-        snapShot.appendItems(messageField.files.map { MessageInputFileCellItem(image: $0) })
+        snapShot.appendItems(messageField.files.map { MessageInputFileCellItem(image: $0.image) })
         dataSource.apply(snapShot, animatingDifferences: false)
     }
 }

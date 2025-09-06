@@ -86,18 +86,31 @@ final class ChatViewModel: ViewModel {
         
         input.sendMessageButtonTapped
             .withAsyncResult(with: self) { owner, message in
-                try await owner.chatRepository.sendMessage(
+                
+                let files = message.files.compactMap { (imageData: ImageData) -> FileData in
+                    if imageData.extension == .png,
+                       let data = imageData.image.pngData(),
+                       data.count <= 1024 * 1024 {
+                        return FileData(data: data, extension: .png)
+                    } else {
+                        return FileData(data: imageData.image.jpegData()!, extension: .jpeg)
+                    }
+                }
+
+                let urls = try await owner.chatRepository.uploadFiles(roomID: owner.roomID, files: files)
+                
+                return try await owner.chatRepository.sendMessage(
                     to: owner.roomID,
                     message: .init(
                         content: message.content,
-                        fileURLs: []
+                        fileURLs: urls
                     ))
             }
             .subscribe(with: self) { owner, result in
                 switch result {
                 case .success(let message):
                     // TODO: 로컬에 메시지 저장 (전송중)
-                    print("보내기 성공")
+                    print("보내기 성공: \(message)")
                 case .failure(let error):
                     print(error)
                 }

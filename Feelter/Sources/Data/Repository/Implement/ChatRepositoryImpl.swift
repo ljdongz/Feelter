@@ -104,6 +104,28 @@ final class ChatRepositoryImpl: ChatRepository {
     }
     
     // MARK: - 메시지 관련
+    
+    func uploadFiles(roomID: String, files: [FileData]) async throws -> [String] {
+        
+        let uploadFileDatas = files.map {
+            UploadFileData(
+                data: $0.data,
+                extension: $0.extension.extension,
+                mimeType: $0.extension.mimeType
+            )
+        }
+        
+        let response = try await networkProvider.request(
+            endpoint: ChatAPI.uploadFiles(
+                roomID: roomID,
+                files: uploadFileDatas
+            ),
+            type: UploadChatFilesResponseDTO.self
+        )
+        
+        return response.files
+    }
+    
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage {
         let requestDTO = SendChatMessageRequestDTO(
             content: message.content,

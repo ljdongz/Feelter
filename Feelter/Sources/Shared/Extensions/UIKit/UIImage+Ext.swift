@@ -27,4 +27,29 @@ extension UIImage {
         let width = self.size.width * scale
         return resized(to: CGSize(width: width, height: height))
     }
+    
+    func jpegData(maxSizeInBytes: Int = 1024 * 1024) -> Data? {
+        // 초기 압축 품질을 1.0에서 시작
+        var compressionQuality: CGFloat = 1.0
+        var imageData = self.jpegData(compressionQuality: compressionQuality)
+        
+        // 이미지 데이터가 1MB보다 작거나 같으면 바로 반환
+        if let data = imageData,
+            data.count <= maxSizeInBytes {
+            return data
+        }
+        
+        // 1MB를 초과하는 경우 압축 품질을 0.1씩 줄여가며 압축
+        while compressionQuality >= 0.1 {
+            compressionQuality -= 0.1
+            imageData = self.jpegData(compressionQuality: compressionQuality)
+            
+            if let data = imageData,
+                data.count <= maxSizeInBytes {
+                return data
+            }
+        }
+        
+        return imageData
+    }
 }

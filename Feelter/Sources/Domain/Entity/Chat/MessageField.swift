@@ -9,5 +9,5 @@ import UIKit
 
 struct MessageField {
     var content: String = ""
-    var files: [UIImage] = []
+    var files: [ImageData] = []
 }
