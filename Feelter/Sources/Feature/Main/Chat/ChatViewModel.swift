@@ -25,7 +25,7 @@ final class ChatViewModel: ViewModel {
     struct Input {
         let viewDidLoad: Observable<Void>
         let viewWillDisappear: Observable<Void>
-        let sendMessageButtonTapped: Observable<String>
+        let sendMessageButtonTapped: Observable<MessageField>
         let loadMoreMessages: Observable<Void>
     }
     
@@ -89,7 +89,7 @@ final class ChatViewModel: ViewModel {
                 try await owner.chatRepository.sendMessage(
                     to: owner.roomID,
                     message: .init(
-                        content: message,
+                        content: message.content,
                         fileURLs: []
                     ))
             }

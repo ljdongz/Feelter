@@ -96,7 +96,7 @@ final class ChatViewController: RxBaseViewController {
             sendMessageButtonTapped: messageInputField.sendButton.rx
                 .tap
                 .compactMap { [weak self] _ in
-                    self?.messageInputField.messageField.content
+                    self?.messageInputField.messageField
                 }
                 .do(onNext: { [weak self] _ in
                     self?.messageInputField.sendButtonTapped()
