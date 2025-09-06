@@ -26,8 +26,8 @@ final class ChatViewController: RxBaseViewController {
         return view
     }()
     
-    private var messageInputField: ChatMessageInputField = {
-        let view = ChatMessageInputField()
+    private var messageInputField: ChatMessageInputFieldView = {
+        let view = ChatMessageInputFieldView()
         return view
     }()
     
@@ -96,7 +96,7 @@ final class ChatViewController: RxBaseViewController {
             sendMessageButtonTapped: messageInputField.sendButton.rx
                 .tap
                 .compactMap { [weak self] _ in
-                    self?.messageInputField.message
+                    self?.messageInputField.messageField.content
                 }
                 .do(onNext: { [weak self] _ in
                     self?.messageInputField.sendButtonTapped()
@@ -147,11 +147,11 @@ final class ChatViewController: RxBaseViewController {
         messageInputField.plusButton.rx
             .tap
             .filter { [weak self] _ in
-                self?.messageInputField.files.count != 5
+                self?.messageInputField.messageField.files.count != 5
             }
             .subscribe(with: self) { owner, _ in
                 var configuration = PHPickerConfiguration()
-                configuration.selectionLimit = 5 - owner.messageInputField.files.count
+                configuration.selectionLimit = 5 - owner.messageInputField.messageField.files.count
                 configuration.filter = .images
                 
                 let picker = PHPickerViewController(configuration: configuration)
@@ -460,7 +460,8 @@ extension ChatViewController: PHPickerViewControllerDelegate {
                     return loadedImages
                 }
                 
-                messageInputField.files = images.sorted { $0.0 < $1.0 }.map { $0.1 }
+                let sortedImages = images.sorted { $0.0 < $1.0 }.map { $0.1 }
+                messageInputField.appendFiles(sortedImages)
             } catch {
                 print("Image loading error: \(error)")
             }

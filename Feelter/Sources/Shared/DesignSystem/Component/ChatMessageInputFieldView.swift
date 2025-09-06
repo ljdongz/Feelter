@@ -11,7 +11,7 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
-final class ChatMessageInputField: RxBaseView {
+final class ChatMessageInputFieldView: RxBaseView {
     
     typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
 
@@ -104,29 +104,7 @@ final class ChatMessageInputField: RxBaseView {
     private let minHeight: CGFloat = 36
     private let maxHeight: CGFloat = 120
     
-    var message: String {
-        get {
-            messageInputTextView.text
-        }
-        set {
-            messageInputTextView.text = newValue
-            updateSendButtonEnabled()
-            updateTextViewHeightConstraint()
-        }
-    }
-    
-    private var _files: [UIImage] = []
-    var files: [UIImage] {
-        get {
-            _files
-        }
-        set {
-            _files.append(contentsOf: newValue)
-            configureDataSource()
-            updateSendButtonEnabled()
-            filesCollectionView.isHidden = newValue.isEmpty
-        }
-    }
+    private(set) var messageField = MessageField()
     
     override func setupView() {
         setupCollectionView()
@@ -215,23 +193,40 @@ final class ChatMessageInputField: RxBaseView {
         filesCollectionView.rx.itemSelected
             .map { $0.item }
             .subscribe(with: self) { owner, item in
-                owner._files.remove(at: item)
+                owner.messageField.files.remove(at: item)
                 owner.configureDataSource()
                 owner.updateSendButtonEnabled()
-                owner.filesCollectionView.isHidden = owner._files.isEmpty
+                owner.filesCollectionView.isHidden = owner.messageField.files.isEmpty
             }
+            .disposed(by: disposeBag)
+        
+        messageInputTextView.rx.text.orEmpty
+            .subscribe(with: self, onNext: { owner, text in
+                owner.messageField.content = text
+            })
             .disposed(by: disposeBag)
     }
     
+    func appendFiles(_ images: [UIImage]) {
+        messageField.files.append(contentsOf: images)
+        configureDataSource()
+        updateSendButtonEnabled()
+        filesCollectionView.isHidden = false
+    }
+    
     func sendButtonTapped() {
-        message = ""
-        files = []
+        messageField = MessageField()
+        messageInputTextView.text = ""
+        updateTextViewHeightConstraint()
+        configureDataSource()
+        updateSendButtonEnabled()
+        filesCollectionView.isHidden = true
     }
 }
 
 // MARK: - CollectionView Configuration
 
-extension ChatMessageInputField {
+extension ChatMessageInputFieldView {
     private func setupCollectionView() {
         // 1) Compositional Layout 설정
         configureCompositionalLayout()
@@ -286,13 +281,13 @@ extension ChatMessageInputField {
     private func configureDataSource() {
         var snapShot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
         snapShot.appendSections([.files])
-        snapShot.appendItems(files.map { MessageInputFileCellItem(image: $0) })
+        snapShot.appendItems(messageField.files.map { MessageInputFileCellItem(image: $0) })
         dataSource.apply(snapShot, animatingDifferences: false)
     }
 }
 
 // MARK: - UITextViewDelegate
-extension ChatMessageInputField: UITextViewDelegate {
+extension ChatMessageInputFieldView: UITextViewDelegate {
     
     func textViewDidChange(_ textView: UITextView) {
 
@@ -304,7 +299,7 @@ extension ChatMessageInputField: UITextViewDelegate {
     }
     
     private func updateSendButtonEnabled() {
-        let isEnabled = !message.isEmpty || !files.isEmpty
+        let isEnabled = !messageField.content.isEmpty || !messageField.files.isEmpty
         sendButton.isUserInteractionEnabled = isEnabled
         sendButton.alpha = isEnabled ? 1 : 0.5
     }
@@ -419,6 +414,6 @@ extension MessageInputFileCollectionViewCell {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    ChatMessageInputField()
+    ChatMessageInputFieldView()
 }
 #endif
