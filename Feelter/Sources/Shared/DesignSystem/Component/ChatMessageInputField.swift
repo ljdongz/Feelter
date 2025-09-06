@@ -48,6 +48,8 @@ final class ChatMessageInputField: BaseView {
         view.axis = .vertical
         view.spacing = 5
         view.alignment = .fill
+        view.backgroundColor = .deepTurquoise
+        view.layer.cornerRadius = 18
         return view
     }()
     
@@ -119,6 +121,7 @@ final class ChatMessageInputField: BaseView {
         set {
             _files = newValue
             configureDataSource()
+            updateSendButtonEnabled()
             filesCollectionView.isHidden = newValue.isEmpty
         }
     }
@@ -207,18 +210,12 @@ final class ChatMessageInputField: BaseView {
     }
     
     func sendButtonTapped() {
-        messageInputTextView.text = ""
-        updateSendButtonEnabled()
-        updateTextViewHeightConstraint()
-    }
-    
-    func configureDataSource() {
-        var snapShot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
-        snapShot.appendSections([.files])
-        snapShot.appendItems(files)
-        dataSource.apply(snapShot, animatingDifferences: true)
+        message = ""
+        files = []
     }
 }
+
+// MARK: - CollectionView Configuration
 
 extension ChatMessageInputField {
     private func setupCollectionView() {
@@ -232,7 +229,7 @@ extension ChatMessageInputField {
         configureDiffableDataSource()
     }
     
-    func configureCompositionalLayout() {
+    private func configureCompositionalLayout() {
         
         let layout = UICollectionViewCompositionalLayout { sectionIndex, environment in
             switch Section(rawValue: sectionIndex)! {
@@ -244,14 +241,14 @@ extension ChatMessageInputField {
         filesCollectionView.collectionViewLayout = layout
     }
     
-    func registerCollectionViewCells() {
+    private func registerCollectionViewCells() {
         filesCollectionView.register(
             MessageInputFileCollectionViewCell.self,
             forCellWithReuseIdentifier: MessageInputFileCollectionViewCell.identifier
         )
     }
     
-    func configureDiffableDataSource() {
+    private func configureDiffableDataSource() {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: filesCollectionView,
             cellProvider: { collectionView, indexPath, itemIdentifier in
@@ -271,6 +268,13 @@ extension ChatMessageInputField {
             }
         )
     }
+    
+    private func configureDataSource() {
+        var snapShot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
+        snapShot.appendSections([.files])
+        snapShot.appendItems(files)
+        dataSource.apply(snapShot, animatingDifferences: true)
+    }
 }
 
 // MARK: - UITextViewDelegate
@@ -286,7 +290,7 @@ extension ChatMessageInputField: UITextViewDelegate {
     }
     
     private func updateSendButtonEnabled() {
-        let isEnabled = !messageInputTextView.text.isEmpty
+        let isEnabled = !message.isEmpty || !files.isEmpty
         sendButton.isUserInteractionEnabled = isEnabled
         sendButton.alpha = isEnabled ? 1 : 0.5
     }
@@ -385,7 +389,7 @@ extension MessageInputFileCollectionViewCell {
         
         let section = NSCollectionLayoutSection(group: group)
         
-        section.contentInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
+        section.contentInsets = .init(top: 0, leading: 5, bottom: 0, trailing: 5)
         return section
     }
 }

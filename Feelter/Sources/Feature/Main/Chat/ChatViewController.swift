@@ -99,7 +99,7 @@ final class ChatViewController: RxBaseViewController {
                     self?.messageInputField.message
                 }
                 .do(onNext: { [weak self] _ in
-                    self?.messageInputField.message = ""
+                    self?.messageInputField.sendButtonTapped()
                 })
                 .asObservable(),
             loadMoreMessages: tableView.rx.contentOffset
