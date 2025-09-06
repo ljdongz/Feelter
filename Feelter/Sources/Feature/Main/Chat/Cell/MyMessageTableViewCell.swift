@@ -12,6 +12,14 @@ import SnapKit
 final class MyMessageTableViewCell: BaseTableViewCell {
     
     static let identifier = "MyMessageTableViewCell"
+    
+    private let stackView: UIStackView = {
+        let view = UIStackView()
+        view.axis = .vertical
+        view.spacing = 2
+        view.alignment = .trailing
+        return view
+    }()
 
     private let messageContainerView: UIView = {
         let view = UIView()
@@ -29,12 +37,23 @@ final class MyMessageTableViewCell: BaseTableViewCell {
         return view
     }()
     
+    private let imageLayoutView: ChatImageLayoutView = {
+        let view = ChatImageLayoutView()
+        view.isHidden = true
+        return view
+    }()
+    
     private let dateLabel: UILabel = {
         let view = UILabel()
         view.textColor = .gray75
         view.font = .pretendard(size: 11, weight: .medium)
         return view
     }()
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+    }
     
     override func setupView() {
         selectionStyle = .none
@@ -43,7 +62,12 @@ final class MyMessageTableViewCell: BaseTableViewCell {
     override func setupSubviews() {
         contentView.addSubviews([
             dateLabel,
-            messageContainerView
+            stackView
+        ])
+        
+        stackView.addArrangedSubviews([
+            messageContainerView,
+            imageLayoutView
         ])
         
         messageContainerView.addSubviews([
@@ -53,11 +77,11 @@ final class MyMessageTableViewCell: BaseTableViewCell {
     
     override func setupConstraints() {
         dateLabel.snp.makeConstraints { make in
-            make.trailing.equalTo(messageContainerView.snp.leading).offset(-5)
-            make.bottom.equalTo(messageContainerView.snp.bottom)
+            make.trailing.equalTo(stackView.snp.leading).offset(-5)
+            make.bottom.equalTo(stackView.snp.bottom)
         }
         
-        messageContainerView.snp.makeConstraints { make in
+        stackView.snp.makeConstraints { make in
             make.verticalEdges.equalToSuperview().inset(2)
             make.trailing.equalToSuperview().inset(20)
             make.leading.greaterThanOrEqualToSuperview().inset(130)
@@ -73,5 +97,11 @@ final class MyMessageTableViewCell: BaseTableViewCell {
         messageLabel.text = message.content
         dateLabel.text = message.timestamp.formatted(.timeOnly)
         dateLabel.isHidden = !message.showTime
+        
+        imageLayoutView.isHidden = message.files.isEmpty
+        
+        if !message.files.isEmpty {
+            imageLayoutView.configureImageURLs(message.files)
+        }
     }
 }

@@ -59,8 +59,8 @@ final class ChatViewModel: ViewModel {
         input.viewDidLoad
             .do(onNext: { [weak self] _ in
                 guard let self else { return }
-                chatRepository.connectRoom(roomID: self.roomID) { message in
-                    receiveMessageTrigger.accept(message)
+                chatRepository.connectRoom(roomID: self.roomID) { [weak receiveMessageTrigger] message in
+                    receiveMessageTrigger?.accept(message)
                 }
             })
             .withAsync(with: self) { owner, _ in
@@ -86,7 +86,7 @@ final class ChatViewModel: ViewModel {
         
         input.sendMessageButtonTapped
             .withAsyncResult(with: self) { owner, message in
-                
+                // TODO: 수정
                 let files = message.files.compactMap { (imageData: ImageData) -> FileData in
                     if imageData.extension == .png,
                        let data = imageData.image.pngData(),

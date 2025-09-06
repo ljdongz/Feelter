@@ -45,6 +45,16 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         view.alignment = .bottom
         return view
     }()
+    
+    private let stackView: UIStackView = {
+        let view = UIStackView()
+        view.axis = .vertical
+        view.spacing = 2
+        view.alignment = .leading
+        view.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        return view
+    }()
 
     private let messageContainerView: UIView = {
         let view = UIView()
@@ -63,12 +73,19 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         return view
     }()
     
+    private let imageLayoutView: ChatImageLayoutView = {
+        let view = ChatImageLayoutView()
+        view.isHidden = true
+        return view
+    }()
+    
     private let dateLabel: UILabel = {
         let view = UILabel()
         view.textColor = .gray75
         view.font = .pretendard(size: 11, weight: .medium)
         view.textAlignment = .left
-        view.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        view.setContentHuggingPriority(.required, for: .horizontal)
+        view.setContentCompressionResistancePriority(.required, for: .horizontal)
         return view
     }()
 
@@ -88,8 +105,13 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         ])
         
         contentHorizontalStackView.addArrangedSubviews([
-            messageContainerView,
+            stackView,
             dateLabel
+        ])
+        
+        stackView.addArrangedSubviews([
+            messageContainerView,
+            imageLayoutView
         ])
         
         messageContainerView.addSubview(messageLabel)
@@ -105,7 +127,7 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         contentVerticalStackView.snp.makeConstraints { make in
             make.top.equalTo(profileImageView.snp.top).offset(2)
             make.leading.equalToSuperview().inset(65)
-            make.trailing.lessThanOrEqualToSuperview().inset(85)
+            make.trailing.lessThanOrEqualToSuperview().inset(45)
             make.bottom.equalToSuperview().inset(2)
         }
         
@@ -127,6 +149,12 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         }
         
         dateLabel.isHidden = !message.showTime
+        
+        imageLayoutView.isHidden = message.files.isEmpty
+        
+        if !message.files.isEmpty {
+            imageLayoutView.configureImageURLs(message.files)
+        }
     }
     
     private func showProfileElements(message: MessageItem) {
