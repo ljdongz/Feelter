@@ -7,9 +7,11 @@
 
 import UIKit
 
+import RxCocoa
+import RxSwift
 import SnapKit
 
-final class ChatMessageInputField: BaseView {
+final class ChatMessageInputField: RxBaseView {
     
     typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
 
@@ -119,7 +121,7 @@ final class ChatMessageInputField: BaseView {
             _files
         }
         set {
-            _files = newValue
+            _files.append(contentsOf: newValue)
             configureDataSource()
             updateSendButtonEnabled()
             filesCollectionView.isHidden = newValue.isEmpty
@@ -209,6 +211,18 @@ final class ChatMessageInputField: BaseView {
         }
     }
     
+    override func bind() {
+        filesCollectionView.rx.itemSelected
+            .map { $0.item }
+            .subscribe(with: self) { owner, item in
+                owner._files.remove(at: item)
+                owner.configureDataSource()
+                owner.updateSendButtonEnabled()
+                owner.filesCollectionView.isHidden = owner._files.isEmpty
+            }
+            .disposed(by: disposeBag)
+    }
+    
     func sendButtonTapped() {
         message = ""
         files = []
@@ -254,7 +268,7 @@ extension ChatMessageInputField {
             cellProvider: { collectionView, indexPath, itemIdentifier in
                 switch Section(rawValue: indexPath.section)! {
                 case .files:
-                    guard let item = itemIdentifier as? UIImage,
+                    guard let item = itemIdentifier as? MessageInputFileCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: MessageInputFileCollectionViewCell.identifier,
                             for: indexPath
@@ -262,7 +276,7 @@ extension ChatMessageInputField {
                         return .init()
                     }
                     
-                    cell.configureCell(image: item)
+                    cell.configureCell(image: item.image)
                     return cell
                 }
             }
@@ -272,8 +286,8 @@ extension ChatMessageInputField {
     private func configureDataSource() {
         var snapShot = NSDiffableDataSourceSnapshot<Section, AnyHashable>()
         snapShot.appendSections([.files])
-        snapShot.appendItems(files)
-        dataSource.apply(snapShot, animatingDifferences: true)
+        snapShot.appendItems(files.map { MessageInputFileCellItem(image: $0) })
+        dataSource.apply(snapShot, animatingDifferences: false)
     }
 }
 
@@ -316,9 +330,16 @@ extension ChatMessageInputField: UITextViewDelegate {
 
 // MARK: - CollectionViewCell
 
+fileprivate typealias MessageInputFileCellItem = MessageInputFileCollectionViewCell.Item
+
 fileprivate final class MessageInputFileCollectionViewCell: BaseCollectionViewCell {
     
     static let identifier = "MessageInputFileCollectionViewCell"
+    
+    struct Item: Hashable {
+        let id = UUID()
+        let image: UIImage
+    }
     
     private lazy var contentImageView: UIImageView = {
         let view = UIImageView()

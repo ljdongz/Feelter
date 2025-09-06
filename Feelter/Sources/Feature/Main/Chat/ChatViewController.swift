@@ -146,9 +146,12 @@ final class ChatViewController: RxBaseViewController {
         
         messageInputField.plusButton.rx
             .tap
+            .filter { [weak self] _ in
+                self?.messageInputField.files.count != 5
+            }
             .subscribe(with: self) { owner, _ in
                 var configuration = PHPickerConfiguration()
-                configuration.selectionLimit = 5
+                configuration.selectionLimit = 5 - owner.messageInputField.files.count
                 configuration.filter = .images
                 
                 let picker = PHPickerViewController(configuration: configuration)
@@ -434,29 +437,32 @@ extension ChatViewController {
 extension ChatViewController: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         
+        dismiss(animated: true)
+        
+        if results.isEmpty { return }
+        
         Task { @MainActor in
             do {
-                let images = try await withThrowingTaskGroup(of: UIImage?.self) { group in
-                    for result in results {
+                let images = try await withThrowingTaskGroup(of: (Int, UIImage?).self) { group in
+                    for (index, result) in results.enumerated() {
                         group.addTask {
-                            return try await result.itemProvider.loadUIImage()
+                            let image = try await result.itemProvider.loadUIImage()
+                            return (index, image)
                         }
                     }
                     
-                    var loadedImages: [UIImage] = []
-                    for try await image in group {
-                        if let image = image {
-                            loadedImages.append(image)
+                    var loadedImages: [(Int, UIImage)] = []
+                    for try await result in group {
+                        if let image = result.1 {
+                            loadedImages.append((result.0, image))
                         }
                     }
                     return loadedImages
                 }
                 
-                messageInputField.files = images
-                picker.dismiss(animated: true)
+                messageInputField.files = images.sorted { $0.0 < $1.0 }.map { $0.1 }
             } catch {
                 print("Image loading error: \(error)")
-                picker.dismiss(animated: true)
             }
         }
     }
