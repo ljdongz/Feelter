@@ -10,9 +10,18 @@ import UIKit
 import RxSwift
 import SnapKit
 
+typealias AuthorProfileCellItem = AuthorProfileCollectionViewCell.Item
+
 final class AuthorProfileCollectionViewCell: BaseCollectionViewCell {
     
     static let identifier = "AuthorProfileCollectionViewCell"
+    
+    struct Item: Hashable {
+        let userID: String
+        let profileImageURL: String?
+        let name: String?
+        let nickname: String
+    }
     
     private let profileView: ProfileView = {
         let view = ProfileView()
@@ -69,8 +78,14 @@ final class AuthorProfileCollectionViewCell: BaseCollectionViewCell {
         }
     }
     
-    func configureCell(profile: Profile?) {
-        profileView.profile = profile
+    func configureCell(item: AuthorProfileCellItem) {
+        profileView.configureUI(
+            imageURL: item.profileImageURL ?? "",
+            name: item.name ?? "윤새싹",
+            nickname: item.nickname
+        )
+        @Dependency var tokenManager: TokenManager
+        chatButton.isHidden = item.userID == tokenManager.userID
     }
 }
 

@@ -164,7 +164,9 @@ final class OtherMessageTableViewCell: BaseTableViewCell {
         nameLabel.text = message.sender.name
         ImageLoader.shared.applyAuthenticatedImage(
             for: profileImageView,
-            path: message.sender.profileImageURL ?? ""
+            path: message.sender.profileImageURL ?? "",
+            cachePolicy: .diskCache(expiration: .chatMessageFile),
+            failureImage: .anonymous
         )
     }
     

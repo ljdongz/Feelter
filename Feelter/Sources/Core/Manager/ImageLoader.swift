@@ -61,10 +61,11 @@ final class ImageLoader {
     func applyAuthenticatedImage(
         for imageView: UIImageView,
         path: String,
-        cachePolicy: ImageCachePolicy = .memoryOnly
+        cachePolicy: ImageCachePolicy = .memoryOnly,
+        failureImage: UIImage? = nil
     ) {
         if path.isEmpty {
-            imageView.image = .sample
+            imageView.image = failureImage
             return
         }
         
@@ -93,7 +94,7 @@ final class ImageLoader {
             .requestModifier(modifier),
             .backgroundDecode,
             .scaleFactor(UIScreen.main.scale),
-            .onFailureImage(.sample),
+            .onFailureImage(failureImage),
             cachePolicy.kingfisherOptions,
         ]
                 
