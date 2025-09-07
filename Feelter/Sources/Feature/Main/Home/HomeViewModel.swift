@@ -26,6 +26,8 @@ final class HomeViewModel: ViewModel {
     @Dependency private var filterRepository: FilterRepository
     @Dependency private var bannerRepository: BannerRepository
     
+    private(set) var homeModel: HomeModel?
+    
     var disposeBag: DisposeBag = .init()
     
     func transform(input: Input) -> Output {
@@ -52,6 +54,7 @@ final class HomeViewModel: ViewModel {
             .subscribe(with: self) { owner, result in
                 switch result {
                 case let .success(data):
+                    owner.homeModel = data
                     output.homeModel.accept(data)
                 case let .failure(error):
                     print(error)

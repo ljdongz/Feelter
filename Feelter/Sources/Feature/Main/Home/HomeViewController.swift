@@ -55,7 +55,7 @@ final class HomeViewController: RxBaseViewController {
         
         mainView.collectionView.rx.itemSelected
             .subscribe(with: self, onNext: { owner, indexPath in
-                let section = HomeView.Section(rawValue: indexPath.section)
+                let section = HomeView.Section(rawValue: indexPath.section)!
                 
                 switch section {
                 case .banner:
@@ -64,6 +64,21 @@ final class HomeViewController: RxBaseViewController {
                     }
                     let url = AppConfiguration.baseURL + banner.payload.value
                     owner.presentWebViewController(with: url)
+                    
+                case .hotTrend:
+                    guard let filters = owner.viewModel.homeModel?.hotTrendFilters else { return }
+                    let filter = filters[indexPath.item]
+                    owner.navigateToFilterDetailViewController(filter: filter) { isLiked in
+                        // TODO: 좋아요 상태 업데이트
+                    }
+                    
+                case .authorPhotos:
+                    guard let filters = owner.viewModel.homeModel?.todayAuthor.filters else { return }
+                    let filter = filters[indexPath.item]
+                    owner.navigateToFilterDetailViewController(filter: filter) { isLiked in
+                        // TODO: 좋아요 상태 업데이트
+                    }
+                    
                 default:
                     break
                 }
@@ -73,11 +88,23 @@ final class HomeViewController: RxBaseViewController {
     }
 }
 
-// MARK: - WebView
-
-private extension HomeViewController {
-    func presentWebViewController(with urlString: String) {
+extension HomeViewController {
+    private func presentWebViewController(with urlString: String) {
         let webViewController = BannerWebViewController(urlString: urlString)
         present(webViewController, animated: true)
+    }
+    
+    private func navigateToFilterDetailViewController(
+        filter: Filter,
+        onChangeLikeStatus: @escaping ((Bool) -> Void)
+    ) {
+        guard let filterID = filter.filterID,
+              let isLiked = filter.isLiked else { return }
+        
+        let vm = FilterDetailViewModel(filterID: filterID, isLiked: isLiked)
+        let vc = FilterDetailViewController(viewModel: vm)
+        vc.title = filter.title
+        vc.onChangeLikeStatus = onChangeLikeStatus
+        navigationController?.pushViewController(vc, animated: true)
     }
 }
