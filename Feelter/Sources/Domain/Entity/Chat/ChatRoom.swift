@@ -12,6 +12,8 @@ struct ChatRoom: Hashable {
     let participants: [MessageSender]
     
     let lastMessage: String?
+    
+    // TODO: 제거하기 (메시지 전송 시 무조건 content 포함시켜야 하기 때문에 마지막 메시지는 content를 보여주도록 수정)
     let isLastMessageFile: Bool
     
     var unReadCount: Int

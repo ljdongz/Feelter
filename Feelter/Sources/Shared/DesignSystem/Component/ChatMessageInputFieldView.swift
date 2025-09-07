@@ -203,6 +203,7 @@ final class ChatMessageInputFieldView: RxBaseView {
         messageInputTextView.rx.text.orEmpty
             .subscribe(with: self, onNext: { owner, text in
                 owner.messageField.content = text
+                owner.updateSendButtonEnabled()
             })
             .disposed(by: disposeBag)
     }

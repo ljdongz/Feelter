@@ -130,7 +130,7 @@ extension ChatRoomViewController {
                 guard let opponent = room.participants.first(where: {
                     $0.userID != userID
                 }) else { return .init() }
-                let message = room.isLastMessageFile ? "파일을 보냈습니다." : room.lastMessage ?? ""
+                let message = room.lastMessage ?? ""
                 
                 cell.configureCell(.init(
                     profileImageURL: opponent.profileImageURL,
