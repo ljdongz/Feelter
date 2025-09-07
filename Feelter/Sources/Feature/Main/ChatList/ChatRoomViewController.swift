@@ -130,12 +130,11 @@ extension ChatRoomViewController {
                 guard let opponent = room.participants.first(where: {
                     $0.userID != userID
                 }) else { return .init() }
-                let message = room.lastMessage ?? ""
                 
                 cell.configureCell(.init(
                     profileImageURL: opponent.profileImageURL,
                     name: opponent.nickname,
-                    message: message,
+                    message: room.lastMessage ?? "",
                     date: room.localUpdatedAt,
                     unreadCount: room.unReadCount
                 ))

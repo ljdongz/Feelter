@@ -7,6 +7,7 @@
 
 import PhotosUI
 import UIKit
+import UniformTypeIdentifiers
 
 import RxCocoa
 import RxSwift

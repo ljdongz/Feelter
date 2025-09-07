@@ -29,7 +29,7 @@ enum FileExtension: CaseIterable {
     var `extension`: String {
         switch self {
         case .jpg, .jpeg: UTType.jpeg.identifier
-        case .png: UTType.pdf.identifier
+        case .png: UTType.png.identifier
         case .gif: UTType.gif.identifier
         case .pdf: UTType.pdf.identifier
         }

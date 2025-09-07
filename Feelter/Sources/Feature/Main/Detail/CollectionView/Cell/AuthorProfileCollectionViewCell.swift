@@ -84,8 +84,9 @@ final class AuthorProfileCollectionViewCell: BaseCollectionViewCell {
             name: item.name ?? "윤새싹",
             nickname: item.nickname
         )
-        @Dependency var tokenManager: TokenManager
-        chatButton.isHidden = item.userID == tokenManager.userID
+        
+        let currentUserID = UserDefaults.standard.string(forKey: "userID")
+        chatButton.isHidden = item.userID == currentUserID
     }
 }
 

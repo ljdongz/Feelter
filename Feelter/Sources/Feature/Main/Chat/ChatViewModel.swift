@@ -57,10 +57,10 @@ final class ChatViewModel: ViewModel {
         let output = Output()
         
         input.viewDidLoad
-            .do(onNext: { [weak self, weak receiveMessageTrigger] _ in
+            .do(onNext: { [weak self] _ in
                 guard let self else { return }
                 chatRepository.connectRoom(roomID: self.roomID) { message in
-                    receiveMessageTrigger?.accept(message)
+                    self.receiveMessageTrigger.accept(message)
                 }
             })
             .withAsync(with: self) { owner, _ in
@@ -87,13 +87,14 @@ final class ChatViewModel: ViewModel {
         input.sendMessageButtonTapped
             .withAsyncResult(with: self) { owner, message in
                 // TODO: 수정
-                let files = message.files.compactMap { (imageData: ImageData) -> FileData in
+                let files = message.files.compactMap { (imageData: ImageData) -> FileData? in
                     if imageData.extension == .png,
                        let data = imageData.image.pngData(),
                        data.count <= 1024 * 1024 {
                         return FileData(data: data, extension: .png)
                     } else {
-                        return FileData(data: imageData.image.jpegData()!, extension: .jpeg)
+                        guard let data = imageData.image.jpegData() else { return nil }
+                        return FileData(data: data, extension: .jpeg)
                     }
                 }
 
