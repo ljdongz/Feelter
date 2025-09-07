@@ -475,13 +475,6 @@ extension FilterMakeViewController {
                         return .init()
                     }
                     
-//                    Observable.combineLatest(
-//                        titleTextFieldRelay.distinctUntilChanged(),
-//                        introductionTextFieldRelay.distinctUntilChanged(),
-//                        priceTextFieldRelay.distinctUntilChanged(),
-//                        uploadImageViewRelay.asObservable()
-//                    )
-//                    .map { !$0.isEmpty && !$1.isEmpty && !$2.isEmpty && $3 != nil }
                     isEnableCreateButtonRelay
                         .subscribe(with: self) { owner, isActive in
                             cell.isUserInteractionEnabled = isActive

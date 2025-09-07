@@ -16,6 +16,7 @@ struct MessageItem: Hashable {
     let id = UUID()
     let sender: MessageSender
     let content: String
+    let files: [String]
     let timestamp: Date
     let showProfile: Bool
     let showTime: Bool // 시간 표시 여부
@@ -188,6 +189,7 @@ extension ChatMessageCellGenerator {
         return .message(MessageItem(
             sender: sender,
             content: message.content,
+            files: message.fileURLs,
             timestamp: message.createdAt,
             showProfile: showProfile,
             showTime: showTime

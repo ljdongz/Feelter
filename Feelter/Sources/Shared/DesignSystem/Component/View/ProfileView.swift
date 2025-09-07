@@ -41,12 +41,6 @@ final class ProfileView: BaseView {
         return view
     }()
     
-    var profile: Profile? {
-        didSet {
-            updateUI(profile: profile)
-        }
-    }
-    
     override func setupSubviews() {
         addSubviews([
             profileImageView,
@@ -72,10 +66,16 @@ final class ProfileView: BaseView {
             make.bottom.lessThanOrEqualToSuperview()
         }
     }
-
-    private func updateUI(profile: Profile?) {
-        profileImageView.image = .sample
-        authorName.text = "윤새싹"
-        authorNickname.text = "SESAC YOON"
+    
+    func configureUI(imageURL: String, name: String?, nickname: String) {
+        ImageLoader.shared.applyAuthenticatedImage(
+            for: profileImageView,
+            path: imageURL,
+            cachePolicy: .memoryOnly,
+            failureImage: .anonymous
+        )
+        
+        authorName.text = name
+        authorNickname.text = nickname
     }
 }

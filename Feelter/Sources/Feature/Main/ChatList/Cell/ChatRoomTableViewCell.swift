@@ -136,7 +136,12 @@ final class ChatRoomTableViewCell: BaseTableViewCell {
     }
     
     func configureCell(_ item: ChatRoomCellItem) {
-        profileImageView.image = .sample
+        ImageLoader.shared.applyAuthenticatedImage(
+            for: profileImageView,
+            path: item.profileImageURL ?? "",
+            cachePolicy: .diskCache(expiration: .chatMessageFile),
+            failureImage: .anonymous
+        )
         
         nameLabel.text = item.name
         messageLabel.text = item.message

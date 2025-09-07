@@ -73,7 +73,8 @@ final class TodayAuthorProfileCollectionViewCell: BaseCollectionViewCell {
         ImageLoader.shared.applyAuthenticatedImage(
             for: profileImageView,
             path: profile.profileImageURL ?? "",
-            cachePolicy: .diskCache(expiration: .todayAuthor)
+            cachePolicy: .diskCache(expiration: .todayAuthor),
+            failureImage: .anonymous
         )
         authorName.text = profile.name
         authorNickname.text = profile.nickname

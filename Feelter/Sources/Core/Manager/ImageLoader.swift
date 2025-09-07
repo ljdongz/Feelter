@@ -18,6 +18,7 @@ enum ImageCachePolicy {
         case banners
         case hotTrendsFilter
         case todayAuthor
+        case chatMessageFile
         
         var value: Double {
             switch self {
@@ -25,6 +26,7 @@ enum ImageCachePolicy {
             case .banners: 86400 * 7
             case .hotTrendsFilter: 86400
             case .todayAuthor: 86400
+            case .chatMessageFile: 86400 * 30
             }
         }
     }
@@ -47,19 +49,23 @@ final class ImageLoader {
     @Dependency private var tokenManager: TokenManager
 
     private init() {
+        ImageCache.default.cleanExpiredDiskCache()
+        
         // 100MB (8GB 기준으로 약 10%)
-        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 100
+//        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 200
         // 500MB
         ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 500
+        ImageCache.default.diskStorage.config.expiration = .days(30)
     }
     
     func applyAuthenticatedImage(
         for imageView: UIImageView,
         path: String,
-        cachePolicy: ImageCachePolicy = .memoryOnly
+        cachePolicy: ImageCachePolicy = .memoryOnly,
+        failureImage: UIImage? = nil
     ) {
         if path.isEmpty {
-            imageView.image = .sample
+            imageView.image = failureImage
             return
         }
         
@@ -88,7 +94,7 @@ final class ImageLoader {
             .requestModifier(modifier),
             .backgroundDecode,
             .scaleFactor(UIScreen.main.scale),
-            .onFailureImage(.sample),
+            .onFailureImage(failureImage),
             cachePolicy.kingfisherOptions,
         ]
                 

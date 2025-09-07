@@ -25,3 +25,9 @@ struct MultipartFormData {
         self.mimeType = mimeType
     }
 }
+
+struct UploadFileData {
+    let data: Data
+    let `extension`: String
+    let mimeType: String
+}

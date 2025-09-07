@@ -72,7 +72,8 @@ final class FilterDetailView: RxBaseView {
         )
         let presets = FilterPresetsCellItem(isPaid: filter.isDownloaded, attribute: filter.attribute)
         let metadata = PhotoMetadataSectionItem(metadata: filter.photoMetadata)
-        let profile = AuthorProfileSectionItem(
+        let profile = AuthorProfileCellItem(
+            userID: filter.author.userID,
             profileImageURL: filter.author.profileImageURL,
             name: filter.author.name,
             nickname: filter.author.nickname
@@ -244,7 +245,7 @@ private extension FilterDetailView {
                     return cell
                     
                 case .authorProfile:
-                    guard let item = itemIdentifier as? AuthorProfileSectionItem,
+                    guard let item = itemIdentifier as? AuthorProfileCellItem,
                           let cell = collectionView.dequeueReusableCell(
                             withReuseIdentifier: AuthorProfileCollectionViewCell.identifier,
                             for: indexPath
@@ -252,17 +253,7 @@ private extension FilterDetailView {
                         return .init()
                     }
                     
-                    cell.configureCell(profile: .init(
-                        userID: "",
-                        email: "",
-                        nickname: item.nickname,
-                        name: item.name,
-                        introduction: "",
-                        description: "",
-                        profileImageURL: item.profileImageURL,
-                        phoneNumber: "",
-                        hashTags: []
-                    ))
+                    cell.configureCell(item: item)
                     
                     cell.chatButton.rx
                         .tap
@@ -331,12 +322,6 @@ extension FilterDetailView {
     struct PhotoMetadataSectionItem: Hashable {
         let uuid = UUID()
         let metadata: PhotoMetadata?
-    }
-    
-    struct AuthorProfileSectionItem: Hashable {
-        let profileImageURL: String?
-        let name: String?
-        let nickname: String
     }
     
     struct HashTagsSectionItem: Hashable {

@@ -19,6 +19,7 @@ protocol ChatRepository {
     func updateRoom(apnsPayload: APNsPayload) async throws
     
     // 메시지 관련
+    func uploadFiles(roomID: String, files: [FileData]) async throws -> [String]
     func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage
     func fetchMessages(from roomID: String, after: String?) async throws -> [ChatMessage]
     func fetchLocalMessages(
