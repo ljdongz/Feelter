@@ -50,7 +50,7 @@ final class FilterEditViewController: RxBaseViewController {
         let view = UIButton(type: .system)
         view.setImage(.undo.resized(to: .init(width: 24, height: 24)), for: .normal)
         view.backgroundColor = .gray75.withAlphaComponent(0.5)
-        view.tintColor = .gray75
+        view.tintColor = .gray30
         view.layer.cornerRadius = 8
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor.gray75.withAlphaComponent(0.5).cgColor
@@ -62,7 +62,7 @@ final class FilterEditViewController: RxBaseViewController {
         let view = UIButton(type: .system)
         view.setImage(.redo.resized(to: .init(width: 24, height: 24)), for: .normal)
         view.backgroundColor = .gray75.withAlphaComponent(0.5)
-        view.tintColor = .gray75
+        view.tintColor = .gray30
         view.layer.cornerRadius = 8
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor.gray75.withAlphaComponent(0.5).cgColor
@@ -74,7 +74,7 @@ final class FilterEditViewController: RxBaseViewController {
         let view = UIButton(type: .system)
         view.setImage(.compare.resized(to: .init(width: 24, height: 24)), for: .normal)
         view.backgroundColor = .gray75.withAlphaComponent(0.5)
-        view.tintColor = .gray75
+        view.tintColor = .gray30
         view.layer.cornerRadius = 8
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor.gray75.withAlphaComponent(0.5).cgColor
@@ -84,8 +84,8 @@ final class FilterEditViewController: RxBaseViewController {
     
     private let slider: UISlider = {
         let view = UISlider()
-        view.minimumValue = -1.0
-        view.maximumValue = 1.0
+        view.minimumValue = -0.25
+        view.maximumValue = 0.25
         view.maximumTrackTintColor = .blackTurquoise
         view.minimumTrackTintColor = .brightTurquoise
         return view
@@ -236,10 +236,11 @@ final class FilterEditViewController: RxBaseViewController {
             .skip(1)
             .map {
                 // TODO: 소수점 아래 n자리 잘라내기
-                Double($0)
+                Double($0).formatByMagnitude()
             }
             .distinctUntilChanged()
             .subscribe(with: self) { owner, value in
+                print(value)
                 let image = owner.coreImageManager.applyFilter(
                     type: owner.selectedFilterAttribute,
                     value: value

@@ -31,7 +31,7 @@ extension CoreImageFilter {
         displayName: "밝기",
         parameter: FilterParameter(
             key: kCIInputBrightnessKey,
-            range: -1.0...1.0,
+            range: -0.25...0.25, // default: -1.0...1.0
             defaultValue: 0.0,
             valueType: .number
         )
