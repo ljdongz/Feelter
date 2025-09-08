@@ -156,7 +156,7 @@ final class ChatViewController: RxBaseViewController {
                 configuration.filter = .images
                 
                 let picker = PHPickerViewController(configuration: configuration)
-                picker.delegate = self
+                picker.delegate = owner
                 owner.view.endEditing(true)
                 owner.present(picker, animated: true)
             }

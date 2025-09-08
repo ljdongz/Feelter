@@ -240,7 +240,6 @@ final class FilterEditViewController: RxBaseViewController {
             }
             .distinctUntilChanged()
             .subscribe(with: self) { owner, value in
-                print(value)
                 let image = owner.coreImageManager.applyFilter(
                     type: owner.selectedFilterAttribute,
                     value: value

@@ -22,6 +22,10 @@ class BaseView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    deinit {
+        print("✅ Deinit: \(String(describing: type(of: self)))")
+    }
+    
     func setupView() {}
     func setupSubviews() {}
     func setupConstraints() {}
