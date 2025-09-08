@@ -39,12 +39,10 @@ final class TabBarViewController: RxBaseViewController {
         let vc1 = UINavigationController(rootViewController: HomeViewController())
         let vc2 = UINavigationController(rootViewController: FilterFeedViewController())
         let vc3 = UINavigationController(rootViewController: FilterMakeOnboardingViewController())
-        let vc4 = UIViewController()
+//        let vc4 = UIViewController()
         let vc5 = UINavigationController(rootViewController: MyPageViewController())
-        
-        vc4.view.backgroundColor = .brightTurquoise
-        
-        setViewControllers([vc1, vc2, vc3, vc4, vc5])
+                
+        setViewControllers([vc1, vc2, vc3, vc5])
     }
     
     // MARK: - Setup

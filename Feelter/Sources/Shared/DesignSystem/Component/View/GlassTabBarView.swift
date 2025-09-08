@@ -14,15 +14,15 @@ enum TabBarItem: Int, CaseIterable {
     case home = 0
     case feed = 1
     case filter = 2
-    case search = 3
-    case profile = 4
+//    case search = 3
+    case profile = 3
     
     var iconName: String {
         switch self {
         case .home: return "house"
         case .feed: return "rectangle.grid.2x2"
         case .filter: return "camera.filters"
-        case .search: return "magnifyingglass"
+//        case .search: return "magnifyingglass"
         case .profile: return "person"
         }
     }
@@ -32,7 +32,7 @@ enum TabBarItem: Int, CaseIterable {
         case .home: .homeFill
         case .feed: .feedFill
         case .filter: .filterFill
-        case .search: .searchFill
+//        case .search: .searchFill
         case .profile: .profileFill
         }
     }
@@ -42,7 +42,7 @@ enum TabBarItem: Int, CaseIterable {
         case .home: .homeEmpty
         case .feed: .feedEmpty
         case .filter: .filterEmpty
-        case .search: .searchEmpty
+//        case .search: .searchEmpty
         case .profile: .profileEmpty
         }
     }
