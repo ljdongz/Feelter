@@ -1,4 +1,4 @@
-# Feel the Filter, Feelter
+# <img width="32" height="32" alt="appicon" src="https://github.com/user-attachments/assets/d20fb2ed-78aa-48ee-9225-528908f6f4d7" /> Feel the Filter, Feelter
 
 사진작가들이 자신만의 독창적인 필터를 제작하여 판매하고, 다른 사용자들이 이를 구매해 활용할 수 있는 플랫폼 서비스입니다.
 
