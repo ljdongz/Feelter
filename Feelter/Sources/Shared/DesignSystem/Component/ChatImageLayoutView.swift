@@ -30,7 +30,7 @@ final class ChatImageLayoutView: BaseView {
     override func setupConstraints() {
         stackView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.width.lessThanOrEqualTo(250)
+            make.width.lessThanOrEqualTo(220)
         }
     }
     
