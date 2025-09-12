@@ -226,7 +226,7 @@ final class FilterEditViewController: RxBaseViewController {
         .subscribe(with: self) { owner, _ in
             owner.coreImageManager.appendHistory(
                 type: owner.selectedFilterAttribute,
-                value: Double(owner.slider.value)
+                value: Double(owner.slider.value).formatByMagnitude()
             )
             owner.updateOptionButtonActivityState()
         }
@@ -234,10 +234,7 @@ final class FilterEditViewController: RxBaseViewController {
         
         slider.rx.value
             .skip(1)
-            .map {
-                // TODO: 소수점 아래 n자리 잘라내기
-                Double($0).formatByMagnitude()
-            }
+            .map { Double($0).formatByMagnitude() }
             .distinctUntilChanged()
             .subscribe(with: self) { owner, value in
                 let image = owner.coreImageManager.applyFilter(
