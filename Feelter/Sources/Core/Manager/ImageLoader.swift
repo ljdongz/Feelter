@@ -52,7 +52,7 @@ final class ImageLoader {
         ImageCache.default.cleanExpiredDiskCache()
         
         // 100MB (8GB 기준으로 약 10%)
-//        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 200
+        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 100
         // 500MB
         ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 500
         ImageCache.default.diskStorage.config.expiration = .days(30)
@@ -67,6 +67,20 @@ final class ImageLoader {
         if path.isEmpty {
             imageView.image = failureImage
             return
+        }
+        
+        let downsamplingSize: CGSize
+        if imageView.bounds.size != .zero {
+            downsamplingSize = imageView.bounds.size
+        } else {
+            // bounds가 zero인 경우 기본 크기로 폴백하거나 layoutIfNeeded 후 재시도
+            imageView.layoutIfNeeded()
+            if imageView.bounds.size != .zero {
+                downsamplingSize = imageView.bounds.size
+            } else {
+                // 기본 크기로 폴백 (너무 큰 이미지 방지)
+                downsamplingSize = CGSize(width: 200, height: 200)
+            }
         }
         
         let token = tokenManager.accessToken
@@ -86,7 +100,7 @@ final class ImageLoader {
         }
         
         let url = "\(AppConfiguration.baseURL)/v1\(path)"
-        let processor = DownsamplingImageProcessor(size: imageView.bounds.size)
+        let processor = DownsamplingImageProcessor(size: downsamplingSize)
         imageView.kf.indicatorType = .activity
         
         let kingfisherOptions: KingfisherOptionsInfo = [
