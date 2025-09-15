@@ -43,7 +43,7 @@ extension SplashViewController {
     private func setupRootView() {
         
         Task {
-            if let _ = tokenManager.accessToken {
+            if let _ = UserDefaults.standard.string(forKey: "userID") {
                 
                 do {
                     async let sleep: Void = Task.sleep(nanoseconds: 1_000_000_000)
