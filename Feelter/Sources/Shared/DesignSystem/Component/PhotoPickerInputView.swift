@@ -51,7 +51,7 @@ final class PhotoPickerInputView: BaseView {
         
         snapShot.appendSections([.photos])
         
-        var datas: [UIImage?] = [.sample, .sample2, .appleLogo, .blackPoint]
+        var datas: [UIImage?] = [.sampleImage, .sample2, .appleLogo, .blackPoint]
 
         snapShot.appendItems(datas.compactMap { $0 }, toSection: .photos)
         dataSource.apply(snapShot, animatingDifferences: false)
@@ -103,7 +103,7 @@ extension PhotoPickerInputView {
                         return .init()
                     }
                     
-                    cell.configureCell(image: .sample)
+                    cell.configureCell(image: .sampleImage)
                     cell.backgroundColor = .yellow
                     return cell
                 }

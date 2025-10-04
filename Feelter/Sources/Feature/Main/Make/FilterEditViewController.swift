@@ -510,6 +510,6 @@ extension FilterEditViewController: UIGestureRecognizerDelegate {
 import SwiftUI
 @available(iOS 17.0, *)
 #Preview {
-    UINavigationController(rootViewController: FilterEditViewController(image: .sample) { _, _ in })
+    UINavigationController(rootViewController: FilterEditViewController(image: .sampleImage) { _, _ in })
 }
 #endif

@@ -162,7 +162,7 @@ final class MainProfileCollectionViewCell: BaseCollectionViewCell {
     }
     
     func configureCell(item: MainProfileCellItem) {
-        profileImageView.image = .sample
+        profileImageView.image = .sampleImage
         nicknameLabel.text = item.nickname
         nameLabel.text = item.name
         emailLabel.text = item.email

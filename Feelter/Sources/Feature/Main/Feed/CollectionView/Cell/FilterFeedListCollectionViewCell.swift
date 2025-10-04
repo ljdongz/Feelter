@@ -84,7 +84,7 @@ final class FilterFeedListCollectionViewCell: BaseCollectionViewCell {
     }
     
     func configureCell(filter: Filter) {
-        filterImageView.imageView.image = .sample
+        filterImageView.imageView.image = .sampleImage
         filterTitleLabel.text = filter.title
         nicknameLabel.text = filter.creator?.nickname
         descriptionLabel.text = filter.creator?.introduction

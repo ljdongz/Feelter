@@ -344,7 +344,7 @@ fileprivate final class MessageInputFileCollectionViewCell: BaseCollectionViewCe
         view.contentMode = .scaleAspectFill
         view.layer.cornerRadius = 8
         view.clipsToBounds = true
-        view.image = .sample
+        view.image = .sampleImage
         view.layer.borderColor = UIColor.gray90.cgColor
         view.layer.borderWidth = 1
         return view

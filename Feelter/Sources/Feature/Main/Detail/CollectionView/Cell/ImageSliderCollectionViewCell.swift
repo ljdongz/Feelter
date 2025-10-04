@@ -18,7 +18,7 @@ final class ImageSliderCollectionViewCell: BaseCollectionViewCell {
     private lazy var afterImageView: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleAspectFill
-        view.image = .sample
+        view.image = .sampleImage
         return view
     }()
     
