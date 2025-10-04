@@ -156,7 +156,7 @@ final class ChatViewController: RxBaseViewController {
                 configuration.filter = .images
                 
                 let picker = PHPickerViewController(configuration: configuration)
-                picker.delegate = self
+                picker.delegate = owner
                 owner.view.endEditing(true)
                 owner.present(picker, animated: true)
             }
@@ -441,7 +441,7 @@ extension ChatViewController: PHPickerViewControllerDelegate {
         dismiss(animated: true)
         
         if results.isEmpty { return }
-        
+        // TODO: 정리
         Task { @MainActor in
             do {
                 let images = try await withThrowingTaskGroup(of: (Int, ImageData)?.self) { group in

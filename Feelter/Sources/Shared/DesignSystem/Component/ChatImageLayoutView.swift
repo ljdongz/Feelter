@@ -30,7 +30,7 @@ final class ChatImageLayoutView: BaseView {
     override func setupConstraints() {
         stackView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.width.lessThanOrEqualTo(250)
+            make.width.lessThanOrEqualTo(220)
         }
     }
     
@@ -341,7 +341,6 @@ extension ChatImageLayoutView {
     }
     
     private func setImageWithURL(_ imageView: UIImageView, _ urlString: String) {
-        // TODO: 다운샘플링 사이즈 설정 수정 (UIImageView 사이즈 그대로 전달 X -> 크기가 설정되지 않은 UIImageView임)
         ImageLoader.shared.applyAuthenticatedImage(
             for: imageView,
             path: urlString,

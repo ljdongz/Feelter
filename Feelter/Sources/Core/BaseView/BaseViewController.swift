@@ -43,6 +43,8 @@ class BaseViewController: UIViewController {
     
     deinit {
         keyboardObserver = nil
+        
+        print("✅ Deinit: \(String(describing: type(of: self)))")
     }
     
     func setupView() {}

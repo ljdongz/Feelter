@@ -575,7 +575,7 @@ extension FilterMakeViewController {
 
 extension FilterMakeViewController: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        
+        // TODO: 정리
         guard let result = results.first else {
             picker.dismiss(animated: true)
             return
