@@ -441,7 +441,7 @@ extension ChatViewController: PHPickerViewControllerDelegate {
         dismiss(animated: true)
         
         if results.isEmpty { return }
-        
+        // TODO: 정리
         Task { @MainActor in
             do {
                 let images = try await withThrowingTaskGroup(of: (Int, ImageData)?.self) { group in
