@@ -25,6 +25,10 @@
 - PG 결제 (필터 구매)
 
 ## 🖼️ 스크린샷
+| 로그인 | 회원가입 |
+| :-------- | :------- |
+| <img width="200" alt="IMG_0235" src="https://github.com/user-attachments/assets/be7c85a6-b5d5-43e7-8247-6c1f0e3e7c61" /> | <img width="200" alt="123312" src="https://github.com/user-attachments/assets/a8bae1c0-12f1-4c96-b774-09aee26d2adf" /> |
+
 | 홈 | 출석체크(웹뷰) | 피드 |
 | :-------- | :------- | :------- | 
 | <img width="200" alt="IMG_0220" src="https://github.com/user-attachments/assets/dae8d16d-851d-4e0a-a5d6-a62707300c4e" /> | <img width="200" alt="IMG_0237" src="https://github.com/user-attachments/assets/5a069239-491d-4ccd-9c12-cc61239a700f" /> | <img width="200" alt="IMG_0238" src="https://github.com/user-attachments/assets/7b3a69ba-9196-4627-a41f-d815873f3f47" /> |
