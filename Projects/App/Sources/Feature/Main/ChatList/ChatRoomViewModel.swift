@@ -37,9 +37,10 @@ final class ChatRoomViewModel: ViewModel {
         let serverFetchTrigger = PublishRelay<Void>()
         
         input.viewDidLoad
-            .withAsync(with: self, { owner, _ in
-                await owner.chatRepository.fetchLocalRooms()
-            })
+            .map { [weak self] _ -> [ChatRoom] in
+                guard let self else { return [] }
+                return self.chatRepository.fetchLocalRooms()
+            }
             .subscribe(with: self, onNext: { owner, rooms in
                 output.chatRooms.accept(rooms)
                 serverFetchTrigger.accept(())
@@ -50,7 +51,7 @@ final class ChatRoomViewModel: ViewModel {
             .withAsyncResult(with: self) { owner, payload in
                 try await owner.chatRepository.updateRoom(apnsPayload: payload)
                 
-                let rooms = await owner.chatRepository.fetchLocalRooms()
+                let rooms = owner.chatRepository.fetchLocalRooms()
                 return rooms
             }
             .subscribe(with: self) { owner, result in
@@ -64,8 +65,9 @@ final class ChatRoomViewModel: ViewModel {
             .disposed(by: disposeBag)
         
         input.receiveSocketMessage
-            .withAsync(with: self) { owner, _ in
-                await owner.chatRepository.fetchLocalRooms()
+            .map { [weak self] _ -> [ChatRoom] in
+                guard let self else { return [] }
+                return self.chatRepository.fetchLocalRooms()
             }
             .subscribe(with: self) { onwer, rooms in
                 output.chatRooms.accept(rooms)

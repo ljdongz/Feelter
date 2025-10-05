@@ -58,8 +58,10 @@ final class ChatRoomViewController: RxBaseViewController {
     }
     
     override func bind() {
+        let viewDidLoadTrigger = PublishRelay<Void>()
+
         let input = ChatRoomViewModel.Input(
-            viewDidLoad: .just(()),
+            viewDidLoad: viewDidLoadTrigger.asObservable(),
             receivedAPNs: NotificationCenter.default.rx
                 .notification(.ReceiveRemotePush)
                 .compactMap { $0.object as? APNsPayload }
@@ -69,15 +71,18 @@ final class ChatRoomViewController: RxBaseViewController {
                 .map { _ in }
                 .asObservable()
         )
-        
+
         let output = viewModel.transform(input: input)
-        
+
         output.chatRooms
             .observe(on: MainScheduler.instance)
             .subscribe(with: self, onNext: { owner, rooms in
                 owner.updateDataSource(with: rooms)
             })
             .disposed(by: disposeBag)
+
+        // 모든 구독 연결 후 viewDidLoad 트리거
+        viewDidLoadTrigger.accept(())
         
         tableView.rx.itemSelected
             .compactMap { [weak self] indexPath in

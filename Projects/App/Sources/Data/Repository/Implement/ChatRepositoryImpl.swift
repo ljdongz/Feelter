@@ -39,7 +39,7 @@ final class ChatRepositoryImpl: ChatRepository {
     // MARK: - 채팅방 관련
     func createRoom(opponentID: String) async throws -> ChatRoom {
         // 이미 기존에 Realm에 저장된 채팅방이 있을 경우, 서버 통신 없이 반환
-        if let localRoom = await chatDataSource.findChatRoom(opponentID: opponentID) {
+        if let localRoom = chatDataSource.findChatRoom(opponentID: opponentID) {
             return localRoom
         }
         
@@ -52,7 +52,7 @@ final class ChatRepositoryImpl: ChatRepository {
         
         let chatRoom = response.toDomain()
         
-        try await chatDataSource.saveChatRooms([chatRoom])
+        try chatDataSource.saveChatRooms([chatRoom])
         
         return chatRoom
     }
@@ -82,12 +82,12 @@ final class ChatRepositoryImpl: ChatRepository {
         await syncMessagesForUpdatedRooms(serverRooms, localRoomsDict: localRoomsDict)
         
         // 5. 업데이트 된 채팅방 목록 반환
-        self.chatRooms = await chatDataSource.fetchChatRooms()
+        self.chatRooms = chatDataSource.fetchChatRooms()
         return chatRooms
     }
     
-    func fetchLocalRooms() async -> [ChatRoom] {
-        let rooms = await chatDataSource.fetchChatRooms()
+    func fetchLocalRooms() -> [ChatRoom] {
+        let rooms = chatDataSource.fetchChatRooms()
         self.chatRooms = rooms
         return rooms
     }
@@ -96,9 +96,9 @@ final class ChatRepositoryImpl: ChatRepository {
         if socketProvider.isConnected(roomID: apnsPayload.roomID) { return }
         
         // 로컬에 저장된 채팅방인지 확인
-        if let _ = await chatDataSource.findChatRoom(roomID: apnsPayload.roomID) {
+        if let _ = chatDataSource.findChatRoom(roomID: apnsPayload.roomID) {
             // 저장된 채팅방인 경우, 로컬 데이터 업데이트
-            try await chatDataSource.updateChatRoom(from: apnsPayload)
+            try chatDataSource.updateChatRoom(from: apnsPayload)
         } else {
             // 저장되지 않은 채팅방인 경우, 서버로부터 전체 채팅방 데이터 가져와서 업데이트
             _ = try await fetchRooms()
@@ -150,17 +150,17 @@ final class ChatRepositoryImpl: ChatRepository {
         
         let messages = response.messages.map { $0.toDomain() }
         
-        try await chatDataSource.saveChatMessages(messages)
+        try chatDataSource.saveChatMessages(messages)
         
         if let lastChat = messages.last {
-            try await chatDataSource.updateChatRoom(
+            try chatDataSource.updateChatRoom(
                 roomID: roomID,
                 updatedAt: lastChat.updatedAt,
                 lastMessage: lastChat.content,
                 isLastMessageFile: !lastChat.fileURLs.isEmpty
             )
             
-            chatRooms = await chatDataSource.fetchChatRooms()
+            chatRooms = chatDataSource.fetchChatRooms()
         }
             
         return messages
@@ -169,20 +169,20 @@ final class ChatRepositoryImpl: ChatRepository {
     func fetchLocalMessages(
         from roomID: String,
         before lastMessageAt: Date
-    ) async -> [ChatMessage] {
-        try? await chatDataSource.updateUnReadCount(roomID: roomID, unReadCount: 0)
+    ) -> [ChatMessage] {
+        try? chatDataSource.updateUnReadCount(roomID: roomID, unReadCount: 0)
         
-        return await chatDataSource.fetchChatMessages(
+        return chatDataSource.fetchChatMessages(
             roomID: roomID,
             before: lastMessageAt,
             limit: 30
         )
     }
     
-    func saveMessage(_ message: ChatMessage) async throws -> ChatMessage {
-        try await chatDataSource.saveChatMessages([message])
+    func saveMessage(_ message: ChatMessage) throws -> ChatMessage {
+        try chatDataSource.saveChatMessages([message])
         
-        try await chatDataSource.updateChatRoom(
+        try chatDataSource.updateChatRoom(
             roomID: message.roomID,
             updatedAt: message.createdAt,
             lastMessage: message.content,
@@ -265,10 +265,10 @@ extension ChatRepositoryImpl {
                 after: afterParameter
             )
             
-            try await chatDataSource.saveChatMessages(newMessages)
+            try chatDataSource.saveChatMessages(newMessages)
             
             room.unReadCount = newMessages.count + (localRoom?.unReadCount ?? 0)
-            try await chatDataSource.saveChatRoom(room)
+            try chatDataSource.saveChatRoom(room)
         } catch {
             print("메시지 동기화 실패 - 채팅방 ID: \(room.roomID), 에러: \(error)")
         }

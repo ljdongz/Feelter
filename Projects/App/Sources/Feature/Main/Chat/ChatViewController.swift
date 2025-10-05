@@ -93,8 +93,10 @@ final class ChatViewController: RxBaseViewController {
     }
     
     override func bind() {
+        let viewDidLoadTrigger = PublishRelay<Void>()
+
         let input = ChatViewModel.Input(
-            viewDidLoad: .just(()),
+            viewDidLoad: viewDidLoadTrigger.asObservable(),
             viewWillDisappear: rx.viewWillDisappear.asObservable(),
             sendMessageButtonTapped: messageInputField.sendButton.rx
                 .tap
@@ -131,6 +133,7 @@ final class ChatViewController: RxBaseViewController {
         output.messages
             .observe(on: MainScheduler.instance)
             .subscribe(with: self) { owner, updateType in
+                print(updateType)
                 switch updateType {
                 case .initMessages(let messages):
                     owner.initializeDataSourceItems(messages)
@@ -146,7 +149,10 @@ final class ChatViewController: RxBaseViewController {
                 }
             }
             .disposed(by: disposeBag)
-        
+
+        // 모든 구독 연결 후 viewDidLoad 트리거
+        viewDidLoadTrigger.accept(())
+
         messageInputField.plusButton.rx
             .tap
             .filter { [weak self] _ in
@@ -268,12 +274,13 @@ extension ChatViewController {
 
 extension ChatViewController {
     private func initializeDataSourceItems(_ messages: [ChatMessage]) {
+        print(messages)
         let cellTypes = messageCellGenerator.generateCellTypes(
             from: messages,
             currentUserID: viewModel.userID,
             insertPosition: .standard
         )
-        
+        print(cellTypes)
         var snapShot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
         snapShot.appendSections([0])
         

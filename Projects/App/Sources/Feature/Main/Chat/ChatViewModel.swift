@@ -65,18 +65,21 @@ final class ChatViewModel: ViewModel {
                     self.receiveMessageTrigger.accept(message)
                 }
             })
-            .withAsync(with: self) { owner, _ in
-                await owner.chatRepository.fetchLocalMessages(
-                    from: owner.roomID,
-                    before: owner.lastMessageAt
+            .map { [weak self] _ -> [ChatMessage] in
+                guard let self else { print("Empty"); return [] }
+                return self.chatRepository.fetchLocalMessages(
+                    from: self.roomID,
+                    before: self.lastMessageAt
                 )
             }
             .subscribe(with: self) { owner, messages in
+                print(messages)
                 owner.lastMessageAt = messages.first?.createdAt ?? .distantPast
-                
+                print("111")
                 output.messages.accept(.initMessages(messages))
-                
+                print("222")
                 owner.serverFetchTrigger.accept(messages.last?.createdAt ?? Date())
+                print("333")
             }
             .disposed(by: disposeBag)
         
@@ -124,45 +127,44 @@ final class ChatViewModel: ViewModel {
             .disposed(by: disposeBag)
         
         input.loadMoreMessages
-            .withAsyncResult(with: self) { owner, _ in
-                await owner.chatRepository.fetchLocalMessages(
-                    from: owner.roomID,
-                    before: owner.lastMessageAt
+            .map { [weak self] _ -> [ChatMessage] in
+                guard let self else { return [] }
+                return self.chatRepository.fetchLocalMessages(
+                    from: self.roomID,
+                    before: self.lastMessageAt
                 )
             }
-            .subscribe(with: self) { owner, result in
-                switch result {
-                case .success(let messages):
-                    owner.lastMessageAt = messages.first?.createdAt ?? .distantPast
-                    
-                    output.messages.accept(.prependPastMessages(messages))
-                case .failure(let error):
-                    print(error)
-                }
+            .subscribe(with: self) { owner, messages in
+                owner.lastMessageAt = messages.first?.createdAt ?? .distantPast
+                
+                output.messages.accept(.prependPastMessages(messages))
             }
             .disposed(by: disposeBag)
         
         receiveMessageTrigger.asObservable()
-            .withAsyncResult(with: self) { owner, message in
-                try await owner.chatRepository.saveMessage(message)
-            }
-            .subscribe(with: self) { owner, result in
-                switch result {
-                case .success(let message):
-                    output.messages.accept(.appendNewMessage(message))
-                    
-                    NotificationCenter.default.post(
-                        name: .ReceiveSocketMessage,
-                        object: nil
-                    )
-                case .failure(let error):
+            .flatMap { [weak self] message -> Observable<ChatMessage> in
+                guard let self else { return .empty() }
+                do {
+                    let saved = try self.chatRepository.saveMessage(message)
+                    return .just(saved)
+                } catch {
                     print(error)
+                    return .empty()
                 }
+            }
+            .subscribe(with: self) { owner, message in
+                output.messages.accept(.appendNewMessage(message))
+
+                NotificationCenter.default.post(
+                    name: .ReceiveSocketMessage,
+                    object: nil
+                )
             }
             .disposed(by: disposeBag)
         
         serverFetchTrigger.asObservable()
             .withAsyncResult(with: self) { owner, date in
+                print("Fetch Start")
                 let utcDate = UTCDateFormatter.shared.string(from: date)
                 return try await owner.chatRepository.fetchMessages(from: owner.roomID, after: utcDate)
             }

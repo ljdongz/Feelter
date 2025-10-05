@@ -17,7 +17,7 @@ protocol ChatRepository {
     // 채팅방 관련
     func createRoom(opponentID: String) async throws -> ChatRoom
     func fetchRooms() async throws -> [ChatRoom]
-    func fetchLocalRooms() async -> [ChatRoom]
+    func fetchLocalRooms() -> [ChatRoom]
     func updateRoom(apnsPayload: APNsPayload) async throws
     
     // 메시지 관련
@@ -27,6 +27,6 @@ protocol ChatRepository {
     func fetchLocalMessages(
         from roomID: String,
         before lastMessageAt: Date
-    ) async -> [ChatMessage]
-    func saveMessage(_ message: ChatMessage) async throws -> ChatMessage
+    ) -> [ChatMessage]
+    func saveMessage(_ message: ChatMessage) throws -> ChatMessage
 }

@@ -12,37 +12,27 @@ import RealmSwift
 // TODO: 구조 고민
 protocol ChatDataSource {
     // 채팅방 관련
-    @MainActor
     func fetchChatRooms() -> [ChatRoom]
-    @MainActor
     func saveChatRooms(_ rooms: [ChatRoom]) throws
-    @MainActor
     func saveChatRoom(_ room: ChatRoom) throws
-    @MainActor
     func findChatRoom(opponentID: String) -> ChatRoom?
-    @MainActor
     func findChatRoom(roomID: String) -> ChatRoom?
-    @MainActor
     func updateChatRoom(
         roomID: String,
         updatedAt: Date,
         lastMessage: String,
         isLastMessageFile: Bool
     ) throws
-    @MainActor
     func updateChatRoom(from apns: APNsPayload) throws
-    @MainActor
     func updateUnReadCount(roomID: String, unReadCount: Int) throws
 
     
     // 메시지 관련
-    @MainActor
     func fetchChatMessages(
         roomID: String,
         before lastMessageAt: Date,
         limit: Int
     ) -> [ChatMessage]
-    @MainActor
     func saveChatMessages(_ messages: [ChatMessage]) throws
 }
 
@@ -50,7 +40,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     
     // MARK: - 채팅방 관련
     func fetchChatRooms() -> [ChatRoom] {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         let realmRooms = realm.objects(RealmChatRoom.self)
             .where { $0.lastMessage != nil || $0.isLastMessageFile } // 채팅 메시지가 존재하는 채팅방만 가져오기
             .sorted(by: [
@@ -61,7 +51,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     }
     
     func saveChatRooms(_ rooms: [ChatRoom]) throws {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         try realm.write {
             let realmRooms = rooms.map { RealmChatRoom(from: $0) }
             realm.add(realmRooms, update: .modified)
@@ -69,7 +59,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     }
     
     func saveChatRoom(_ room: ChatRoom) throws {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         try realm.write {
             let realmRoom = RealmChatRoom(from: room)
             realm.add(realmRoom, update: .modified)
@@ -77,7 +67,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     }
     
     func findChatRoom(opponentID: String) -> ChatRoom? {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         let localRoom = realm.objects(RealmChatRoom.self)
             .where { $0.participants.userID == opponentID }
             .first
@@ -85,7 +75,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     }
     
     func findChatRoom(roomID: String) -> ChatRoom? {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         let localRoom = realm.object(ofType: RealmChatRoom.self, forPrimaryKey: roomID)
         return localRoom?.toDomain()
     }
@@ -96,7 +86,7 @@ struct ChatDataSourceImpl: ChatDataSource {
         lastMessage: String,
         isLastMessageFile: Bool
     ) throws {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         try realm.write {
             let room = realm.object(
                 ofType: RealmChatRoom.self,
@@ -110,7 +100,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     }
     
     func updateChatRoom(from apns: APNsPayload) throws {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         try realm.write {
             let room = realm.object(
                 ofType: RealmChatRoom.self,
@@ -125,7 +115,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     }
     
     func updateUnReadCount(roomID: String, unReadCount: Int) throws {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         try realm.write {
             let room = realm.object(
                 ofType: RealmChatRoom.self,
@@ -142,7 +132,7 @@ struct ChatDataSourceImpl: ChatDataSource {
         before lastMessageAt: Date,
         limit: Int
     ) -> [ChatMessage] {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         let realmMessages = realm.objects(RealmChatMessage.self)
             .where { $0.roomID == roomID && $0.createdAt < lastMessageAt }
             .sorted(by: \.createdAt, ascending: true)
@@ -151,7 +141,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     }
     
     func saveChatMessages(_ messages: [ChatMessage]) throws {
-        let realm = RealmStorage.shared.realm
+        let realm = try! Realm()
         try realm.write {
             let realmMessages = messages.map { RealmChatMessage(from: $0) }
             realm.add(realmMessages, update: .modified)
