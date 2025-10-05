@@ -37,6 +37,7 @@ let project = Project(
             bundleId: "kr.co.ios.swift.apple.Feelter",
             infoPlist: .extendingDefault(with: [
                 "CFBundleDisplayName": "Feelter",
+                "UIUserInterfaceStyle": "Dark",
                 "IamportUserCode": "$(IAMPORT_USER_CODE)",
                 "FirebaseAppDelegateProxyEnabled": false,
                 "ApiHeaderKey": "$(API_HEADER_KEY)",
@@ -99,7 +100,7 @@ let project = Project(
                 "Feelter/Sources/**"
             ],
             resources: [
-                .glob(pattern: "Feelter/Resources/**", excluding: ["Feelter/Resources/Config/Info.plist"])
+                .glob(pattern: "Feelter/Resources/**")
             ],
             entitlements: .file(path: .relativeToRoot("Feelter/Resources/Config/Feelter.entitlements")),
             dependencies: [
