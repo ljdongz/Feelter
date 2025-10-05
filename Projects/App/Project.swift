@@ -21,11 +21,11 @@ let project = Project(
         configurations: [
             .debug(
                 name: "Debug",
-                xcconfig: "../../Feelter/Resources/Config/Config.xcconfig"
+                xcconfig: "Resources/Config/Config.xcconfig"
             ),
             .release(
                 name: "Release",
-                xcconfig: "../../Feelter/Resources/Config/Config.xcconfig"
+                xcconfig: "Resources/Config/Config.xcconfig"
             )
         ]
     ),
@@ -97,12 +97,12 @@ let project = Project(
                 "UILaunchStoryboardName": "LaunchScreen"
             ]),
             sources: [
-                "../../Feelter/Sources/**"
+                "Sources/**"
             ],
             resources: [
-                .glob(pattern: "../../Feelter/Resources/**")
+                .glob(pattern: "Resources/**")
             ],
-            entitlements: .file(path: "../../Feelter/Resources/Config/Feelter.entitlements"),
+            entitlements: .file(path: "Resources/Config/Feelter.entitlements"),
             dependencies: [
                 .project(target: "FTUtility", path: "../FTUtility"),
                 .external(name: "SnapKit"),
