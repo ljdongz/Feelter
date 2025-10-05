@@ -7,6 +7,8 @@
 
 import UIKit
 
+import FTUtility
+
 class BaseViewController: UIViewController {
     
     private var keyboardObserver: KeyboardObserver?

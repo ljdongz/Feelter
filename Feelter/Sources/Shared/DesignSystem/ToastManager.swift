@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ToastManager {
+public final class ToastManager {
     static let shared = ToastManager()
     
     private var activeToasts: [ToastView] = []

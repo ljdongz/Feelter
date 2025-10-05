@@ -10,7 +10,7 @@ import UIKit
 import RxCocoa
 import RxSwift
 
-extension Reactive where Base: UIViewController {
+public extension Reactive where Base: UIViewController {
     var viewWillAppear: ControlEvent<Void> {
         let source = self.methodInvoked(#selector(Base.viewWillAppear(_:))).map { _ in }
         return ControlEvent(events: source)
@@ -22,7 +22,7 @@ extension Reactive where Base: UIViewController {
     }
 }
 
-extension Reactive where Base: UIView {
+public extension Reactive where Base: UIView {
     var tap: ControlEvent<Void> {
         let tapGesture = UITapGestureRecognizer()
         base.addGestureRecognizer(tapGesture)

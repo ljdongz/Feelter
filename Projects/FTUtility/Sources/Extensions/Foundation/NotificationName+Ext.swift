@@ -7,7 +7,7 @@
 
 import UIKit
 
-extension Notification.Name {
+public extension Notification.Name {
     static let KeyboardWillShow = UIResponder.keyboardWillShowNotification
     static let KeyboardWillHide = UIResponder.keyboardWillHideNotification
     static let ReceiveRemotePush = Notification.Name("ReceiveRemotePush")

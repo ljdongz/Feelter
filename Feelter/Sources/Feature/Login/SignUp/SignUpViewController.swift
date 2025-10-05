@@ -10,6 +10,8 @@ import UIKit
 import RxCocoa
 import RxSwift
 
+import FTUtility
+
 final class SignUpViewController: RxBaseViewController {
     
     private let mainView = SignUpView()

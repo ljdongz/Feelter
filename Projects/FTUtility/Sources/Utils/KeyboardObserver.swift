@@ -7,25 +7,25 @@
 
 import UIKit
 
-final class KeyboardObserver {
+public final class KeyboardObserver {
     
-    struct CustomSpacing {
+    public struct CustomSpacing {
         let view: UIView
         let spacing: CGFloat
         
-        init(view: UIView, spacing: CGFloat) {
+        public init(view: UIView, spacing: CGFloat) {
             self.view = view
             self.spacing = spacing
         }
     }
     
-    struct Configuration {
+    public struct Configuration {
         let defaultSpacing: CGFloat
         let customSpacings: [CustomSpacing]
         
         static let `default` = Configuration(defaultSpacing: 0)
         
-        init(defaultSpacing: CGFloat, customSpacings: [CustomSpacing] = []) {
+        public init(defaultSpacing: CGFloat, customSpacings: [CustomSpacing] = []) {
             self.defaultSpacing = defaultSpacing
             self.customSpacings = customSpacings
         }
@@ -38,7 +38,7 @@ final class KeyboardObserver {
     private weak var viewController: UIViewController?
     private let configuration: Configuration
     
-    init(viewController: UIViewController, configuration: Configuration) {
+    public init(viewController: UIViewController, configuration: Configuration) {
         self.viewController = viewController
         self.configuration = configuration
         setupKeyboardObservers()

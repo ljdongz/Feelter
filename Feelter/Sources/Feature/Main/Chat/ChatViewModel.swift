@@ -10,6 +10,8 @@ import Foundation
 import RxCocoa
 import RxSwift
 
+import FTUtility
+
 enum UpdateType {
     /// 초기 로드, 재연결
     case initMessages([ChatMessage])

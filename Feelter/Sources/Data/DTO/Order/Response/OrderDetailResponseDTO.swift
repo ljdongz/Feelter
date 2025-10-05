@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTUtility
+
 struct OrderDetailListResponseDTO: Decodable {
     let orders: [OrderDetailResponseDTO]
     

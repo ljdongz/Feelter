@@ -9,6 +9,8 @@ import UIKit
 
 import SnapKit
 
+import FTUtility
+
 typealias CounterStateCellItem = CounterStateCollectionViewCell.Item
 
 final class CounterStateCollectionViewCell: BaseCollectionViewCell {

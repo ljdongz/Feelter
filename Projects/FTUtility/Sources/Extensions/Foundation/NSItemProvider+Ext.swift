@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-extension NSItemProvider {
+public extension NSItemProvider {
     
     func loadUIImage() async throws -> UIImage? {
         guard canLoadObject(ofClass: UIImage.self) else { return nil }

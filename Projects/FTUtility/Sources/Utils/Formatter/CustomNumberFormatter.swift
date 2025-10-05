@@ -7,8 +7,8 @@
 
 import Foundation
 
-final class CustomNumberFormatter {
-    static let shared = CustomNumberFormatter()
+public final class CustomNumberFormatter {
+    public static let shared = CustomNumberFormatter()
     
     private lazy var decimalFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
@@ -16,7 +16,7 @@ final class CustomNumberFormatter {
         return formatter
     }()
     
-    func decimal(from number: Int) -> String {
+    public func decimal(from number: Int) -> String {
         return decimalFormatter.string(from: NSNumber(value: number))!
     }
 }

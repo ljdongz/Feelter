@@ -7,12 +7,12 @@
 
 import Foundation
 
-enum MessageCellType: Hashable {
+public enum MessageCellType: Hashable {
     case message(MessageItem)
     case separator(MessageSeparatorItem)
 }
 
-struct MessageItem: Hashable {
+public struct MessageItem: Hashable {
     let id = UUID()
     let sender: MessageSender
     let content: String
@@ -29,12 +29,12 @@ struct MessageItem: Hashable {
     }
 }
 
-struct MessageSeparatorItem: Hashable {
+public struct MessageSeparatorItem: Hashable {
     let id = UUID()
     let text: String
 }
 
-final class ChatMessageCellGenerator {
+public final class ChatMessageCellGenerator {
     
     enum InsertPosition {
         case standard
@@ -69,7 +69,7 @@ final class ChatMessageCellGenerator {
     }
 }
 
-extension ChatMessageCellGenerator {
+public extension ChatMessageCellGenerator {
     
     private func generateCellTypes(
         from messages: [ChatMessage],

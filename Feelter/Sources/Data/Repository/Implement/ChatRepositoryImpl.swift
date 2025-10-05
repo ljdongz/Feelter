@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTUtility
+
 final class ChatRepositoryImpl: ChatRepository {
     
     private let networkProvider: NetworkProvider

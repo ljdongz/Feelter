@@ -9,24 +9,34 @@ import Foundation
 import UIKit
 import UniformTypeIdentifiers
 
-struct FileData {
-    let data: Data
-    let `extension`: FileExtension
+public struct FileData {
+    public let data: Data
+    public let `extension`: FileExtension
+    
+    public init(data: Data, `extension`: FileExtension) {
+        self.data = data
+        self.extension = `extension`
+    }
 }
 
-struct ImageData {
-    let image: UIImage
-    let `extension`: FileExtension
+public struct ImageData {
+    public let image: UIImage
+    public let `extension`: FileExtension
+    
+    public init(image: UIImage, `extension`: FileExtension) {
+        self.image = image
+        self.extension = `extension`
+    }
 }
 
-enum FileExtension: CaseIterable {
+public enum FileExtension: CaseIterable {
     case jpg
     case jpeg
     case png
     case gif
     case pdf
     
-    var `extension`: String {
+    public var `extension`: String {
         switch self {
         case .jpg, .jpeg: UTType.jpeg.identifier
         case .png: UTType.png.identifier
@@ -35,7 +45,7 @@ enum FileExtension: CaseIterable {
         }
     }
     
-    var mimeType: String {
+    public var mimeType: String {
         switch self {
         case .png:
             "image/png"

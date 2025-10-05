@@ -7,7 +7,7 @@
 
 import UIKit
 
-extension Notification {
+public extension Notification {
     var keyboardAnimationDurationUserInfoKey: Double? {
         self.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double
     }

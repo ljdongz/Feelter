@@ -11,6 +11,8 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
+import FTUtility
+
 final class ChatMessageInputFieldView: RxBaseView {
     
     typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>

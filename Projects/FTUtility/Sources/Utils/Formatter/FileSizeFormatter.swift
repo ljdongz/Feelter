@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct FileSizeFormatter {
+public struct FileSizeFormatter {
     
-    enum FileSizeStyle {
+    public enum FileSizeStyle {
         case adaptive // 자동으로 적절한 단위 선택
         case decimal // 1000 단위 (KB, MB, GB)
         case binary // 1024 단위 (KiB, MiB, GiB)
@@ -17,7 +17,7 @@ struct FileSizeFormatter {
     }
     
     // MARK: - 기본 포맷팅 메서드
-    static func format(bytes: Int, style: FileSizeStyle = .adaptive) -> String {
+    public static func format(bytes: Int, style: FileSizeStyle = .adaptive) -> String {
         switch style {
         case .adaptive:
             return formatAdaptive(bytes: bytes)

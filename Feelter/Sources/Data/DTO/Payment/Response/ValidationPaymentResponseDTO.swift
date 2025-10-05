@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTUtility
+
 struct ValidationPaymentResponseDTO: Decodable {
     let paymentID: String
     let orderItem: ValidationPaymentOrderResponseDTO

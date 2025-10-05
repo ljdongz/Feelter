@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTUtility
+
 struct ChatRoomResponseDTO: Decodable {
     let roomID: String
     

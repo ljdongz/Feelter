@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTUtility
+
 protocol ChatRepository {
     // 소켓 관련
     func connectRoom(roomID: String, receiveMessage: @escaping (ChatMessage) -> Void)

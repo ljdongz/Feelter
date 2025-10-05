@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class CustomDateFormatter {
+public final class CustomDateFormatter {
     static let shared = CustomDateFormatter()
     
     private let calendar: Calendar
@@ -44,7 +44,7 @@ final class CustomDateFormatter {
         self.calendar = Calendar.current
     }
     
-    func formatDate(_ date: Date) -> String {
+    public func formatDate(_ date: Date) -> String {
         let now = Date()
         
         // 오늘인지 확인
@@ -70,12 +70,12 @@ final class CustomDateFormatter {
     }
     
     /// 어떤 날짜든 '2025.8.14 목요일' 형식으로 포맷팅
-    func formatFullDateWithWeekday(_ date: Date) -> String {
+    public func formatFullDateWithWeekday(_ date: Date) -> String {
         return fullDateWithWeekdayFormatter.string(from: date)
     }
     
     /// 어떤 날짜든 시간만 표시 (오후 8:00, 오전 12:32)
-    func formatTimeOnly(_ date: Date) -> String {
+    public func formatTimeOnly(_ date: Date) -> String {
         return timeFormatter.string(from: date)
     }
 }

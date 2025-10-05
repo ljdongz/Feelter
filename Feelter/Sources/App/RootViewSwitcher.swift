@@ -7,7 +7,7 @@
 
 import UIKit
 
-struct RootViewSwitcher {
+public struct RootViewSwitcher {
     
     enum RootViewType {
         case signIn

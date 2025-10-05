@@ -9,28 +9,28 @@ import Foundation
 
 // MARK: - Validation Error
 
-enum ValidationError: Error {
+public enum ValidationError: Error {
     case invalidFormat
 }
 
 // MARK: - Validation Result
 
-enum ValidationResult: Equatable {
+public enum ValidationResult: Equatable {
     case valid
     case invalid(message: String)
     
-    var isValid: Bool {
+    public var isValid: Bool {
         self == .valid
     }
 }
 
 // MARK: - Validation Helper
 
-struct ValidationHelper {
+public struct ValidationHelper {
     
     // MARK: - Email Validation
     
-    static func validateEmail(_ email: String) -> ValidationResult {
+    public static func validateEmail(_ email: String) -> ValidationResult {
         guard !email.isEmpty else {
             return .invalid(message: "이메일을 입력해주세요.")
         }
@@ -50,7 +50,7 @@ struct ValidationHelper {
     
     // MARK: - Password Validation
     
-    static func validatePassword(_ password: String) -> ValidationResult {
+    public static func validatePassword(_ password: String) -> ValidationResult {
         guard !password.isEmpty else {
             return .invalid(message: "비밀번호를 입력해주세요.")
         }
@@ -77,7 +77,7 @@ struct ValidationHelper {
     
     // MARK: - Phone Number Validation
     
-    static func validatePhoneNumber(_ phoneNumber: String) -> ValidationResult {
+    public static func validatePhoneNumber(_ phoneNumber: String) -> ValidationResult {
         guard !phoneNumber.isEmpty else {
             return .invalid(message: "전화번호를 입력해주세요.")
         }

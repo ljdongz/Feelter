@@ -10,7 +10,7 @@ import Foundation
 import RxSwift
 
 // MARK: - Instance Method
-extension Observable {
+public extension Observable {
     func withAsyncResult<T, Object: AnyObject>(
         with object: Object,
         _ operation: @escaping (Object, Element) async throws -> T
@@ -90,7 +90,7 @@ extension Observable {
 }
 
 // MARK: - Static Method
-extension Observable {
+public extension Observable {
     /// async 함수를 Observable로 변환
     /// - Parameter operation: 실행할 async 함수
     /// - Returns: async 함수의 결과를 방출하는 Observable

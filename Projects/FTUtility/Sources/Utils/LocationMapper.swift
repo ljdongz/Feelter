@@ -8,12 +8,12 @@
 import CoreLocation
 import Foundation
 
-struct LocationMapper {
-    static let shared = LocationMapper()
+public struct LocationMapper {
+    public static let shared = LocationMapper()
     private let geocoder = CLGeocoder()
     private init() {}
     
-    func address(latitude: Double, longitude: Double) async -> String? {
+    public func address(latitude: Double, longitude: Double) async -> String? {
         let location = CLLocation(latitude: latitude, longitude: longitude)
         
         do {

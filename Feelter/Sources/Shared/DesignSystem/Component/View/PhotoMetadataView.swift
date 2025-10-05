@@ -10,6 +10,8 @@ import UIKit
 
 import SnapKit
 
+import FTUtility
+
 final class PhotoMetadataView: BaseView {
 
     private let containerView: UIView = {

@@ -7,6 +7,8 @@
 
 import UIKit
 
+import FTUtility
+
 struct MessageField {
     var content: String = ""
     var files: [ImageData] = []

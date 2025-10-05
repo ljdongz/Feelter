@@ -13,6 +13,8 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
+import FTUtility
+
 final class ChatViewController: RxBaseViewController {
     
     typealias DataSourceType = UITableViewDiffableDataSource<Int, AnyHashable>

@@ -10,6 +10,8 @@ import Foundation
 import RxCocoa
 import RxSwift
 
+import FTUtility
+
 final class SignInViewModel: ViewModel {
     
     typealias SignInResult = (isSuccess: Bool, message: String)
