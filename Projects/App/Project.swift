@@ -104,7 +104,10 @@ let project = Project(
             ],
             entitlements: .file(path: "Resources/Config/Feelter.entitlements"),
             dependencies: [
-                .project(target: "FTUtility", path: "../FTUtility"),
+                .project(
+                    target: "FTUtility",
+                    path: .relativeToRoot("Projects/Shared/FTUtility")
+                ),
                 .external(name: "SnapKit"),
                 .external(name: "RxSwift"),
                 .external(name: "RxCocoa"),

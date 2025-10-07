@@ -4,6 +4,6 @@ let workspace = Workspace(
     name: "Feelter",
     projects: [
         "Projects/App",
-        "Projects/FTUtility"
+        "Projects/Shared/FTUtility"
     ]
 )
