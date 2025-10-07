@@ -7,25 +7,25 @@
 
 import CoreImage
 
-struct CoreImageFilter {
-    let name: String
-    let displayName: String
-    let parameter: FilterParameter
+public struct CoreImageFilter {
+    public let name: String
+    public let displayName: String
+    public let parameter: FilterParameter
     
-    struct FilterParameter {
-        enum ValueType {
+    public struct FilterParameter {
+        public enum ValueType {
             case number
             case vector
         }
         
-        let key: String
-        let range: ClosedRange<Double>
-        let defaultValue: Double
-        let valueType: ValueType
+        public let key: String
+        public let range: ClosedRange<Double>
+        public let defaultValue: Double
+        public let valueType: ValueType
     }
 }
 
-extension CoreImageFilter {
+public extension CoreImageFilter {
     static let brightness = CoreImageFilter(
         name: "CIColorControls",
         displayName: "밝기",

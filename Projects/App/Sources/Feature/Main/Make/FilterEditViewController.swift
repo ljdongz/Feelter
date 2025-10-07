@@ -11,6 +11,8 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
+import FTCoreImage
+
 final class FilterEditViewController: RxBaseViewController {
     
     typealias DataSourceType = UICollectionViewDiffableDataSource<Section, AnyHashable>
@@ -225,7 +227,7 @@ final class FilterEditViewController: RxBaseViewController {
         )
         .subscribe(with: self) { owner, _ in
             owner.coreImageManager.appendHistory(
-                type: owner.selectedFilterAttribute,
+                type: owner.selectedFilterAttribute.toFTCoreImageType(),
                 value: Double(owner.slider.value).formatByMagnitude()
             )
             owner.updateOptionButtonActivityState()
@@ -238,7 +240,7 @@ final class FilterEditViewController: RxBaseViewController {
             .distinctUntilChanged()
             .subscribe(with: self) { owner, value in
                 let image = owner.coreImageManager.applyFilter(
-                    type: owner.selectedFilterAttribute,
+                    type: owner.selectedFilterAttribute.toFTCoreImageType(),
                     value: value
                 )
                 owner.filterImageView.image = image
@@ -247,16 +249,18 @@ final class FilterEditViewController: RxBaseViewController {
         
         undoButton.rx.tap
             .subscribe(with: self) { owner, _ in
+                let coreImageFilterType = owner.selectedFilterAttribute.toFTCoreImageType()
                 owner.filterImageView.image = owner.coreImageManager.undo()
-                owner.slider.value = Float(owner.coreImageManager.filterStateValue(for: owner.selectedFilterAttribute))
+                owner.slider.value = Float(owner.coreImageManager.filterStateValue(for: coreImageFilterType))
                 owner.updateOptionButtonActivityState()
             }
             .disposed(by: disposeBag)
         
         redoButton.rx.tap
             .subscribe(with: self) { owner, _ in
+                let coreImageFilterType = owner.selectedFilterAttribute.toFTCoreImageType()
                 owner.filterImageView.image = owner.coreImageManager.redo()
-                owner.slider.value = Float(owner.coreImageManager.filterStateValue(for: owner.selectedFilterAttribute))
+                owner.slider.value = Float(owner.coreImageManager.filterStateValue(for: coreImageFilterType))
                 owner.updateOptionButtonActivityState()
             }
             .disposed(by: disposeBag)
@@ -266,14 +270,14 @@ final class FilterEditViewController: RxBaseViewController {
             compareButton.rx.controlEvent(.touchUpInside).asObservable()
         )
         .subscribe(with: self) { owner, _ in
-            owner.filterImageView.image = owner.coreImageManager.imageComparison.filtered
+            owner.filterImageView.image = owner.coreImageManager.filteredImage
         }
         .disposed(by: disposeBag)
         
         compareButton.rx.controlEvent(.touchDown)
             .asObservable()
             .subscribe(with: self) { owner, _ in
-                owner.filterImageView.image = owner.coreImageManager.imageComparison.origin
+                owner.filterImageView.image = owner.coreImageManager.originalImage
             }
             .disposed(by: disposeBag)
         
@@ -331,9 +335,12 @@ final class FilterEditViewController: RxBaseViewController {
                     title: "확인",
                     style: .default
                 ) { _ in
-                    let filteredImage = owner.coreImageManager.imageComparison
-                    let filterAttribute = owner.coreImageManager.currentFilterAttributeState
-                    owner.completionHandler(filteredImage, filterAttribute)
+                    let imageComparison = ImageComparison(
+                        origin: owner.coreImageManager.originalImage,
+                        filtered: owner.coreImageManager.filteredImage
+                    )
+                    let filterAttribute = owner.coreImageManager.currentFilterAttributeState.toFilterAttribute()
+                    owner.completionHandler(imageComparison, filterAttribute)
                     owner.navigationController?.popViewController(animated: true)
                 }
                 let cancelAction = UIAlertAction(title: "취소", style: .cancel)
@@ -445,7 +452,7 @@ extension FilterEditViewController {
         
         slider.minimumValue = Float(coreImageFilter.parameter.range.lowerBound)
         slider.maximumValue = Float(coreImageFilter.parameter.range.upperBound)
-        slider.value = Float(coreImageManager.filterStateValue(for: selectedItem))
+        slider.value = Float(coreImageManager.filterStateValue(for: selectedItem.toFTCoreImageType()))
         
         selectedFilterAttribute = selectedItem
         
@@ -465,7 +472,7 @@ extension FilterEditViewController {
         
         slider.minimumValue = Float(coreImageFilter.parameter.range.lowerBound)
         slider.maximumValue = Float(coreImageFilter.parameter.range.upperBound)
-        slider.value = Float(coreImageManager.filterStateValue(for: selectedItem))
+        slider.value = Float(coreImageManager.filterStateValue(for: selectedItem.toFTCoreImageType()))
         
         selectedFilterAttribute = selectedItem
         
@@ -505,6 +512,63 @@ extension FilterEditViewController: UIGestureRecognizerDelegate {
     }
 }
 
+// MARK: - CoreImageFilter Mapping
+
+extension FilterAttributeType {
+    var filter: CoreImageFilter {
+        switch self {
+        case .brightness: CoreImageFilter.brightness
+        case .exposure: CoreImageFilter.exposure
+        case .contrast: CoreImageFilter.contrast
+        case .saturation: CoreImageFilter.saturation
+        case .sharpness: CoreImageFilter.sharpness
+        case .blur: CoreImageFilter.blur
+        case .vignette: CoreImageFilter.vignette
+        case .noiseReduction: CoreImageFilter.noiseReduction
+        case .highlights: CoreImageFilter.highlight
+        case .shadows: CoreImageFilter.shadow
+        case .temperature: CoreImageFilter.temperature
+        // TODO: 블랙포인트 수정
+        case .blackPoint: CoreImageFilter.brightness
+        }
+    }
+    
+    func toFTCoreImageType() -> CoreImageFilterAttributeType {
+        switch self {
+        case .brightness: .brightness
+        case .exposure: .exposure
+        case .contrast: .contrast
+        case .saturation: .saturation
+        case .sharpness: .sharpness
+        case .blur: .blur
+        case .vignette: .vignette
+        case .noiseReduction: .noiseReduction
+        case .highlights: .highlights
+        case .shadows: .shadows
+        case .temperature: .temperature
+        case .blackPoint: .blackPoint
+        }
+    }
+}
+
+fileprivate extension CoreImageFilterAttribute {
+    func toFilterAttribute() -> FilterAttribute {
+        .init(
+            brightness: brightness,
+            exposure: exposure,
+            contrast: contrast,
+            saturation: saturation,
+            sharpness: sharpness,
+            blur: blur,
+            vignette: vignette,
+            noiseReduction: noiseReduction,
+            highlights: highlights,
+            shadows: shadows,
+            temperature: temperature,
+            blackPoint: blackPoint
+        )
+    }
+}
 
 #if DEBUG
 import SwiftUI

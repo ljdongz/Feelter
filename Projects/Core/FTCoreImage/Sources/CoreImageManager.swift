@@ -9,13 +9,13 @@ import CoreImage
 import Metal
 import UIKit
 
-struct FilterChange {
-    let filterType: FilterAttributeType
+public struct FilterChange {
+    let filterType: CoreImageFilterAttributeType
     let beforeValue: Double
     let afterValue: Double
 }
 
-final class CoreImageManager {
+public final class CoreImageManager {
     static let context: CIContext = {
         // GPU를 우선적으로 사용하는 CIContext 생성
         if let metalDevice = MTLCreateSystemDefaultDevice() {
@@ -29,9 +29,9 @@ final class CoreImageManager {
     private let orientation: UIImage.Orientation
     private let originCIImage: CIImage?
     
-    private var currentState: [FilterAttributeType: Double] = [:]
-    var currentFilterAttributeState: FilterAttribute {
-        FilterAttribute(
+    private var currentState: [CoreImageFilterAttributeType: Double] = [:]
+    public var currentFilterAttributeState: CoreImageFilterAttribute {
+        CoreImageFilterAttribute(
             brightness: filterStateValue(for: .brightness),
             exposure: filterStateValue(for: .exposure),
             contrast: filterStateValue(for: .contrast),
@@ -47,22 +47,25 @@ final class CoreImageManager {
         )
     }
     
-    private(set) var undoStack: [FilterChange] = []
-    private(set) var redoStack: [FilterChange] = []
-    private(set) var imageComparison: ImageComparison
+    private(set) public var undoStack: [FilterChange] = []
+    private(set) public var redoStack: [FilterChange] = []
+
+    private(set) public var originalImage: UIImage
+    private(set) public var filteredImage: UIImage
     
-    init(originalImage: UIImage) {
-        self.imageComparison = .init(origin: originalImage, filtered: originalImage)
+    public init(originalImage: UIImage) {
+        self.originalImage = originalImage
+        self.filteredImage = originalImage
         
         self.originCIImage = CIImage(image: originalImage)
         self.orientation = originalImage.imageOrientation
     }
     
-    func filterStateValue(for type: FilterAttributeType) -> Double {
+    public func filterStateValue(for type: CoreImageFilterAttributeType) -> Double {
         currentState[type] ?? type.filter.parameter.defaultValue
     }
     
-    func applyFilter(type: FilterAttributeType, value: Double) -> UIImage? {
+    public func applyFilter(type: CoreImageFilterAttributeType, value: Double) -> UIImage? {
         // 현재 상태를 복사하고 임시로 새 값 추가 (실시간 미리보기용)
         var tempState = currentState
         tempState[type] = value
@@ -71,7 +74,7 @@ final class CoreImageManager {
         return applyFilters(tempState)
     }
     
-    func appendHistory(type: FilterAttributeType, value afterValue: Double) {
+    public func appendHistory(type: CoreImageFilterAttributeType, value afterValue: Double) {
         let beforeValue = filterStateValue(for: type)
         
         // 값이 변경된 경우에만 히스토리 추가
@@ -89,7 +92,7 @@ final class CoreImageManager {
         currentState[type] = afterValue
     }
     
-    func undo() -> UIImage? {
+    public func undo() -> UIImage? {
         guard let lastChange = undoStack.popLast() else { return nil }
         
         // Redo 스택에 현재 변경사항 저장
@@ -106,7 +109,7 @@ final class CoreImageManager {
         return applyFilters(currentState)
     }
     
-    func redo() -> UIImage? {
+    public func redo() -> UIImage? {
         guard let change = redoStack.popLast() else { return nil }
         
         // Undo 스택에 다시 저장
@@ -122,12 +125,12 @@ final class CoreImageManager {
 
 extension CoreImageManager {
     
-    private func applyFilters(_ state: [FilterAttributeType: Double]) -> UIImage? {
+    private func applyFilters(_ state: [CoreImageFilterAttributeType: Double]) -> UIImage? {
         guard let originalImage = originCIImage else { return nil }
         
         // 우선순위 순서로 필터 정렬
         let sortedFilters = state
-            .compactMap { (filterType: FilterAttributeType, value: Double) -> (FilterAttributeType, Double)? in
+            .compactMap { (filterType: CoreImageFilterAttributeType, value: Double) -> (CoreImageFilterAttributeType, Double)? in
                 // 기본값이 아닌 것만 필터링
                 guard value != filterType.filter.parameter.defaultValue else { return nil }
                 return (filterType, value)
@@ -149,7 +152,9 @@ extension CoreImageManager {
         let uiImage = createUIImage(from: result)
         
         // 필터가 새로 적용된 CIImage를 저장
-        imageComparison.filtered = uiImage
+        if let image = uiImage {
+            filteredImage = image
+        }
         
         // 최종 UIImage로 변환
         return uiImage
