@@ -8,18 +8,18 @@
 import Foundation
 import Security
 
-enum KeychainError: Error {
+public enum KeychainError: Error {
     case encodingFailed
     case decodingFailed
     case unexpectedStatus(OSStatus)
 }
 
-enum KeychainKey: String {
+public enum KeychainKey: String {
     case accessToken = "feelter-accessToken"
     case refreshToken = "feelter-refreshToken"
 }
 
-protocol KeychainStorage {
+public protocol KeychainStorage {
     func save(_ value: String, forKey key: KeychainKey) throws
     func load(forKey key: KeychainKey) throws -> String?
     func delete(forKey key: KeychainKey) throws

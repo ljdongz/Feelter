@@ -12,6 +12,9 @@ import FirebaseMessaging
 import iamport_ios
 import KakaoSDKCommon
 
+import FTStorageInterface
+import FTStorage
+
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -94,7 +97,7 @@ extension AppDelegate: MessagingDelegate {
         
         guard let newToken = fcmToken else { return }
         
-        let tokenManager = DIContainer.shared.resolve(TokenManager.self)
+        let tokenManager = DefaultTokenManager.shared
         
         // 디바이스 토큰이 저장되있지 않은 경우 (로그인 화면인 경우), 새로 저장
         guard let current = tokenManager.deviceToken else {

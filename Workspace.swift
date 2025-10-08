@@ -5,6 +5,7 @@ let workspace = Workspace(
     projects: [
         "Projects/App",
         "Projects/Core/FTCoreImage",
+        "Projects/Core/FTStorage",
         "Projects/Shared/FTUtility"
     ]
 )

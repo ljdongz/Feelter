@@ -12,6 +12,8 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
+import FTStorageInterface
+
 final class BannerWebViewController: UIViewController {
     
     // MARK: - UI Components

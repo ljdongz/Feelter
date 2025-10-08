@@ -7,12 +7,14 @@
 
 import UIKit
 
+import FTStorage
+
 final class SplashViewController: UIViewController {
     
     private let gradientLayer = CAGradientLayer()
     
+    private var tokenManager = DefaultTokenManager.shared
     @Dependency private var networkProvider: NetworkProvider
-    @Dependency private var tokenManager: TokenManager
     
     var apnsPayload: APNsPayload?
     

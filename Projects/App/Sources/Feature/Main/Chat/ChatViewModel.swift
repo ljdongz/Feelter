@@ -10,6 +10,7 @@ import Foundation
 import RxCocoa
 import RxSwift
 
+import FTStorageInterface
 import FTUtility
 
 enum UpdateType {

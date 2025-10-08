@@ -7,6 +7,9 @@
 
 import Foundation
 
+import FTStorageInterface
+import FTStorage
+
 final class DIContainer {
     static let shared = DIContainer()
     private var dependencies: [String: Any] = [:]
@@ -41,8 +44,7 @@ struct Dependency<T> {
 
 extension DIContainer {
     func registerDependencies() {
-        let keychainStorage = KeychainStorageImpl()
-        let tokenManager = TokenManager(keychainStorage: keychainStorage)
+        let tokenManager = DefaultTokenManager.shared
         let tokenInterceptor = TokenInterceptor(tokenManager: tokenManager)
         let appleAuthService = AppleAuthServiceImpl()
         let kakaoAuthService = KakaoAuthServiceImpl()
@@ -50,7 +52,6 @@ extension DIContainer {
         let socketProvider = SocketProviderImpl(tokenManager: tokenManager)
         let chatDataSource = ChatDataSourceImpl()
         
-        register(tokenManager, type: TokenManager.self)
         register(networkProvider, type: NetworkProvider.self)
         
         let authRepository = AuthRepositoryImpl(

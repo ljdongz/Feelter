@@ -112,6 +112,10 @@ let project = Project(
                     target: "FTCoreImage",
                     path: .relativeToRoot("Projects/Core/FTCoreImage")
                 ),
+                .project(
+                    target: "FTStorage",
+                    path: .relativeToRoot("Projects/Core/FTStorage")
+                ),
                 .external(name: "SnapKit"),
                 .external(name: "RxSwift"),
                 .external(name: "RxCocoa"),

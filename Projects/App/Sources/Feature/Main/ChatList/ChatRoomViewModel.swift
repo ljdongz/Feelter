@@ -10,6 +10,8 @@ import Foundation
 import RxCocoa
 import RxSwift
 
+import FTStorageInterface
+
 final class ChatRoomViewModel: ViewModel {
     
     struct Input {

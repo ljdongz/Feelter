@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTStorageInterface
+
 struct TokenInterceptor: RequestInterceptor {
     
     private let tokenRefreshTasker = TokenRefreshTasker()

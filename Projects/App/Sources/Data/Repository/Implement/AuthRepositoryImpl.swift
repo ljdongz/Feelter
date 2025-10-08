@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTStorageInterface
+
 struct AuthRepositoryImpl: AuthRepository {
     
     private let appleAuthService: AppleAuthService

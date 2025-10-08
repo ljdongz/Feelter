@@ -9,6 +9,9 @@ import UIKit
 
 import Kingfisher
 
+import FTStorage
+import FTStorageInterface
+
 enum ImageCachePolicy {
     case memoryOnly
     case diskCache(expiration: ExpirationConfig)
@@ -41,14 +44,17 @@ enum ImageCachePolicy {
     }
 }
 
+// TODO: DIContainer에 의존성 등록 후 사용하는 곳에서 resolve로 사용하기
 @MainActor
 final class ImageLoader {
     
     static let shared = ImageLoader()
     
-    @Dependency private var tokenManager: TokenManager
+    private var tokenManager: TokenManager
 
-    private init() {
+    init(tokenManager: TokenManager = DefaultTokenManager.shared) {
+        self.tokenManager = tokenManager
+        
         ImageCache.default.cleanExpiredDiskCache()
         
         // 100MB (8GB 기준으로 약 10%)

@@ -8,9 +8,15 @@
 import Foundation
 import Security
 
-struct KeychainStorageImpl: KeychainStorage {
+import FTStorageInterface
+
+public struct KeychainStorageImpl: KeychainStorage {
     
-    func save(_ value: String, forKey key: KeychainKey) throws {
+    public static let shared = KeychainStorageImpl()
+    
+    init() {}
+    
+    public func save(_ value: String, forKey key: KeychainKey) throws {
         guard let data = value.data(using: .utf8) else {
             throw KeychainError.encodingFailed
         }
@@ -30,7 +36,7 @@ struct KeychainStorageImpl: KeychainStorage {
         }
     }
     
-    func load(forKey key: KeychainKey) throws -> String? {
+    public func load(forKey key: KeychainKey) throws -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key.rawValue,
@@ -50,7 +56,7 @@ struct KeychainStorageImpl: KeychainStorage {
         return String(data: data, encoding: .utf8)
     }
     
-    func delete(forKey key: KeychainKey) throws {
+    public func delete(forKey key: KeychainKey) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key.rawValue

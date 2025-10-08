@@ -9,6 +9,8 @@ import Foundation
 
 import SocketIO
 
+import FTStorageInterface
+
 final class SocketProviderImpl: SocketProvider {
     
     private let tokenManager: TokenManager
