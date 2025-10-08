@@ -10,6 +10,8 @@ import Foundation
 import RxCocoa
 import RxSwift
 
+import FTDependencies
+
 final class MyPageViewModel: ViewModel {
     struct Input {
         let viewDidLoad: Observable<Void>

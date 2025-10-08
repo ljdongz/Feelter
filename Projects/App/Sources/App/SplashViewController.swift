@@ -7,6 +7,7 @@
 
 import UIKit
 
+import FTDependencies
 import FTStorage
 
 final class SplashViewController: UIViewController {

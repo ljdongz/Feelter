@@ -12,6 +12,7 @@ import FirebaseMessaging
 import iamport_ios
 import KakaoSDKCommon
 
+import FTDependencies
 import FTStorageInterface
 import FTStorage
 

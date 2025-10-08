@@ -12,6 +12,7 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
+import FTDependencies
 import FTStorageInterface
 
 final class BannerWebViewController: UIViewController {

@@ -10,6 +10,7 @@ import Foundation
 import RxCocoa
 import RxSwift
 
+import FTDependencies
 import FTStorageInterface
 import FTUtility
 

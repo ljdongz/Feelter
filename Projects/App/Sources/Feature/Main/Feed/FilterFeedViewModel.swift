@@ -10,6 +10,8 @@ import Foundation
 import RxCocoa
 import RxSwift
 
+import FTDependencies
+
 final class FilterFeedViewModel: ViewModel {
     struct Input {
         let viewDidLoad: Observable<Void>

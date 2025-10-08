@@ -7,40 +7,9 @@
 
 import Foundation
 
+import FTDependencies
 import FTStorageInterface
 import FTStorage
-
-final class DIContainer {
-    static let shared = DIContainer()
-    private var dependencies: [String: Any] = [:]
-    
-    private init() {}
-    
-    func register<T, U>(_ dependency: T, type: U.Type) {
-        let key = String(describing: U.self)
-        dependencies[key] = dependency
-    }
-    
-    func resolve<T>(_ type: T.Type) -> T {
-        let key = String(describing: type)
-        let dependency = dependencies[key]
-        
-        guard let dependency = dependency as? T else {
-            fatalError("\(key)는 register되지 않았어어요. resolve 부르기전에 register 해주세요")
-        }
-        
-        return dependency
-    }
-}
-
-@propertyWrapper
-struct Dependency<T> {
-    let wrappedValue: T
-    
-    init() {
-        self.wrappedValue = DIContainer.shared.resolve(T.self)
-    }
-}
 
 extension DIContainer {
     func registerDependencies() {
@@ -52,6 +21,7 @@ extension DIContainer {
         let socketProvider = SocketProviderImpl(tokenManager: tokenManager)
         let chatDataSource = ChatDataSourceImpl()
         
+        register(tokenManager, type: TokenManager.self)
         register(networkProvider, type: NetworkProvider.self)
         
         let authRepository = AuthRepositoryImpl(

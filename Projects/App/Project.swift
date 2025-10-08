@@ -109,6 +109,10 @@ let project = Project(
                     path: .relativeToRoot("Projects/Shared/FTUtility")
                 ),
                 .project(
+                    target: "FTDependencies",
+                    path: .relativeToRoot("Projects/Shared/FTDependencies")
+                ),
+                .project(
                     target: "FTCoreImage",
                     path: .relativeToRoot("Projects/Core/FTCoreImage")
                 ),

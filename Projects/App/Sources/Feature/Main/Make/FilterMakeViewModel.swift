@@ -11,6 +11,8 @@ import UIKit
 import RxCocoa
 import RxSwift
 
+import FTDependencies
+
 final class FilterMakeViewModel: ViewModel {
     struct Input {
         let titleTextFieldValue: Observable<String>

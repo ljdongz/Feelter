@@ -11,6 +11,8 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
+import FTDependencies
+
 final class TabBarViewController: RxBaseViewController {
     
     // MARK: - UI Components

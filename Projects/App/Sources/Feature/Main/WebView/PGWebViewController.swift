@@ -13,6 +13,8 @@ import RxCocoa
 import RxSwift
 import SnapKit
 
+import FTDependencies
+
 final class PGWebViewController: RxBaseViewController {
     
     struct PaymentAlertStatus {
