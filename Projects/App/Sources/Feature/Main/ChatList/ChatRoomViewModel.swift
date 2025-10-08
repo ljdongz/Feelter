@@ -12,6 +12,7 @@ import RxSwift
 
 import FTDependencies
 import FTStorageInterface
+import FTUtility
 
 final class ChatRoomViewModel: ViewModel {
     
