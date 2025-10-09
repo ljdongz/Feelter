@@ -7,12 +7,14 @@
 
 import Foundation
 
-struct NetworkProviderImpl: NetworkProvider {
+import FTNetworkInterface
+
+public struct NetworkProviderImpl: NetworkProvider {
     
     private let session: URLSession
     private let tokenInterceptor: RequestInterceptor?
     
-    init(
+    public init(
         session: URLSession = .shared,
         tokenInterceptor: RequestInterceptor? = nil
     ) {
@@ -20,7 +22,7 @@ struct NetworkProviderImpl: NetworkProvider {
         self.tokenInterceptor = tokenInterceptor
     }
     
-    func request<T: Decodable>(endpoint: APIEndpoint, type: T.Type) async throws -> T {
+    public func request<T: Decodable>(endpoint: APIEndpoint, type: T.Type) async throws -> T {
         // URLRequest 객체 생성
         guard var request = endpoint.asURLRequest() else {
             throw NetworkError.notCreatedURLRequest
@@ -44,7 +46,7 @@ struct NetworkProviderImpl: NetworkProvider {
         }
     }
     
-    func request(endpoint: APIEndpoint) async throws {
+    public func request(endpoint: APIEndpoint) async throws {
         // URLRequest 객체 생성
         guard var request = endpoint.asURLRequest() else {
             throw NetworkError.notCreatedURLRequest
@@ -68,7 +70,7 @@ struct NetworkProviderImpl: NetworkProvider {
         }
     }
     
-    func upload<T: Decodable>(endpoint: APIEndpoint, type: T.Type) async throws -> T {
+    public func upload<T: Decodable>(endpoint: APIEndpoint, type: T.Type) async throws -> T {
         // URLRequest 객체 생성
         guard var request = endpoint.asURLRequest() else {
             throw NetworkError.notCreatedURLRequest

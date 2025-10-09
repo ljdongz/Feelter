@@ -1,5 +1,5 @@
 //
-//  AuthAPI.swift
+//  AuthAPI+APIEndpoint.swift
 //  Feelter
 //
 //  Created by 이정동 on 7/31/25.
@@ -7,27 +7,14 @@
 
 import Foundation
 
-enum AuthAPI {
-    case refresh
-    
-    case validationEmail(Encodable)
-    case emailSignUp(Encodable)
-    
-    case emailLogin(Encodable)
-    case appleLogin(Encodable)
-    case kakaoLogin(Encodable)
-    
-    case updateDeviceToken(Encodable)
-    
-    case signOut
-}
+import FTNetworkInterface
 
 extension AuthAPI: APIEndpoint {
-    var baseURL: URL {
+    public var baseURL: URL {
         URL(string: ftBaseURL)!
     }
-    
-    var path: String {
+
+    public var path: String {
         switch self {
         case .refresh:
             "/v1/auth/refresh"
@@ -47,8 +34,8 @@ extension AuthAPI: APIEndpoint {
             "/v1/users/logout"
         }
     }
-    
-    var method: HTTPMethod {
+
+    public var method: HTTPMethod {
         switch self {
         case .refresh: .get
         case .validationEmail: .post
@@ -60,8 +47,8 @@ extension AuthAPI: APIEndpoint {
         case .signOut: .post
         }
     }
-    
-    var task: HTTPTask {
+
+    public var task: HTTPTask {
         switch self {
         case .refresh:
                 .requestPlain
@@ -81,8 +68,8 @@ extension AuthAPI: APIEndpoint {
                 .requestPlain
         }
     }
-    
-    var headers: [String : String]? {
+
+    public var headers: [String : String]? {
         [
             "SeSACKey": ftApiKey
         ]

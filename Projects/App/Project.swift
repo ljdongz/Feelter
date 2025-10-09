@@ -117,6 +117,10 @@ let project = Project(
                     path: .relativeToRoot("Projects/Core/FTCoreImage")
                 ),
                 .project(
+                    target: "FTNetwork",
+                    path: .relativeToRoot("Projects/Core/FTNetwork")
+                ),
+                .project(
                     target: "FTStorage",
                     path: .relativeToRoot("Projects/Core/FTStorage")
                 ),
@@ -127,7 +131,6 @@ let project = Project(
                 .external(name: "KakaoSDKCommon"),
                 .external(name: "KakaoSDKUser"),
                 .external(name: "Kingfisher"),
-                .external(name: "SocketIO"),
                 .external(name: "RealmSwift"),
                 .external(name: "Realm"),
                 .external(name: "FirebaseCore"),

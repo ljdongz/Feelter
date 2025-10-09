@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol NetworkProvider {
+public protocol NetworkProvider {
     func request<T: Decodable>(
         endpoint: APIEndpoint,
         type: T.Type

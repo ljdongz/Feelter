@@ -7,6 +7,7 @@
 
 import Foundation
 
+import FTNetworkInterface
 import FTUtility
 
 final class ChatRepositoryImpl: ChatRepository {
@@ -29,7 +30,18 @@ final class ChatRepositoryImpl: ChatRepository {
     
     // MARK: - 소켓 관련
     func connectRoom(roomID: String, receiveMessage: @escaping (ChatMessage) -> Void) {
-        socketProvider.connect(roomID: roomID, receiveMessage: receiveMessage)
+        socketProvider.connect(roomID: roomID) { data in
+            let decoder = JSONDecoder()
+            
+            do {
+                let messageDTO = try decoder.decode(ChatMessageResponseDTO.self, from: data)
+                let chatMessage = messageDTO.toDomain()
+                
+                receiveMessage(chatMessage)
+            } catch {
+                print(error)
+            }
+        }
     }
     
     func disconnectRoom() {

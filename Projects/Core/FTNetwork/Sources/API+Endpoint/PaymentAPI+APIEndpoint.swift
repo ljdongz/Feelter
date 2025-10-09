@@ -1,5 +1,5 @@
 //
-//  PaymentAPI.swift
+//  PaymentAPI+APIEndpoint.swift
 //  Feelter
 //
 //  Created by 이정동 on 8/21/25.
@@ -7,17 +7,14 @@
 
 import Foundation
 
-enum PaymentAPI {
-    case validation(Encodable)
-    case inquiry(orderCode: String)
-}
+import FTNetworkInterface
 
 extension PaymentAPI: APIEndpoint {
-    var baseURL: URL {
+    public var baseURL: URL {
         URL(string: ftBaseURL)!
     }
-    
-    var path: String {
+
+    public var path: String {
         switch self {
         case .validation:
             "/v1/payments/validation"
@@ -25,15 +22,15 @@ extension PaymentAPI: APIEndpoint {
             "/v1/payments/\(orderCode)"
         }
     }
-    
-    var method: HTTPMethod {
+
+    public var method: HTTPMethod {
         switch self {
         case .validation: .post
         case .inquiry: .get
         }
     }
-    
-    var task: HTTPTask {
+
+    public var task: HTTPTask {
         switch self {
         case .validation(let data):
                 .requestJSONEncodable(data)
@@ -41,8 +38,8 @@ extension PaymentAPI: APIEndpoint {
                 .requestPlain
         }
     }
-    
-    var headers: [String : String]? {
+
+    public var headers: [String : String]? {
         [
             "SeSACKey": ftApiKey
         ]

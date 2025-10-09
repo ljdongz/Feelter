@@ -7,18 +7,21 @@
 
 import Foundation
 
-enum NetworkError: Error {
+public enum NetworkError: Error {
     case urlSessionError(Error)
     case notCreatedURLRequest
     case decodingError(Error)
 }
 
-enum HTTPResponseError: Error {
+public enum HTTPResponseError: Error {
     /// 401 (액세스, 리프래시, 계정 불일치 등의 오류)
     case invalidObject
 
     /// 403 (갱신되기 이전 토큰 사용)
     case forbidden
+    
+    /// 418 (리프레시 토큰 만료)
+    case expiredRefreshToken
     
     /// 419 (액세스 토큰 만료)
     case expiredAccessToken

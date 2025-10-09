@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum HTTPTask {
+public enum HTTPTask {
     case requestPlain
     case requestQueryParameters(parameters: [String: Any])
     case requestJSONEncodable(Encodable)

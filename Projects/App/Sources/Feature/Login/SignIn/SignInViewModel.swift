@@ -11,6 +11,7 @@ import RxCocoa
 import RxSwift
 
 import FTDependencies
+import FTNetworkInterface
 import FTUtility
 
 final class SignInViewModel: ViewModel {

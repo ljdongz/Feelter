@@ -1,5 +1,5 @@
 //
-//  UserAPI.swift
+//  UserAPI+APIEndpoint.swift
 //  Feelter
 //
 //  Created by 이정동 on 8/6/25.
@@ -7,17 +7,14 @@
 
 import Foundation
 
-enum UserAPI {
-    case todayAuthor
-    case myProfile
-}
+import FTNetworkInterface
 
 extension UserAPI: APIEndpoint {
-    var baseURL: URL {
+    public var baseURL: URL {
         URL(string: ftBaseURL)!
     }
-    
-    var path: String {
+
+    public var path: String {
         switch self {
         case .todayAuthor:
             "/v1/users/today-author"
@@ -25,15 +22,15 @@ extension UserAPI: APIEndpoint {
             "/v1/users/me/profile"
         }
     }
-    
-    var method: HTTPMethod {
+
+    public var method: HTTPMethod {
         switch self {
         case .todayAuthor: .get
         case .myProfile: .get
         }
     }
-    
-    var task: HTTPTask {
+
+    public var task: HTTPTask {
         switch self {
         case .todayAuthor:
                 .requestPlain
@@ -41,8 +38,8 @@ extension UserAPI: APIEndpoint {
                 .requestPlain
         }
     }
-    
-    var headers: [String : String]? {
+
+    public var headers: [String : String]? {
         [
             "SeSACKey": ftApiKey
         ]

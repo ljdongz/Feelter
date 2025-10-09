@@ -133,7 +133,7 @@ final class ChatViewController: RxBaseViewController {
         output.messages
             .observe(on: MainScheduler.instance)
             .subscribe(with: self) { owner, updateType in
-                print(updateType)
+                
                 switch updateType {
                 case .initMessages(let messages):
                     owner.initializeDataSourceItems(messages)
@@ -274,13 +274,13 @@ extension ChatViewController {
 
 extension ChatViewController {
     private func initializeDataSourceItems(_ messages: [ChatMessage]) {
-        print(messages)
+        
         let cellTypes = messageCellGenerator.generateCellTypes(
             from: messages,
             currentUserID: viewModel.userID,
             insertPosition: .standard
         )
-        print(cellTypes)
+        
         var snapShot = NSDiffableDataSourceSnapshot<Int, AnyHashable>()
         snapShot.appendSections([0])
         

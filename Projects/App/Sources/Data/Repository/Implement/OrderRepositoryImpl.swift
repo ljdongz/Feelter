@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTNetworkInterface
+
 struct OrderRepositoryImpl: OrderRepository {
     
     private let networkProvider: NetworkProvider

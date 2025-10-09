@@ -1,5 +1,5 @@
 //
-//  OrderAPI.swift
+//  OrderAPI+APIEndpoint.swift
 //  Feelter
 //
 //  Created by 이정동 on 8/21/25.
@@ -7,17 +7,14 @@
 
 import Foundation
 
-enum OrderAPI {
-    case create(Encodable)
-    case inquiry
-}
+import FTNetworkInterface
 
 extension OrderAPI: APIEndpoint {
-    var baseURL: URL {
+    public var baseURL: URL {
         URL(string: ftBaseURL)!
     }
-    
-    var path: String {
+
+    public var path: String {
         switch self {
         case .create:
             "/v1/orders"
@@ -25,15 +22,15 @@ extension OrderAPI: APIEndpoint {
             "/v1/orders"
         }
     }
-    
-    var method: HTTPMethod {
+
+    public var method: HTTPMethod {
         switch self {
         case .create: .post
         case .inquiry: .get
         }
     }
-    
-    var task: HTTPTask {
+
+    public var task: HTTPTask {
         switch self {
         case .create(let data):
                 .requestJSONEncodable(data)
@@ -41,8 +38,8 @@ extension OrderAPI: APIEndpoint {
                 .requestPlain
         }
     }
-    
-    var headers: [String : String]? {
+
+    public var headers: [String : String]? {
         [
             "SeSACKey": ftApiKey
         ]

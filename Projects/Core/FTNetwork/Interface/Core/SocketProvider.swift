@@ -7,8 +7,8 @@
 
 import Foundation
 
-protocol SocketProvider {
-    func connect(roomID: String, receiveMessage: @escaping ((ChatMessage) -> Void))
+public protocol SocketProvider {
+    func connect(roomID: String, receiveMessage: @escaping ((Data) -> Void))
     func disconnect()
     
     func isConnected(roomID: String) -> Bool

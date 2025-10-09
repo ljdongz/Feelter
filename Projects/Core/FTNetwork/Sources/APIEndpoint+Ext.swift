@@ -1,19 +1,13 @@
 //
-//  APIEndpoint.swift
-//  Feelter
+//  APIEndpoint+Ext.swift
+//  FTNetwork
 //
-//  Created by 이정동 on 7/31/25.
+//  Created by 이정동 on 10/9/25.
 //
 
 import Foundation
 
-protocol APIEndpoint {
-    var baseURL: URL { get }
-    var path: String { get }
-    var method: HTTPMethod { get }
-    var task: HTTPTask { get }
-    var headers: [String: String]? { get }
-}
+import FTNetworkInterface
 
 extension APIEndpoint {
     func asURLRequest() -> URLRequest? {

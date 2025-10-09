@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTNetworkInterface
+
 struct BannerRepositoryImpl: BannerRepository {
     
     private let networkProvider: NetworkProvider

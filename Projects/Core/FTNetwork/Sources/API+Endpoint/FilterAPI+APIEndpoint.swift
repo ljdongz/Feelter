@@ -1,5 +1,5 @@
 //
-//  FilterAPI.swift
+//  FilterAPI+APIEndpoint.swift
 //  Feelter
 //
 //  Created by 이정동 on 8/6/25.
@@ -7,30 +7,14 @@
 
 import Foundation
 
-enum FilterAPI {
-    case create(Encodable)
-    case hotTrend
-    case todayFilter
-    case queryFilters(
-        next: String?,
-        limit: String?,
-        category: String?,
-        order: String?
-    )
-    case detail(filterID: String)
-    case like(filterID: String, body: Encodable)
-    case uploadFiles(
-        originalImage: Data,
-        filteredImage: Data
-    )
-}
+import FTNetworkInterface
 
 extension FilterAPI: APIEndpoint {
-    var baseURL: URL {
+    public var baseURL: URL {
         URL(string: ftBaseURL)!
     }
-    
-    var path: String {
+
+    public var path: String {
         switch self {
         case .create:
             "/v1/filters"
@@ -48,8 +32,8 @@ extension FilterAPI: APIEndpoint {
             "/v1/filters/files"
         }
     }
-    
-    var method: HTTPMethod {
+
+    public var method: HTTPMethod {
         switch self {
         case .create: .post
         case .hotTrend: .get
@@ -60,8 +44,8 @@ extension FilterAPI: APIEndpoint {
         case .uploadFiles: .post
         }
     }
-    
-    var task: HTTPTask {
+
+    public var task: HTTPTask {
         switch self {
         case let .create(data):
             return .requestJSONEncodable(data)
@@ -87,10 +71,10 @@ extension FilterAPI: APIEndpoint {
             ])
         }
     }
-    
-    var headers: [String : String]? {
+
+    public var headers: [String : String]? {
         [
             "SeSACKey": ftApiKey
         ]
-    } 
+    }
 }

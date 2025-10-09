@@ -1,5 +1,5 @@
 //
-//  ChatAPI.swift
+//  ChatAPI+APIEndpoint.swift
 //  Feelter
 //
 //  Created by 이정동 on 8/14/25.
@@ -7,20 +7,14 @@
 
 import Foundation
 
-enum ChatAPI {
-    case createRoom(Encodable)
-    case fetchRooms
-    case sendMessage(roomID: String, Encodable)
-    case fetchMessages(roomID: String, after: String?)
-    case uploadFiles(roomID: String, files: [UploadFileData])
-}
+import FTNetworkInterface
 
 extension ChatAPI: APIEndpoint {
-    var baseURL: URL {
+    public var baseURL: URL {
         URL(string: ftBaseURL)!
     }
-    
-    var path: String {
+
+    public var path: String {
         switch self {
         case .createRoom:
             "/v1/chats"
@@ -34,8 +28,8 @@ extension ChatAPI: APIEndpoint {
             "/v1/chats/\(roomID)/files"
         }
     }
-    
-    var method: HTTPMethod {
+
+    public var method: HTTPMethod {
         switch self {
         case .createRoom: .post
         case .fetchRooms: .get
@@ -44,8 +38,8 @@ extension ChatAPI: APIEndpoint {
         case .uploadFiles: .post
         }
     }
-    
-    var task: HTTPTask {
+
+    public var task: HTTPTask {
         switch self {
         case .createRoom(let encodable):
             return .requestJSONEncodable(encodable)
@@ -69,12 +63,10 @@ extension ChatAPI: APIEndpoint {
             return .requestMultipartData(formData: multiparts)
         }
     }
-    
-    var headers: [String : String]? {
+
+    public var headers: [String : String]? {
         [
             "SeSACKey": ftApiKey
         ]
     }
-    
-    
 }

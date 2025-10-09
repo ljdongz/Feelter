@@ -6,8 +6,8 @@
 //
 
 import Foundation
-
-struct TokenRefreshResponseDTO: Decodable {
-    let accessToken: String
-    let refreshToken: String
-}
+//
+//struct TokenRefreshResponseDTO: Decodable {
+//    let accessToken: String
+//    let refreshToken: String
+//}

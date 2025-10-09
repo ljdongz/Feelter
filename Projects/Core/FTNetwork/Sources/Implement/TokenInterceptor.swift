@@ -7,19 +7,20 @@
 
 import Foundation
 
+import FTNetworkInterface
 import FTStorageInterface
 
-struct TokenInterceptor: RequestInterceptor {
+public struct TokenInterceptor: RequestInterceptor {
     
     private let tokenRefreshTasker = TokenRefreshTasker()
     private let tokenManager: TokenManager
     
-    init(tokenManager: TokenManager) {
+    public init(tokenManager: TokenManager) {
         self.tokenManager = tokenManager
     }
     
     // 요청 전에 액세스 토큰 추가
-    func adapt(_ request: URLRequest) -> URLRequest {
+    public func adapt(_ request: URLRequest) -> URLRequest {
         // 액세스 토큰이 존재하는지 확인 (없으면 엑세스 토큰을 설정할 필요 없는 API)
         guard let accessToken = tokenManager.accessToken,
               let refreshToken = tokenManager.refreshToken else {
@@ -44,7 +45,7 @@ struct TokenInterceptor: RequestInterceptor {
     }
     
     // 에러 발생 시 토큰 갱신 처리
-    func retry(_ request: URLRequest, for error: Error) async throws -> RetryResult {
+    public func retry(_ request: URLRequest, for error: Error) async throws -> RetryResult {
         guard let httpError = error as? HTTPResponseError,
               case .expiredAccessToken = httpError else {
             // 액세스 토큰 만료 에러가 아닌 경우, 재시도하지 않음
@@ -99,7 +100,7 @@ struct TokenInterceptor: RequestInterceptor {
         if let httpResponse = response as? HTTPURLResponse {
             guard 200...299 ~= httpResponse.statusCode else {
                 
-                throw AuthError.expiredRefreshToken
+                throw HTTPResponseError.expiredRefreshToken
             }
         }
         
@@ -146,4 +147,9 @@ fileprivate actor TokenRefreshTasker {
         refreshTask = newTask
         return newTask
     }
+}
+
+public struct TokenRefreshResponseDTO: Decodable {
+    public let accessToken: String
+    public let refreshToken: String
 }

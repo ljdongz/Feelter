@@ -10,29 +10,30 @@ import Foundation
 import SocketIO
 
 // Core
+import FTNetworkInterface
 import FTStorageInterface
 // Shared
 import FTDependencies
 import FTUtility
 
-final class SocketProviderImpl: SocketProvider {
+public final class SocketProviderImpl: SocketProvider {
     
     private let tokenManager: TokenManager
     
     private var manager: SocketManager?
     private var socket: SocketIOClient?
     
-    private var receiveMessageHandler: ((ChatMessage) -> Void)?
+    private var receiveMessageHandler: ((Data) -> Void)?
     
     private var connectRoomID: String?
     
     @Dependency private var environment: EnvironmentProviding
     
-    init(tokenManager: TokenManager) {
+    public init(tokenManager: TokenManager) {
         self.tokenManager = tokenManager
     }
     
-    func connect(roomID: String, receiveMessage: @escaping ((ChatMessage) -> Void)) {
+    public func connect(roomID: String, receiveMessage: @escaping ((Data) -> Void)) {
         guard let accessToken = tokenManager.accessToken else {
             print("No access token available")
             return
@@ -64,7 +65,7 @@ final class SocketProviderImpl: SocketProvider {
         socket?.connect()
     }
     
-    func disconnect() {
+    public func disconnect() {
         socket?.disconnect()
         socket = nil
         manager = nil
@@ -72,7 +73,7 @@ final class SocketProviderImpl: SocketProvider {
         connectRoomID = nil
     }
     
-    func isConnected(roomID: String) -> Bool {
+    public func isConnected(roomID: String) -> Bool {
         (connectRoomID == roomID) && (socket?.status == .connected)
     }
 }
@@ -121,14 +122,7 @@ extension SocketProviderImpl {
             // Dictionary를 JSON Data로 변환
             let jsonData = try JSONSerialization.data(withJSONObject: messageDict)
             
-            // JSON Data를 ChatMessageResponseDTO로 디코딩
-            let decoder = JSONDecoder()
-            let messageDTO = try decoder.decode(ChatMessageResponseDTO.self, from: jsonData)
-            
-            // DTO를 Domain 모델로 변환
-            let chatMessage = messageDTO.toDomain()
-            
-            receiveMessageHandler?(chatMessage)
+            receiveMessageHandler?(jsonData)
             
         } catch {
             print("❌ Failed to decode message: \(error)")

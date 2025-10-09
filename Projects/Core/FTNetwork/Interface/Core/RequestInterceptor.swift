@@ -7,12 +7,12 @@
 
 import Foundation
 
-enum RetryResult {
+public enum RetryResult {
     case retry
     case doNotRetry
 }
 
-protocol RequestInterceptor {
+public protocol RequestInterceptor {
     func adapt(_ request: URLRequest) -> URLRequest
     func retry(_ request: URLRequest, for error: Error) async throws -> RetryResult
 }

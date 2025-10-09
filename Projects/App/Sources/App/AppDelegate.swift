@@ -13,8 +13,10 @@ import iamport_ios
 import KakaoSDKCommon
 
 import FTDependencies
-import FTStorageInterface
+import FTNetwork
+import FTNetworkInterface
 import FTStorage
+import FTStorageInterface
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {

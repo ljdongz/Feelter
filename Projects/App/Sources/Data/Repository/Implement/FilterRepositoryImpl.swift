@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTNetworkInterface
+
 struct FilterRepositoryImpl: FilterRepository {
     
     private let networkProvider: NetworkProvider

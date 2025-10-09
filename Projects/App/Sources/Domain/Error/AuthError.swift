@@ -8,7 +8,5 @@
 import Foundation
 
 enum AuthError: Error {
-    case expiredRefreshToken
-    
     case alreadyExist
 }

@@ -7,6 +7,8 @@
 
 import Foundation
 
+import FTNetworkInterface
+
 struct PaymentRepositoryImpl: PaymentRepository {
     
     private let networkProvider: NetworkProvider

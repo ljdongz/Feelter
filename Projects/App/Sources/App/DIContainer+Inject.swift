@@ -8,8 +8,10 @@
 import Foundation
 
 import FTDependencies
-import FTStorageInterface
+import FTNetwork
+import FTNetworkInterface
 import FTStorage
+import FTStorageInterface
 import FTUtility
 
 extension DIContainer {

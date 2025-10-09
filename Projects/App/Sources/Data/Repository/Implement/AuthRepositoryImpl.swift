@@ -7,6 +7,7 @@
 
 import Foundation
 
+import FTNetworkInterface
 import FTStorageInterface
 
 struct AuthRepositoryImpl: AuthRepository {
