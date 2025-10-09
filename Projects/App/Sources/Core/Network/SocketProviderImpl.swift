@@ -9,7 +9,11 @@ import Foundation
 
 import SocketIO
 
+// Core
 import FTStorageInterface
+// Shared
+import FTDependencies
+import FTUtility
 
 final class SocketProviderImpl: SocketProvider {
     
@@ -21,6 +25,8 @@ final class SocketProviderImpl: SocketProvider {
     private var receiveMessageHandler: ((ChatMessage) -> Void)?
     
     private var connectRoomID: String?
+    
+    @Dependency private var environment: EnvironmentProviding
     
     init(tokenManager: TokenManager) {
         self.tokenManager = tokenManager
@@ -38,12 +44,12 @@ final class SocketProviderImpl: SocketProvider {
             .compress,
             .extraHeaders([
                 "Authorization": "\(accessToken)",
-                "SeSACKey" : AppConfiguration.apiKey
+                "SeSACKey" : environment.apiKey
             ])
         ]
         
         manager = SocketManager(
-            socketURL: URL(string: AppConfiguration.baseURL)!,
+            socketURL: URL(string: environment.baseURL)!,
             config: config
         )
         

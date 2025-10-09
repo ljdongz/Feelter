@@ -13,7 +13,7 @@ enum BannerAPI {
 
 extension BannerAPI: APIEndpoint {
     var baseURL: URL {
-        URL(string: AppConfiguration.baseURL)!
+        URL(string: ftBaseURL)!
     }
     
     var path: String {
@@ -30,7 +30,7 @@ extension BannerAPI: APIEndpoint {
     
     var headers: [String : String]? {
         [
-            "SeSACKey": AppConfiguration.apiKey
+            "SeSACKey": ftApiKey
         ]
     }
 }

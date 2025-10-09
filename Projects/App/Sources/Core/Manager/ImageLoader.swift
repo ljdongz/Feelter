@@ -9,8 +9,12 @@ import UIKit
 
 import Kingfisher
 
+// Core
 import FTStorage
 import FTStorageInterface
+// Shared
+import FTDependencies
+import FTUtility
 
 enum ImageCachePolicy {
     case memoryOnly
@@ -51,6 +55,8 @@ final class ImageLoader {
     static let shared = ImageLoader()
     
     private var tokenManager: TokenManager
+    
+    @Dependency private var environment: EnvironmentProviding
 
     init(tokenManager: TokenManager = DefaultTokenManager.shared) {
         self.tokenManager = tokenManager
@@ -90,10 +96,11 @@ final class ImageLoader {
         }
         
         let token = tokenManager.accessToken
+        let apiKey = environment.apiKey
         let modifier = AnyModifier { request in
             var request = request
             request.addValue(
-                AppConfiguration.apiKey,
+                apiKey,
                 forHTTPHeaderField: "SeSACKey"
             )
             if let token = token {
@@ -105,7 +112,7 @@ final class ImageLoader {
             return request
         }
         
-        let url = "\(AppConfiguration.baseURL)/v1\(path)"
+        let url = "\(environment.baseURL)/v1\(path)"
         let processor = DownsamplingImageProcessor(size: downsamplingSize)
         imageView.kf.indicatorType = .activity
         

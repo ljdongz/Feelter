@@ -14,6 +14,7 @@ import RxSwift
 import SnapKit
 
 import FTDependencies
+import FTUtility
 
 final class PGWebViewController: RxBaseViewController {
     
@@ -39,6 +40,8 @@ final class PGWebViewController: RxBaseViewController {
     private let alertTrigger = PublishRelay<PaymentAlertStatus>()
     
     var successPaymentCompletion: (() -> Void)?
+    
+    @Dependency private var environment: EnvironmentProviding
     
     init(paymentInfo: PaymentInfo) {
         self.paymentInfo = paymentInfo
@@ -114,7 +117,7 @@ final class PGWebViewController: RxBaseViewController {
 
 extension PGWebViewController {
     private func requestPayment(paymentInfo: PaymentInfo) {
-        let userCode = AppConfiguration.iamportUserCode
+        let userCode = environment.iamportUserCode
         let payment = createPaymentData(
             orderCode: paymentInfo.orderCode,
             filterName: paymentInfo.filterName,

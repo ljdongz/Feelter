@@ -14,6 +14,7 @@ import SnapKit
 
 import FTDependencies
 import FTStorageInterface
+import FTUtility
 
 final class BannerWebViewController: UIViewController {
     
@@ -58,14 +59,15 @@ final class BannerWebViewController: UIViewController {
     }()
     
     @Dependency private var tokenManager: TokenManager
+    @Dependency private var environment: EnvironmentProviding
     
     private let disposeBag = DisposeBag()
-    private let urlString: String
+    private let path: String
     
     // MARK: - Initializer
     
-    init(urlString: String) {
-        self.urlString = urlString
+    init(path: String) {
+        self.path = path
         super.init(nibName: nil, bundle: nil)
         
         modalPresentationStyle = .fullScreen
@@ -138,14 +140,14 @@ final class BannerWebViewController: UIViewController {
     }
     
     private func loadURL() {
-        guard let url = URL(string: urlString) else {
+        guard let url = URL(string: environment.baseURL + path) else {
             presentAlert(title: "잘못된 URL입니다.")
             return
         }
         
         var request = URLRequest(url: url)
         request.setValue(
-            AppConfiguration.apiKey,
+            environment.apiKey,
             forHTTPHeaderField: "SeSACKey"
         )
         

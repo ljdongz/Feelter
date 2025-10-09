@@ -14,7 +14,7 @@ enum PaymentAPI {
 
 extension PaymentAPI: APIEndpoint {
     var baseURL: URL {
-        URL(string: AppConfiguration.baseURL)!
+        URL(string: ftBaseURL)!
     }
     
     var path: String {
@@ -44,7 +44,7 @@ extension PaymentAPI: APIEndpoint {
     
     var headers: [String : String]? {
         [
-            "SeSACKey": AppConfiguration.apiKey
+            "SeSACKey": ftApiKey
         ]
     }
 }

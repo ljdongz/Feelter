@@ -62,8 +62,8 @@ final class HomeViewController: RxBaseViewController {
                     guard let banner = owner.mainView.banner(at: indexPath.item) else {
                         return
                     }
-                    let url = AppConfiguration.baseURL + banner.payload.value
-                    owner.presentWebViewController(with: url)
+                    
+                    owner.presentWebViewController(with: banner.payload.value)
                     
                 case .hotTrend:
                     guard let filters = owner.viewModel.homeModel?.hotTrendFilters else { return }
@@ -89,8 +89,8 @@ final class HomeViewController: RxBaseViewController {
 }
 
 extension HomeViewController {
-    private func presentWebViewController(with urlString: String) {
-        let webViewController = BannerWebViewController(urlString: urlString)
+    private func presentWebViewController(with path: String) {
+        let webViewController = BannerWebViewController(path: path)
         present(webViewController, animated: true)
     }
     

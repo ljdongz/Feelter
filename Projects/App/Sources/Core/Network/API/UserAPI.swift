@@ -14,7 +14,7 @@ enum UserAPI {
 
 extension UserAPI: APIEndpoint {
     var baseURL: URL {
-        URL(string: AppConfiguration.baseURL)!
+        URL(string: ftBaseURL)!
     }
     
     var path: String {
@@ -44,7 +44,7 @@ extension UserAPI: APIEndpoint {
     
     var headers: [String : String]? {
         [
-            "SeSACKey": AppConfiguration.apiKey
+            "SeSACKey": ftApiKey
         ]
     }
 }

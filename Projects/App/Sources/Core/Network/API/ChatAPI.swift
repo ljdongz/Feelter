@@ -17,7 +17,7 @@ enum ChatAPI {
 
 extension ChatAPI: APIEndpoint {
     var baseURL: URL {
-        URL(string: AppConfiguration.baseURL)!
+        URL(string: ftBaseURL)!
     }
     
     var path: String {
@@ -72,7 +72,7 @@ extension ChatAPI: APIEndpoint {
     
     var headers: [String : String]? {
         [
-            "SeSACKey": AppConfiguration.apiKey
+            "SeSACKey": ftApiKey
         ]
     }
     

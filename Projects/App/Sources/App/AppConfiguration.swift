@@ -7,14 +7,16 @@
 
 import Foundation
 
-enum AppConfiguration {
+import FTUtility
+
+struct AppConfiguration: EnvironmentProviding {
     
-    static let apiKey = Self.value(forKey: "ApiHeaderKey")
-    static let baseURL = Self.value(forKey: "BaseUrl")
-    static let kakaoApiKey = Self.value(forKey: "KakaoApiKey")
-    static let iamportUserCode = Self.value(forKey: "IamportUserCode")
+    var apiKey: String { value(forKey: "ApiHeaderKey") }
+    var baseURL: String { value(forKey: "BaseUrl") }
+    var kakaoApiKey: String { value(forKey: "KakaoApiKey") }
+    var iamportUserCode: String { value(forKey: "IamportUserCode") }
     
-    private static func value(forKey: String) -> String {
+    private func value(forKey: String) -> String {
         guard let value = Bundle.main.object(forInfoDictionaryKey: forKey) as? String else {
             fatalError("\(forKey) not set")
         }

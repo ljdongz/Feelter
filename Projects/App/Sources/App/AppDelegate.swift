@@ -21,10 +21,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
+        DIContainer.shared.registerDependencies()
+
         FirebaseApp.configure()
         
-        KakaoSDK.initSDK(appKey: AppConfiguration.kakaoApiKey)
-        DIContainer.shared.registerDependencies()
+        KakaoSDK.initSDK(appKey: AppConfiguration().kakaoApiKey)
         
         configurePushNotification()
         application.registerForRemoteNotifications()

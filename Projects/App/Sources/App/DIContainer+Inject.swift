@@ -10,9 +10,14 @@ import Foundation
 import FTDependencies
 import FTStorageInterface
 import FTStorage
+import FTUtility
 
 extension DIContainer {
     func registerDependencies() {
+        let appConfiguration = AppConfiguration()
+        
+        register(appConfiguration, type: EnvironmentProviding.self)
+        
         let tokenManager = DefaultTokenManager.shared
         let tokenInterceptor = TokenInterceptor(tokenManager: tokenManager)
         let appleAuthService = AppleAuthServiceImpl()

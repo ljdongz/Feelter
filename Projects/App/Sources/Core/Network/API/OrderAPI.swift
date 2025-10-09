@@ -14,7 +14,7 @@ enum OrderAPI {
 
 extension OrderAPI: APIEndpoint {
     var baseURL: URL {
-        URL(string: AppConfiguration.baseURL)!
+        URL(string: ftBaseURL)!
     }
     
     var path: String {
@@ -44,7 +44,7 @@ extension OrderAPI: APIEndpoint {
     
     var headers: [String : String]? {
         [
-            "SeSACKey": AppConfiguration.apiKey
+            "SeSACKey": ftApiKey
         ]
     }
 }
