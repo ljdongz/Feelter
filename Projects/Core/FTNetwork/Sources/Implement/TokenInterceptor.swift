@@ -10,13 +10,23 @@ import Foundation
 import FTNetworkInterface
 import FTStorageInterface
 
+// MARK: - TokenInterceptor
+
 public struct TokenInterceptor: RequestInterceptor {
-    
+
     private let tokenRefreshTasker = TokenRefreshTasker()
     private let tokenManager: TokenManager
-    
-    public init(tokenManager: TokenManager) {
+    private let urlSession: URLSessionProtocol
+    private let refreshAPI: APIEndpoint
+
+    public init(
+        tokenManager: TokenManager,
+        urlSession: URLSessionProtocol = URLSession.shared,
+        refreshAPI: APIEndpoint = AuthAPI.refresh
+    ) {
         self.tokenManager = tokenManager
+        self.urlSession = urlSession
+        self.refreshAPI = refreshAPI
     }
     
     // 요청 전에 액세스 토큰 추가
@@ -56,7 +66,7 @@ public struct TokenInterceptor: RequestInterceptor {
         let refreshTask = await tokenRefreshTasker.task(performing: {
             
             do {
-                let token = try await performAccessTokenRefresh(api: AuthAPI.refresh)
+                let token = try await performAccessTokenRefresh(api: refreshAPI)
                 
                 // 새롭게 갱신된 액세스, 리프레시 토큰 저장
                 tokenManager.updateAuthToken(
@@ -91,7 +101,7 @@ public struct TokenInterceptor: RequestInterceptor {
         
         let (data, response): (Data, URLResponse)
         do {
-            (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await urlSession.data(for: request)
         } catch {
             throw NetworkError.urlSessionError(error)
         }

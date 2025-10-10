@@ -51,7 +51,7 @@ final class PhotoPickerInputView: BaseView {
         
         snapShot.appendSections([.photos])
         
-        var datas: [UIImage?] = [.sampleImage, .sample2, .appleLogo, .blackPoint]
+        let datas: [UIImage?] = [.sampleImage, .sample2, .appleLogo, .blackPoint]
 
         snapShot.appendItems(datas.compactMap { $0 }, toSection: .photos)
         dataSource.apply(snapShot, animatingDifferences: false)
@@ -93,7 +93,7 @@ extension PhotoPickerInputView {
         dataSource = UICollectionViewDiffableDataSource(
             collectionView: collectionView,
             cellProvider: { [weak self] collectionView, indexPath, itemIdentifier in
-                guard let self else { return .init() }
+                
                 switch Section(rawValue: indexPath.section)! {
                 case .photos:
                     guard let cell = collectionView.dequeueReusableCell(

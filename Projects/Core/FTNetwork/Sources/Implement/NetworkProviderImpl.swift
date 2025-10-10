@@ -11,11 +11,11 @@ import FTNetworkInterface
 
 public struct NetworkProviderImpl: NetworkProvider {
     
-    private let session: URLSession
+    private let session: URLSessionProtocol
     private let tokenInterceptor: RequestInterceptor?
     
     public init(
-        session: URLSession = .shared,
+        session: URLSessionProtocol = URLSession.shared,
         tokenInterceptor: RequestInterceptor? = nil
     ) {
         self.session = session
