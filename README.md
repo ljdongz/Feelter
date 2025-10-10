@@ -5,17 +5,18 @@
 ## 💬 개요
 - 팀 구성 : 3명 (iOS 1명, Backend 1명, Design 1명)
 - 개발 기간 : 2025.7.29 ~ 2025.9.7
-- 개발 환경 : Xcode 16.4, iOS 16.0, Swift 5.10
+- 개발 환경 : Tuist 4.81.1, Xcode 16.4, iOS 16.0, Swift 5.10
 
 ## 🛠️ 기술 스택
 - UI : UIKit, SnapKit, WebKit
-- Reactive : RxSwift, RxCocoa
-- Architecture : MVVM(Input/Output Pattern), Repository Pattern
+- Reactive & Async : RxSwift, RxCocoa, Swift Concurrency
+- Architecture : MVVM(Input/Output Pattern), Repository Pattern, Modular Architecture
 - Auth : AutheticationServices, KakaoSDK
 - Network : URLSession, SocketIO, FCM, PushNotification
 - DB : Realm, Keychain, UserDefaults
 - Image : CoreImage, Kingfisher
-- PG Payment : iamport
+- PG : iamport
+- Unit Test : Swift Testing
 
 ## 📚 핵심 기능
 - 회원 관리 (이메일, 애플, 카카오 로그인 / JWT 토큰 관리)
