@@ -70,9 +70,17 @@ DerivedData/
 ### Tuist derived files ###
 graph.dot
 Derived/
+.tuist
 
 ### Tuist managed dependencies ###
 Tuist/.build
+
+### Tuist generated files ###
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+*.xcodeproj
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
 
 ### Firebase ###
 .idea

@@ -1,0 +1,32 @@
+//
+//  ChatRepository.swift
+//  Feelter
+//
+//  Created by 이정동 on 8/14/25.
+//
+
+import Foundation
+
+import FTUtility
+
+protocol ChatRepository {
+    // 소켓 관련
+    func connectRoom(roomID: String, receiveMessage: @escaping (ChatMessage) -> Void)
+    func disconnectRoom()
+    
+    // 채팅방 관련
+    func createRoom(opponentID: String) async throws -> ChatRoom
+    func fetchRooms() async throws -> [ChatRoom]
+    func fetchLocalRooms() -> [ChatRoom]
+    func updateRoom(apnsPayload: APNsPayload) async throws
+    
+    // 메시지 관련
+    func uploadFiles(roomID: String, files: [FileData]) async throws -> [String]
+    func sendMessage(to roomID: String, message: SendMessage) async throws -> ChatMessage
+    func fetchMessages(from roomID: String, after: String?) async throws -> [ChatMessage]
+    func fetchLocalMessages(
+        from roomID: String,
+        before lastMessageAt: Date
+    ) -> [ChatMessage]
+    func saveMessage(_ message: ChatMessage) throws -> ChatMessage
+}
