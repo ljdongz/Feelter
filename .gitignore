@@ -59,11 +59,6 @@ DerivedData/
 !default.perspectivev3
 
 ### Xcode Patch ###
-*.xcodeproj/*
-!*.xcodeproj/project.xcworkspace
-!*.xcodeproj/project.pbxproj
-!*.xcodeproj/xcshareddata/
-!*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 
 
@@ -77,10 +72,7 @@ Tuist/.build
 
 ### Tuist generated files ###
 *.xcworkspace
-!*.xcworkspace/contents.xcworkspacedata
 *.xcodeproj
-!*.xcodeproj/project.pbxproj
-!*.xcodeproj/xcshareddata/
 
 ### Firebase ###
 .idea
