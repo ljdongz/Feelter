@@ -159,6 +159,8 @@ fileprivate actor TokenRefreshTasker {
     }
 }
 
+// TODO: Data 레이어에 정의해야 하는 것인지 고민 필요
+
 public struct TokenRefreshResponseDTO: Decodable {
     public let accessToken: String
     public let refreshToken: String
