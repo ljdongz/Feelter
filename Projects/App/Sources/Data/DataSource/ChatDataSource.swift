@@ -20,8 +20,7 @@ protocol ChatDataSource {
     func updateChatRoom(
         roomID: String,
         updatedAt: Date,
-        lastMessage: String,
-        isLastMessageFile: Bool
+        lastMessage: String
     ) throws
     func updateChatRoom(from apns: APNsPayload) throws
     func updateUnReadCount(roomID: String, unReadCount: Int) throws
@@ -42,7 +41,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     func fetchChatRooms() -> [ChatRoom] {
         let realm = try! Realm()
         let realmRooms = realm.objects(RealmChatRoom.self)
-            .where { $0.lastMessage != nil || $0.isLastMessageFile } // 채팅 메시지가 존재하는 채팅방만 가져오기
+            .where { $0.lastMessage != nil } // 채팅 메시지가 존재하는 채팅방만 가져오기
             .sorted(by: [
                 .init(keyPath: "localUpdatedAt", ascending: false),
                 .init(keyPath: "updatedAt", ascending: false)
@@ -83,8 +82,7 @@ struct ChatDataSourceImpl: ChatDataSource {
     func updateChatRoom(
         roomID: String,
         updatedAt: Date,
-        lastMessage: String,
-        isLastMessageFile: Bool
+        lastMessage: String
     ) throws {
         let realm = try! Realm()
         try realm.write {
@@ -95,7 +93,6 @@ struct ChatDataSourceImpl: ChatDataSource {
             room?.updatedAt = updatedAt
             room?.localUpdatedAt = updatedAt
             room?.lastMessage = lastMessage
-            room?.isLastMessageFile = isLastMessageFile
         }
     }
     
@@ -107,8 +104,7 @@ struct ChatDataSourceImpl: ChatDataSource {
                 forPrimaryKey: apns.roomID
             )
             // TODO: APNs 응답 형식에 맞춰 수정하기
-            room?.lastMessage = apns.aps.alert.body ?? "-"
-            room?.isLastMessageFile = false
+            room?.lastMessage = apns.aps.alert.body ?? ""
             room?.localUpdatedAt = Date()
             room?.unReadCount += 1
         }

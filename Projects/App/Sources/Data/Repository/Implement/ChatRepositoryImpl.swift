@@ -168,8 +168,7 @@ final class ChatRepositoryImpl: ChatRepository {
             try chatDataSource.updateChatRoom(
                 roomID: roomID,
                 updatedAt: lastChat.updatedAt,
-                lastMessage: lastChat.content,
-                isLastMessageFile: !lastChat.fileURLs.isEmpty
+                lastMessage: lastChat.content
             )
             
             chatRooms = chatDataSource.fetchChatRooms()
@@ -197,8 +196,7 @@ final class ChatRepositoryImpl: ChatRepository {
         try chatDataSource.updateChatRoom(
             roomID: message.roomID,
             updatedAt: message.createdAt,
-            lastMessage: message.content,
-            isLastMessageFile: !message.fileURLs.isEmpty
+            lastMessage: message.content
         )
         
         if let index = chatRooms.firstIndex(where: { $0.roomID == message.roomID }) {
@@ -206,7 +204,6 @@ final class ChatRepositoryImpl: ChatRepository {
                 roomID: message.roomID,
                 participants: chatRooms[index].participants,
                 lastMessage: message.content,
-                isLastMessageFile: !message.fileURLs.isEmpty,
                 unReadCount: chatRooms[index].unReadCount,
                 createdAt: chatRooms[index].createdAt,
                 updatedAt: message.createdAt,
