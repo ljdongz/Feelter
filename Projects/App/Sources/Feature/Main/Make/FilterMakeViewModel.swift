@@ -121,28 +121,33 @@ extension FilterMakeViewModel {
     
     func compressionImage(image: UIImage) -> Data? {
         let maxSizeInBytes = 1024 * 1024 // 1MB
-        
-        // 초기 압축 품질을 1.0에서 시작
+        let maxWidth: CGFloat = 1320
+
+        // 1) 리사이징 (너비가 maxWidth를 초과하는 경우)
+        var targetImage = image
+        if image.size.width > maxWidth {
+            targetImage = image.resized(toWidth: maxWidth) ?? image
+        }
+
+        // 2) jpeg로 압축
         var compressionQuality: CGFloat = 1.0
-        var imageData = image.jpegData(compressionQuality: compressionQuality)
-        
-        // 이미지 데이터가 1MB보다 작거나 같으면 바로 반환
-        if let data = imageData,
-            data.count <= maxSizeInBytes {
+        var imageData = targetImage.jpegData(compressionQuality: compressionQuality)
+
+        // 3) 이미지 데이터가 1MB보다 작거나 같으면 바로 반환
+        if let data = imageData, data.count <= maxSizeInBytes {
             return data
         }
-        
-        // 1MB를 초과하는 경우 압축 품질을 0.1씩 줄여가며 압축
+
+        // 4) 1MB를 초과하는 경우 압축 품질을 0.1씩 줄여가며 압축
         while compressionQuality >= 0.1 {
             compressionQuality -= 0.1
-            imageData = image.jpegData(compressionQuality: compressionQuality)
-            
-            if let data = imageData,
-                data.count <= maxSizeInBytes {
+            imageData = targetImage.jpegData(compressionQuality: compressionQuality)
+
+            if let data = imageData, data.count <= maxSizeInBytes {
                 return data
             }
         }
-        
+
         return imageData
     }
 }

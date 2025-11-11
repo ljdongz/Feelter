@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import RegexBuilder
 
 // MARK: - Validation Error
 
@@ -27,68 +28,68 @@ public enum ValidationResult: Equatable {
 // MARK: - Validation Helper
 
 public struct ValidationHelper {
-    
+
     // MARK: - Email Validation
-    
+
+    private static let emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
+
     public static func validateEmail(_ email: String) -> ValidationResult {
         guard !email.isEmpty else {
             return .invalid(message: "이메일을 입력해주세요.")
         }
-        
-        guard isValidEmailFormat(email) else {
+
+        guard email.wholeMatch(of: emailRegex) != nil else {
             return .invalid(message: "올바른 이메일 형식이 아닙니다.")
         }
-        
+
         return .valid
     }
     
-    private static func isValidEmailFormat(_ email: String) -> Bool {
-        let emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
-        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
-        return emailPredicate.evaluate(with: email)
-    }
-    
     // MARK: - Password Validation
-    
+
+    private static let uppercaseRegex = /[A-Z]/
+    private static let lowercaseRegex = /[a-z]/
+    private static let numberRegex = /[0-9]/
+    private static let specialCharRegex = /[@$!%*#?&]/
+
     public static func validatePassword(_ password: String) -> ValidationResult {
         guard !password.isEmpty else {
             return .invalid(message: "비밀번호를 입력해주세요.")
         }
-        
+
         guard password.count >= 8 else {
             return .invalid(message: "비밀번호는 8자리 이상이어야 합니다.")
         }
-        
+
         guard hasRequiredPasswordComplexity(password) else {
             return .invalid(message: "영문, 숫자, 특수문자(@$!%*#?&)를 각각 포함해야 합니다.")
         }
-        
+
         return .valid
     }
-    
+
     private static func hasRequiredPasswordComplexity(_ password: String) -> Bool {
-        let hasUppercase = password.range(of: "[A-Z]", options: .regularExpression) != nil
-        let hasLowercase = password.range(of: "[a-z]", options: .regularExpression) != nil
-        let hasNumber = password.range(of: "[0-9]", options: .regularExpression) != nil
-        let hasSpecialChar = password.range(of: "[@$!%*#?&]", options: .regularExpression) != nil
-        
+        let hasUppercase = password.contains(uppercaseRegex)
+        let hasLowercase = password.contains(lowercaseRegex)
+        let hasNumber = password.contains(numberRegex)
+        let hasSpecialChar = password.contains(specialCharRegex)
+
         return (hasUppercase || hasLowercase) && hasNumber && hasSpecialChar
     }
     
     // MARK: - Phone Number Validation
-    
+
+    private static let phoneRegex = /^01[0-9][0-9]{3,4}[0-9]{4}$/
+
     public static func validatePhoneNumber(_ phoneNumber: String) -> ValidationResult {
         guard !phoneNumber.isEmpty else {
             return .invalid(message: "전화번호를 입력해주세요.")
         }
-        
-        let phoneRegex = "^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$"
-        let phonePredicate = NSPredicate(format: "SELF MATCHES %@", phoneRegex)
-        
-        guard phonePredicate.evaluate(with: phoneNumber) else {
+
+        guard phoneNumber.wholeMatch(of: phoneRegex) != nil else {
             return .invalid(message: "올바른 전화번호 형식이 아닙니다.")
         }
-        
+
         return .valid
     }
 }
