@@ -238,6 +238,7 @@ final class FilterEditViewController: RxBaseViewController {
             .skip(1)
             .map { Double($0).formatByMagnitude() }
             .distinctUntilChanged()
+            .throttle(.milliseconds(25), latest: true, scheduler: MainScheduler.instance)
             .subscribe(with: self) { owner, value in
                 let image = owner.coreImageManager.applyFilter(
                     type: owner.selectedFilterAttribute.toFTCoreImageType(),
