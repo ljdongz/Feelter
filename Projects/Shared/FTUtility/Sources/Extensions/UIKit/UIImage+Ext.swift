@@ -55,9 +55,14 @@ public extension UIImage {
     }
 
     /// ImageIO를 사용한 메모리 효율적인 다운샘플링
-    /// - Parameter maxDimension: 최대 너비 또는 높이 (포인트 단위)
-    /// - Returns: 다운샘플링된 이미지
+    /// - Parameter maxDimension: 최대 너비 또는 높이 (픽셀 단위)
+    /// - Returns: 다운샘플링된 이미지 (이미 작은 경우 원본 반환)
     func downsampledImage(maxDimension: CGFloat) -> UIImage? {
+        // 이미 작은 이미지는 그대로 반환
+        if max(self.size.width, self.size.height) <= maxDimension {
+            return self
+        }
+
         // UIImage를 Data로 변환
         guard let data = self.jpegData(compressionQuality: 1.0) ?? self.pngData() else {
             return nil
@@ -68,7 +73,7 @@ public extension UIImage {
             return nil
         }
 
-        let maxDimensionInPixels = maxDimension * UIScreen.main.scale
+        let maxDimensionInPixels = maxDimension
 
         let downsampleOptions = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
@@ -83,8 +88,8 @@ public extension UIImage {
 
         return UIImage(
             cgImage: downsampledImage,
-            scale: UIScreen.main.scale,
-            orientation: self.imageOrientation
+            scale: 1.0,
+            orientation: .up
         )
     }
 }

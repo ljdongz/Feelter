@@ -121,13 +121,10 @@ extension FilterMakeViewModel {
     
     func compressionImage(image: UIImage) -> Data? {
         let maxSizeInBytes = 1024 * 1024 // 1MB
-        let maxWidth: CGFloat = 1320
+        let maxDimension: CGFloat = 1920
 
-        // 1) 리사이징 (너비가 maxWidth를 초과하는 경우)
-        var targetImage = image
-        if image.size.width > maxWidth {
-            targetImage = image.resized(toWidth: maxWidth) ?? image
-        }
+        // 1) 다운샘플링
+        let targetImage = image.downsampledImage(maxDimension: maxDimension) ?? image
 
         // 2) jpeg로 압축
         var compressionQuality: CGFloat = 1.0

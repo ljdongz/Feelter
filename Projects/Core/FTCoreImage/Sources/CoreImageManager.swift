@@ -56,8 +56,8 @@ public final class CoreImageManager {
     private(set) public var filteredImage: UIImage
     
     public init(originalImage: UIImage) {
+        let downsampledImage = originalImage.downsampledImage(maxDimension: 1920) ?? originalImage
 
-        let downsampledImage = originalImage.downsampledImage(maxDimension: 1320) ?? originalImage
         self.originalImage = downsampledImage
         self.filteredImage = downsampledImage
 
