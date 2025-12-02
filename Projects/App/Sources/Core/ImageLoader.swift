@@ -63,8 +63,8 @@ final class ImageLoader {
         
         ImageCache.default.cleanExpiredDiskCache()
         
-        // 100MB (8GB 기준으로 약 10%)
-        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 100
+        // 200MB
+        ImageCache.default.memoryStorage.config.totalCostLimit = 1024 * 1024 * 200
         // 500MB
         ImageCache.default.diskStorage.config.sizeLimit = 1024 * 1024 * 500
         ImageCache.default.diskStorage.config.expiration = .days(30)
@@ -124,11 +124,11 @@ final class ImageLoader {
             .onFailureImage(failureImage),
             cachePolicy.kingfisherOptions,
         ]
-                
+
         imageView.kf.setImage(
             with: URL(string: url),
             options: kingfisherOptions
-        ) 
+        )
     }
     
     func cancelDownloadTask(for imageView: UIImageView) {

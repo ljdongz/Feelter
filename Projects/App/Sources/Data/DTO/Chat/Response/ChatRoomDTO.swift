@@ -27,13 +27,10 @@ struct ChatRoomResponseDTO: Decodable {
     }
     
     func toDomain() -> ChatRoom {
-        let isLastMessageFile = !(lastChat?.fileURLs.isEmpty ?? true)
-        
         return .init(
             roomID: roomID,
             participants: participants.map { $0.toDomain() },
             lastMessage: lastChat?.content,
-            isLastMessageFile: isLastMessageFile,
             unReadCount: 0,
             createdAt: UTCDateFormatter.shared.date(from: createdAt) ?? Date(),
             updatedAt: UTCDateFormatter.shared.date(from: updatedAt) ?? Date(),

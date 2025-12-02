@@ -10,7 +10,9 @@ let project = Project(
             bundleId: "kr.co.ios.swift.apple.FTCoreImage",
             deploymentTargets: .iOS("16.0"),
             sources: ["Sources/**"],
-            dependencies: []
+            dependencies: [
+                .project(target: "FTUtility", path: .relativeToRoot("Projects/Shared/FTUtility")),
+            ]
         )
     ]
 )

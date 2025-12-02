@@ -12,8 +12,7 @@ import RealmSwift
 final class RealmChatRoom: Object {
     @Persisted(primaryKey: true) var roomID: String
     @Persisted var participants: List<RealmMessageSender>
-    @Persisted var lastMessage: String?
-    @Persisted var isLastMessageFile: Bool
+    @Persisted var lastMessage: String? // 채팅방 첫 생성 시에는 채팅 내역이 존재하지 않음
     @Persisted var unReadCount: Int
     @Persisted var createdAt: Date
     @Persisted var updatedAt: Date
@@ -23,7 +22,6 @@ final class RealmChatRoom: Object {
         roomID: String,
         participants: List<RealmMessageSender>,
         lastMessage: String?,
-        isLastMessageFile: Bool,
         unReadCount: Int = 0,
         createdAt: Date,
         updatedAt: Date,
@@ -33,7 +31,6 @@ final class RealmChatRoom: Object {
         self.roomID = roomID
         self.participants = participants
         self.lastMessage = lastMessage
-        self.isLastMessageFile = isLastMessageFile
         self.unReadCount = unReadCount
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -51,7 +48,6 @@ final class RealmChatRoom: Object {
         self.participants = participants
         
         self.lastMessage = chatRoom.lastMessage
-        self.isLastMessageFile = chatRoom.isLastMessageFile
         self.unReadCount = chatRoom.unReadCount
         self.createdAt = chatRoom.createdAt
         self.updatedAt = chatRoom.updatedAt
@@ -63,7 +59,6 @@ final class RealmChatRoom: Object {
             roomID: roomID,
             participants: Array(participants).map { $0.toDomain() },
             lastMessage: lastMessage,
-            isLastMessageFile: isLastMessageFile,
             unReadCount: unReadCount,
             createdAt: createdAt,
             updatedAt: updatedAt,

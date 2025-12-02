@@ -9,6 +9,8 @@ import CoreImage
 import Metal
 import UIKit
 
+import FTUtility
+
 public struct FilterChange {
     let filterType: CoreImageFilterAttributeType
     let beforeValue: Double
@@ -26,9 +28,9 @@ public final class CoreImageManager {
         }
     }()
     
-    private let orientation: UIImage.Orientation
     private let originCIImage: CIImage?
-    
+    private let originalExtent: CGRect  // 원본 이미지 크기 저장 (extent 확장 방지)
+
     private var currentState: [CoreImageFilterAttributeType: Double] = [:]
     public var currentFilterAttributeState: CoreImageFilterAttribute {
         CoreImageFilterAttribute(
@@ -54,11 +56,13 @@ public final class CoreImageManager {
     private(set) public var filteredImage: UIImage
     
     public init(originalImage: UIImage) {
-        self.originalImage = originalImage
-        self.filteredImage = originalImage
-        
-        self.originCIImage = CIImage(image: originalImage)
-        self.orientation = originalImage.imageOrientation
+        let downsampledImage = originalImage.downsampledImage(maxDimension: 1920) ?? originalImage
+
+        self.originalImage = downsampledImage
+        self.filteredImage = downsampledImage
+
+        self.originCIImage = CIImage(image: downsampledImage)
+        self.originalExtent = self.originCIImage?.extent ?? .zero
     }
     
     public func filterStateValue(for type: CoreImageFilterAttributeType) -> Double {
@@ -180,11 +184,11 @@ extension CoreImageManager {
     private func createUIImage(from ciImage: CIImage?) -> UIImage? {
         guard let ciImage,
               let cgImage = Self.context.createCGImage(
-                ciImage,
-                from: ciImage.extent
-              ) else { return nil }
-        
-        return UIImage(cgImage: cgImage, scale: 1, orientation: orientation)
+            ciImage,
+            from: originalExtent
+        ) else { return nil }
+
+        return UIImage(cgImage: cgImage, scale: 1, orientation: .up)
     }
 }
 

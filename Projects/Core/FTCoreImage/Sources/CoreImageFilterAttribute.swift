@@ -82,18 +82,18 @@ public extension CoreImageFilterAttributeType {
     
     var priority: Int {
         switch self {
-        case .exposure: return 0        // 전체적인 밝기 기준 (가장 먼저)
-        case .blackPoint: return 1      // 블랙 포인트 설정
-        case .brightness: return 2      // 중간톤 밝기
-        case .highlights: return 3      // 하이라이트 조정
-        case .shadows: return 4         // 그림자 조정
-        case .contrast: return 5        // 명암 대비
-        case .temperature: return 6     // 색온도
+        case .temperature: return 0     // 색온도
+        case .exposure: return 1        // 노출
+        case .highlights: return 2      // 하이라이트
+        case .shadows: return 3         // 그림자
+        case .blackPoint: return 4      // 블랙 포인트
+        case .brightness: return 5      // 밝기
+        case .contrast: return 6        // 대비
         case .saturation: return 7      // 채도
-        case .vignette: return 8        // 비네팅 효과
-        case .sharpness: return 9       // 선명도
-        case .blur: return 10           // 블러 (선명도와 상반)
-        case .noiseReduction: return 11 // 노이즈 감소 (가장 나중)
+        case .vignette: return 8        // 비네팅
+        case .blur: return 9            // 블러
+        case .sharpness: return 10      // 선명도
+        case .noiseReduction: return 11 // 노이즈 감소
         }
     }
 }

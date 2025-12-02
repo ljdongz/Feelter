@@ -11,6 +11,7 @@ import RxCocoa
 import RxSwift
 
 import FTDependencies
+import FTNetworkInterface
 import FTUtility
 
 final class PGWebViewModel: ViewModel {
@@ -30,15 +31,62 @@ final class PGWebViewModel: ViewModel {
         let output = Output()
         
         input.validPayment
-            .withAsyncResult(with: self) { owner, impUID in
-                try await owner.paymentRepository.validatePayment(impID: impUID)
+            .flatMap { [weak self] impUID -> Observable<Event<Void>> in
+                guard let self = self else {
+                    return Observable.just(Event.error(NSError(domain: "", code: -1)))
+                }
+                
+                return Observable.create { observer in
+                    Task {
+                        do {
+                            _ = try await self.paymentRepository.validatePayment(impID: impUID)
+                            observer.onNext(())
+                            observer.onCompleted()
+                        } catch {
+                            observer.onError(error)
+                        }
+                    }
+                    return Disposables.create()
+                }
+                .retry(when: { observableError in
+                    observableError.enumerated().flatMap { (attempt, error) -> Observable<Int> in
+                        // 재시도 가능한 에러 판단
+                        let shouldRetry: Bool = {
+                            // 네트워크 에러 (타임아웃, 연결 끊김)
+                            if let urlError = error as? URLError,
+                               [.timedOut, .networkConnectionLost].contains(urlError.code) {
+                                return true
+                            }
+                            // 서버 에러 (5xx)
+                            if let httpError = error as? HTTPResponseError,
+                               case .serverError = httpError {
+                                return true
+                            }
+                            return false
+                        }()
+
+                        guard shouldRetry, attempt < 3 else {
+                            return Observable.error(error)
+                        }
+
+                        // 1초, 2초, 4초
+                        let delay = pow(2.0, Double(attempt))
+                        return Observable<Int>.timer(
+                            .seconds(Int(delay)),
+                            scheduler: MainScheduler.instance
+                        )
+                    }
+                })
+                .materialize()
             }
-            .subscribe(with: self) { owner, result in
-                switch result {
-                case .success:
+            .subscribe(with: self) { owner, event in
+                switch event {
+                case .next:
                     output.validationResult.accept(.success(()))
-                case .failure(let error):
+                case .error(let error):
                     output.validationResult.accept(.failure(error))
+                case .completed:
+                    break
                 }
             }
             .disposed(by: disposeBag)

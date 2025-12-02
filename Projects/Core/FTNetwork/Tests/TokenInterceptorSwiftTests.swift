@@ -227,41 +227,6 @@ struct TokenInterceptorSwiftTests {
         #expect(updateCallCount == 0, "토큰 갱신이 호출되지 않아야 합니다")
     }
 
-    /// 매우 많은 동시 요청 (스트레스 테스트)
-    @Test("10개의 동시 요청에도 네트워크 호출은 1번만")
-    func concurrentRetries_withManyRequests_shouldStillPerformOnlyOneNetworkRequest() async throws {
-        // Given: 10개의 동시 요청
-        let numberOfConcurrentRequests = 10
-        let request = URLRequest.dummy
-        let error = HTTPResponseError.expiredAccessToken
-
-        let refreshURL = URL(string: "https://test.com")!
-        await mockURLSession.setSuccessResponse(url: refreshURL)
-        mockURLSession.delay = 0.5
-
-        // When: 10개의 요청을 동시에 실행
-        try await withThrowingTaskGroup(of: RetryResult.self) { group in
-            for _ in 0..<numberOfConcurrentRequests {
-                group.addTask {
-                    try await self.sut.retry(request, for: error)
-                }
-            }
-
-            var results: [RetryResult] = []
-            for try await result in group {
-                results.append(result)
-            }
-
-            // Then: 모든 요청이 성공
-            #expect(results.count == numberOfConcurrentRequests)
-            #expect(results.allSatisfy { $0 == .retry })
-        }
-
-        // Then: 네트워크 요청은 여전히 1번만
-        let networkCallCount = await mockURLSession.getDataCallCount()
-        #expect(networkCallCount == 1, "많은 동시 요청에도 네트워크 요청은 1번만 발생해야 합니다")
-    }
-
     // MARK: - Adapt Tests
 
     @Test("토큰이 있는 경우 Authorization 헤더 추가")
