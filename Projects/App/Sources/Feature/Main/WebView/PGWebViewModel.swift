@@ -11,6 +11,7 @@ import RxCocoa
 import RxSwift
 
 import FTDependencies
+import FTNetworkInterface
 import FTUtility
 
 final class PGWebViewModel: ViewModel {
@@ -49,14 +50,29 @@ final class PGWebViewModel: ViewModel {
                 }
                 .retry(when: { observableError in
                     observableError.enumerated().flatMap { (attempt, error) -> Observable<Int> in
-                        guard let urlError = error as? URLError,
-                              [.timedOut, .networkConnectionLost].contains(urlError.code),
-                              attempt < 2 else {
+                        // 재시도 가능한 에러 판단
+                        let shouldRetry: Bool = {
+                            // 네트워크 에러 (타임아웃, 연결 끊김)
+                            if let urlError = error as? URLError,
+                               [.timedOut, .networkConnectionLost].contains(urlError.code) {
+                                return true
+                            }
+                            // 서버 에러 (5xx)
+                            if let httpError = error as? HTTPResponseError,
+                               case .serverError = httpError {
+                                return true
+                            }
+                            return false
+                        }()
+
+                        guard shouldRetry, attempt < 3 else {
                             return Observable.error(error)
                         }
-                        
+
+                        // 1초, 2초, 4초
+                        let delay = pow(2.0, Double(attempt))
                         return Observable<Int>.timer(
-                            .seconds(1),
+                            .seconds(Int(delay)),
                             scheduler: MainScheduler.instance
                         )
                     }

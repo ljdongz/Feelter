@@ -193,23 +193,33 @@ extension BannerWebViewController: WKNavigationDelegate {
 
 extension BannerWebViewController: WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        
+
         guard let sourceURL = message.frameInfo.request.url,
               let host = sourceURL.host(),
               host == environment.baseURL else {
             print("URL을 확인할 수 없음")
             return
         }
-        
+
         switch message.name {
-            
+
         case "click_attendance_button":
             guard let accessToken = tokenManager.accessToken else {
                 return
             }
-            let jsonData = try! JSONEncoder().encode(accessToken)
-            let jsonString = String(data: jsonData, encoding: .utf8)!
-            webView.evaluateJavaScript("requestAttendance('\(jsonString)')")
+            webView.callAsyncJavaScript(
+                "requestAttendance(token)",
+                arguments: ["token": accessToken],
+                in: nil,
+                in: .page
+            ) { result in
+                switch result {
+                case .success(let value):
+                    print("JavaScript 실행 성공: \(String(describing: value))")
+                case .failure(let error):
+                    print("JavaScript 실행 실패: \(error.localizedDescription)")
+                }
+            }
             
         case "complete_attendance":
             var alertMessage: String?
